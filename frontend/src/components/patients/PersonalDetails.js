@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import ProgressSteps from "@/components/ProgressSteps"
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 
-export default function PersonalDetails() {
+export default function PersonalDetails({onNext, onBack, progress}) {
   const [formData, setFormData] = useState({
     firstName: "Andrew",
     lastName: "Mathew",
@@ -27,10 +27,25 @@ export default function PersonalDetails() {
 
   const handlePrevious = () => {
     console.log("Navigate to previous step")
+    onBack()
   }
 
   const handleNext = () => {
     console.log("Navigate to next step")
+    onNext(
+      {
+        first_name:               formData.firstName,
+        last_name:                formData.lastName,
+        date_of_birth:            formData.dateOfBirth,
+        gender:                   formData.gender,
+        phone:                    formData.phoneNumber,
+        email:                    formData.emailAddress,
+        address:                  formData.homeAddress,
+        emergency_contact_name:   formData.emergencyContactName,
+        emergency_contact_number: formData.emergencyContactNumber,
+      },
+      "personal"   // matches the formData section key in the store
+    );
   }
 
   return (
@@ -80,7 +95,7 @@ export default function PersonalDetails() {
                     </div>
                     <span className="text-gray-700">Completing your registration...</span>
                   </div>
-                  <span className="font-medium text-gray-900 text-sm">40%</span>
+                  <span className="font-medium text-gray-900 text-sm">{progress?.percent ?? 0}%</span>
                 </div>
                 
                 {/* Progress Bar */}
@@ -89,7 +104,7 @@ export default function PersonalDetails() {
                     className="h-2 rounded-full transition-all duration-300"
                     style={{
                       background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                      width: `40%`
+                      width: `${progress?.percent ?? 0}%`
                     }}
                   ></div>
                 </div>

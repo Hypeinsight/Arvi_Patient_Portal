@@ -1,18 +1,45 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import ProgressSteps from "@/components/ProgressSteps"
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 
-export default function MedicalDetails() {
+export default function MedicalDetails({onNext, onBack, progress}) {
+  const [formData, setFormData] = useState({
+    currentConditions: "",
+    currentMedications: "",
+    allergies: "",
+    previousSurgeries: "",
+    familyMedicalHistory: "",
+  })
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
 
   const handlePrevious = () => {
     console.log("Navigate to previous step")
+    onBack()
   }
 
   const handleNext = () => {
     console.log("Navigate to next step")
+    onNext(
+      {
+        conditions: formData.currentConditions
+          ? formData.currentConditions.split(",").map(s => s.trim())
+          : [],
+        medications: formData.currentMedications
+          ? formData.currentMedications.split(",").map(s => s.trim())
+          : [],
+        allergies: formData.allergies
+          ? formData.allergies.split(",").map(s => s.trim())
+          : [],
+        previous_surgeries: formData.previousSurgeries,
+        family_history: formData.familyMedicalHistory,
+      },
+      "medical"
+    )
   }
 
   return (
@@ -62,7 +89,7 @@ export default function MedicalDetails() {
                     </div>
                     <span className="text-gray-700">Completing your registration...</span>
                   </div>
-                  <span className="font-medium text-gray-900 text-sm">70%</span>
+                  <span className="font-medium text-gray-900 text-sm">{progress?.percent ?? 0}%</span>
                 </div>
                 
                 {/* Progress Bar */}
@@ -71,7 +98,7 @@ export default function MedicalDetails() {
                     className="h-2 rounded-full transition-all duration-300"
                     style={{
                       background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                      width: `70%`
+                      width: `${progress?.percent ?? 0}%`
                     }}
                   ></div>
                 </div>
@@ -85,7 +112,7 @@ export default function MedicalDetails() {
                   </h2>
                 </div>
 
-                {/* Information */}
+                 {/* Information */}
                 <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -106,6 +133,80 @@ export default function MedicalDetails() {
                     </div>
                   </div>
                 </div>
+
+                <form className="space-y-6">
+                  {/* Row 1 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Current Medical Conditions*
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={formData.currentConditions}
+                        onChange={e => handleInputChange("currentConditions", e.target.value)}
+                        placeholder="List any current medical conditions you have"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Current Medications*
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={formData.currentMedications}
+                        onChange={e => handleInputChange("currentMedications", e.target.value)}
+                        placeholder="List all medications you are currently taking"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 2 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Allergies*
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={formData.allergies}
+                        onChange={e => handleInputChange("allergies", e.target.value)}
+                        placeholder="List any known allergies (Medications, food, environment)"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Previous Surgeries*
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={formData.previousSurgeries}
+                        onChange={e => handleInputChange("previousSurgeries", e.target.value)}
+                        placeholder="List any previous surgeries with dates"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 3 — full width */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Family Medical History*
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={formData.familyMedicalHistory}
+                      onChange={e => handleInputChange("familyMedicalHistory", e.target.value)}
+                      placeholder="Relevant family medical history (Heart Disease, diabetes, etc.)"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                    />
+                  </div>
+                </form>
+
+               
               </div>
 
               {/* Navigation Buttons */}

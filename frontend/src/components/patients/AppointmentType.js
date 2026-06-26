@@ -1,32 +1,28 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import ProgressSteps from "@/components/ProgressSteps"
 import { User, Users, ArrowLeft, ArrowRight } from "lucide-react"
+import useIntakeStore from '@/lib/intakeStore';
 
-export default function AppointmentType() {
+export default function AppointmentType({onNext}) {
   const [selectedType, setSelectedType] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const { getProgress } = useIntakeStore()
 
-  const steps = [
-    { number: 1, title: "Appointment Type", isActive: true },
-    { number: 2, title: "Privacy & Consent" },
-    { number: 3, title: "Personal Details" },
-    { number: 4, title: "Medical Details" },
-    { number: 5, title: "Referral Details" },
-    { number: 6, title: "Review & Submit" }
-  ]
+  const progress = getProgress();
 
   const appointmentTypes = [
     {
-      id: "new-patient",
+      id: "new",
+      patientType: "new",
       title: "New Patient",
       subtitle: "First time visiting our clinic",
       icon: User
     },
     {
       id: "follow-up-12-plus",
+      patientType: "followup_gt12",
       title: "Follow-up",
       subtitle: "(More than 12 months)",
       description: "For Patients Returning After 12+ Months",
@@ -35,6 +31,7 @@ export default function AppointmentType() {
     },
     {
       id: "follow-up-12-less",
+      patientType: "followup_lt12",
       title: "Follow-up",
       subtitle: "(Less than 12 months)",
       description: "For Patients Returning Within 12 Months",
@@ -42,6 +39,11 @@ export default function AppointmentType() {
       hasRightArrow: true
     }
   ]
+
+ const handleSelect = async (type) => {
+  setSelectedType(type.id)
+  onNext({ type: type.patientType }, "appointment")
+}
 
   return (
     <div className="min-h-screen">
@@ -90,7 +92,7 @@ export default function AppointmentType() {
                   </div>
                   <span className="text-gray-700">Completing your registration...</span>
                 </div>
-                <span className="font-medium text-gray-900 text-sm">20%</span>
+                <span className="font-medium text-gray-900 text-sm">{progress?.percent ?? 0}%</span>
               </div>
               
               {/* Progress Bar */}
@@ -99,7 +101,7 @@ export default function AppointmentType() {
                   className="h-2 rounded-full transition-all duration-300"
                   style={{
                     background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                    width: `20%`
+                    width: `${progress?.percent ?? 0}%`
                   }}
                 ></div>
               </div>
@@ -148,7 +150,7 @@ export default function AppointmentType() {
             : 'border-gray-200 hover:border-gray-300'
           }
         `}
-        onClick={() => setSelectedType(type.id)}
+        onClick={() => !loading && handleSelect(type)}
       >
         {/* Left Arrow */}
         {type.hasLeftArrow && (

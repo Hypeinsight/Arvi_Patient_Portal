@@ -4,9 +4,13 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
+import useIntakeStore from '@/lib/intakeStore';
+import { createSession } from "@/lib/api";
 
-export default function MainPage() {
+export default function MainPage({onNext}) {
   const [selectedMethod, setSelectedMethod] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const { initSession } = useIntakeStore()
 
   const handleLogin = () => {
     console.log("Login clicked")
@@ -23,6 +27,25 @@ export default function MainPage() {
     console.log("Continue as Guest selected")
     setSelectedMethod("guest")
     // Add your guest logic here
+  }
+
+  const handleSelect = async (method) => {
+    setSelectedMethod(method)
+    setLoading(true)
+
+    // Map selection to patient type
+    // "create" = new user, "guest" = guest
+    // For follow-up types, those come from AppointmentType screen
+    const patientType = method === "guest" ? "guest" : "new"
+
+    const data = await createSession(patientType, "doc-123", "apt-456")
+
+    if (data.success) {
+      initSession(data.session_id, data.patient_type, data.screens)
+      onNext() // no data to save for this screen, just advance
+    }
+
+    setLoading(false)
   }
 
   return (
@@ -69,7 +92,7 @@ export default function MainPage() {
               className={`cursor-pointer transition-all duration-200 hover:shadow-lg border-2 h-80 ${
                 selectedMethod === "create" ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-300"
               }`}
-              onClick={handleCreateAccount}
+              onClick={() => !loading && handleSelect("create")}
             >
               <CardContent className="p-8 text-center h-full flex flex-col justify-center">
                 <div className="mb-6">
@@ -95,7 +118,7 @@ export default function MainPage() {
               className={`cursor-pointer transition-all duration-200 hover:shadow-lg border-2 h-80 ${
                 selectedMethod === "guest" ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-green-300"
               }`}
-              onClick={handleContinueAsGuest}
+              onClick={() => !loading && handleSelect("guest")}
             >
               <CardContent className="p-8 text-center h-full flex flex-col justify-center">
                 <div className="mb-6">

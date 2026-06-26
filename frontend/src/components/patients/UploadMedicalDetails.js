@@ -5,15 +5,17 @@ import { Button } from "@/components/ui/button"
 import ProgressSteps from "@/components/ProgressSteps"
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 
-export default function UploadMedicalDetails() {
+export default function UploadMedicalDetails({onNext, onBack, progress}) {
   const [selectedFile, setSelectedFile] = useState(null)
 
   const handlePrevious = () => {
     console.log("Navigate to previous step")
+    onBack()
   }
 
   const handleNext = () => {
     console.log("Navigate to next step")
+    onNext()
   }
 
   const handleFileSelect = (event) => {
@@ -92,7 +94,7 @@ export default function UploadMedicalDetails() {
                     </div>
                     <span className="text-gray-700">Completing your registration...</span>
                   </div>
-                  <span className="font-medium text-gray-900 text-sm">60%</span>
+                  <span className="font-medium text-gray-900 text-sm">{progress?.percent ?? 0}%</span>
                 </div>
                 
                 {/* Progress Bar */}
@@ -101,7 +103,7 @@ export default function UploadMedicalDetails() {
                     className="h-2 rounded-full transition-all duration-300"
                     style={{
                       background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                      width: `60%`
+                      width: `${progress?.percent ?? 0}%`
                     }}
                   ></div>
                 </div>

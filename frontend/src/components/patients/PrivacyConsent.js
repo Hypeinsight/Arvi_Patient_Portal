@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import ProgressSteps from "@/components/ProgressSteps"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-export default function PrivacyConsent() {
+export default function PrivacyConsent({onNext, onBack, progress}) {
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
   const [consentMarketing, setConsentMarketing] = useState(false)
@@ -13,11 +13,13 @@ export default function PrivacyConsent() {
   const handlePrevious = () => {
     // Handle navigation to previous step
     console.log("Navigate to previous step")
+    onBack()
   }
 
   const handleNext = () => {
     // Handle navigation to next step
     console.log("Navigate to next step")
+    onNext()
   }
 
   const isNextDisabled = !acceptedTerms || !acceptedPrivacy
@@ -69,7 +71,7 @@ export default function PrivacyConsent() {
                     </div>
                     <span className="text-gray-700">Completing your registration...</span>
                   </div>
-                  <span className="font-medium text-gray-900 text-sm">50%</span>
+                  <span className="font-medium text-gray-900 text-sm">{progress?.percent ?? 0}%</span>
                 </div>
                 
                 {/* Progress Bar */}
@@ -78,7 +80,7 @@ export default function PrivacyConsent() {
                     className="h-2 rounded-full transition-all duration-300"
                     style={{
                       background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                      width: `50%`
+                      width: `${progress?.percent ?? 0}%`
                     }}
                   ></div>
                 </div>

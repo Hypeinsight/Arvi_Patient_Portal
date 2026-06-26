@@ -3,9 +3,11 @@ import os
 from flask import Flask
 from app.extensions import db, migrate, bcrypt
 from app.config     import config_map
+from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
 
     env = os.getenv("FLASK_ENV", "development")
     app.config.from_object(config_map.get(env, config_map["development"]))
