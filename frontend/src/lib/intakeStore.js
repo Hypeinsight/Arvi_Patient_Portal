@@ -20,6 +20,10 @@ const useIntakeStore = create((set, get) => ({
   // Upload references returned by the server
   uploadedFiles: [],
 
+  // OCR state — personal ID document only
+  ocrText: null,        // raw string returned by backend
+  uploadedFile: null,   // JS File object — lives in memory for this session
+
   // Progress
   getProgress: () => {
     const { screens, currentIndex } = get();
@@ -59,6 +63,13 @@ const useIntakeStore = create((set, get) => ({
       uploadedFiles: state.uploadedFiles.filter((f) => f.upload_id !== uploadId),
     })),
 
+  // OCR actions
+  setOcrResult: (file, text) =>    // file = JS File object, text = raw OCR string
+    set({ uploadedFile: file, ocrText: text }),
+
+  clearOcrResult: () =>
+    set({ uploadedFile: null, ocrText: null }),
+
   reset: () =>
     set({
       sessionId: null,
@@ -74,6 +85,8 @@ const useIntakeStore = create((set, get) => ({
         referral: null,
       },
       uploadedFiles: [],
+      ocrText: null,
+      uploadedFile: null,
     }),
 }));
 

@@ -1,52 +1,97 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import ProgressSteps from "@/components/ProgressSteps"
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
+import { useState, useEffect } from "react";
+import ProgressSteps from "@/components/ProgressSteps";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import useIntakeStore from "@/lib/intakeStore";
+import { parseOcrText } from "@/lib/utils";
 
-export default function PersonalDetails({onNext, onBack, progress}) {
-  const [formData, setFormData] = useState({
-    firstName: "Andrew",
-    lastName: "Mathew",
-    dateOfBirth: "29/06/1986",
-    gender: "Male",
-    phoneNumber: "+61 1234 56789",
-    emailAddress: "Mathew",
-    homeAddress: "124 Brunswick Road, Melbourne Victoria",
-    emergencyContactName: "Andrew",
-    emergencyContactNumber: "+61 1234 56789"
-  })
+const EMPTY_FORM = {
+  firstName: "",
+  lastName: "",
+  dateOfBirth: "",
+  gender: "Male",
+  phoneNumber: "",
+  emailAddress: "",
+  homeAddress: "",
+  emergencyContactName: "",
+  emergencyContactNumber: "",
+};
+
+export default function PersonalDetails({ onNext, onBack, progress }) {
+  // const [formData, setFormData] = useState({
+  //   firstName: "Andrew",
+  //   lastName: "Mathew",
+  //   dateOfBirth: "29/06/1986",
+  //   gender: "Male",
+  //   phoneNumber: "+61 1234 56789",
+  //   emailAddress: "Mathew",
+  //   homeAddress: "124 Brunswick Road, Melbourne Victoria",
+  //   emergencyContactName: "Andrew",
+  //   emergencyContactNumber: "+61 1234 56789"
+  // })
+
+  const { ocrText, saveStepData } = useIntakeStore();
+
+  const [formData, setFormData] = useState(() => {
+    // Initial parse on mount
+    if (!ocrText) return EMPTY_FORM;
+    return { ...EMPTY_FORM, ...parseOcrText(ocrText) };
+  });
+
+  // Re-parse if user went back, changed document, and came forward again
+  useEffect(() => {
+    if (!ocrText) {
+      setFormData(EMPTY_FORM);
+    } else {
+      setFormData({ ...EMPTY_FORM, ...parseOcrText(ocrText) });
+    }
+  }, [ocrText]);
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
-    }))
-  }
+      [field]: value,
+    }));
+  };
 
   const handlePrevious = () => {
-    console.log("Navigate to previous step")
-    onBack()
-  }
+    console.log("Navigate to previous step");
+    onBack();
+  };
+
+  // const handleNext = () => {
+  //   console.log("Navigate to next step")
+  //   onNext(
+  //     {
+  //       first_name:               formData.firstName,
+  //       last_name:                formData.lastName,
+  //       date_of_birth:            formData.dateOfBirth,
+  //       gender:                   formData.gender,
+  //       phone:                    formData.phoneNumber,
+  //       email:                    formData.emailAddress,
+  //       address:                  formData.homeAddress,
+  //       emergency_contact_name:   formData.emergencyContactName,
+  //       emergency_contact_number: formData.emergencyContactNumber,
+  //     },
+  //     "personal"   // matches the formData section key in the store
+  //   );
+  // }
 
   const handleNext = () => {
-    console.log("Navigate to next step")
-    onNext(
-      {
-        first_name:               formData.firstName,
-        last_name:                formData.lastName,
-        date_of_birth:            formData.dateOfBirth,
-        gender:                   formData.gender,
-        phone:                    formData.phoneNumber,
-        email:                    formData.emailAddress,
-        address:                  formData.homeAddress,
-        emergency_contact_name:   formData.emergencyContactName,
-        emergency_contact_number: formData.emergencyContactNumber,
-      },
-      "personal"   // matches the formData section key in the store
-    );
-  }
+    saveStepData("personal", {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      date_of_birth: formData.dateOfBirth,
+      gender: formData.gender,
+      phone: formData.phoneNumber,
+      email: formData.emailAddress,
+      address: formData.homeAddress,
+      emergency_contact_name: formData.emergencyContactName,
+      emergency_contact_number: formData.emergencyContactNumber,
+    });
+    onNext();
+  };
 
   return (
     <div className="min-h-screen">
@@ -55,7 +100,9 @@ export default function PersonalDetails({onNext, onBack, progress}) {
         <div className="max-w-8xl mx-auto ">
           {/* Page Title */}
           <div className="mb-12">
-            <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900">Patient Intake Form</h1>
+            <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900">
+              Patient Intake Form
+            </h1>
           </div>
 
           {/* Progress Steps */}
@@ -64,11 +111,11 @@ export default function PersonalDetails({onNext, onBack, progress}) {
           {/* Main White Container */}
           <div className="relative mt-7 min-h-[700px]">
             {/* Custom SVG Background */}
-            <svg 
-              className="absolute inset-0 w-full h-full" 
-              viewBox="0 0 1320 600" 
+            <svg
+              className="absolute inset-0 w-full h-full"
+              viewBox="0 0 1320 600"
               preserveAspectRatio="none"
-              style={{ filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1))' }}
+              style={{ filter: "drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1))" }}
             >
               <path
                 fillRule="evenodd"
@@ -77,7 +124,7 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                 fill="white"
               />
             </svg>
-            
+
             {/* Content Container */}
             <div className="relative z-10 p-8">
               {/* Progress Indicator - Positioned in top right */}
@@ -85,26 +132,30 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                 {/* Text and Percentage Row */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm">
-                    <div 
+                    <div
                       className="w-4 h-4 rounded-full flex items-center justify-center"
                       style={{
-                        background: 'linear-gradient(135deg, #0575E6, #021B79)'
+                        background: "linear-gradient(135deg, #0575E6, #021B79)",
                       }}
                     >
                       <span className="text-white text-xs font-bold">i</span>
                     </div>
-                    <span className="text-gray-700">Completing your registration...</span>
+                    <span className="text-gray-700">
+                      Completing your registration...
+                    </span>
                   </div>
-                  <span className="font-medium text-gray-900 text-sm">{progress?.percent ?? 0}%</span>
+                  <span className="font-medium text-gray-900 text-sm">
+                    {progress?.percent ?? 0}%
+                  </span>
                 </div>
-                
+
                 {/* Progress Bar */}
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="h-2 rounded-full transition-all duration-300"
                     style={{
-                      background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                      width: `${progress?.percent ?? 0}%`
+                      background: "linear-gradient(135deg, #0575E6, #021B79)",
+                      width: `${progress?.percent ?? 0}%`,
                     }}
                   ></div>
                 </div>
@@ -119,20 +170,48 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                 {/* Information */}
                 <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="flex items-start gap-3">
-                    <div 
+                    <div
                       className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                       style={{
-                        background: 'linear-gradient(135deg, #0575E6, #021B79)'
+                        background: "linear-gradient(135deg, #0575E6, #021B79)",
                       }}
                     >
                       <span className="text-white text-xs font-bold">i</span>
                     </div>
+
                     <div>
+                      <h3 className="font-medium text-gray-900 mb-1">
+                        Scanned Documents Overview
+                      </h3>
+                      {ocrText ? (
+                        <>
+                          <h3 className="font-medium text-gray-900 mb-1">
+                            Details Pre-filled
+                          </h3>
+                          <p className="text-sm text-gray-700">
+                            Below is a list of all the details we've received.
+                            Double-check the files and update or remove any if
+                            needed.
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="font-medium text-gray-900 mb-1">
+                            Enter Your Details
+                          </h3>
+                          <p className="text-sm text-gray-700">
+                            No document was uploaded. Please fill in your
+                            personal details below.
+                          </p>
+                        </>
+                      )}
+                    </div>
+                    {/* <div>
                       <h3 className="font-medium text-gray-900 mb-1">Scanned Documents Overview</h3>
                       <p className="text-sm text-gray-700 mb-1">
                         Below is a list of all the details we've received. Double-check the files and update or remove any if needed.
                       </p>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
@@ -147,7 +226,9 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                       <input
                         type="text"
                         value={formData.firstName}
-                        onChange={(e) => handleInputChange('firstName', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("firstName", e.target.value)
+                        }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -158,7 +239,9 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                       <input
                         type="text"
                         value={formData.lastName}
-                        onChange={(e) => handleInputChange('lastName', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("lastName", e.target.value)
+                        }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -170,7 +253,9 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                         <input
                           type="text"
                           value={formData.dateOfBirth}
-                          onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("dateOfBirth", e.target.value)
+                          }
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="DD/MM/YYYY"
                         />
@@ -187,13 +272,17 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                       </label>
                       <select
                         value={formData.gender}
-                        onChange={(e) => handleInputChange('gender', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("gender", e.target.value)
+                        }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                         <option value="Other">Other</option>
-                        <option value="Prefer not to say">Prefer not to say</option>
+                        <option value="Prefer not to say">
+                          Prefer not to say
+                        </option>
                       </select>
                     </div>
                     <div>
@@ -208,7 +297,9 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                         <input
                           type="tel"
                           value={formData.phoneNumber}
-                          onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("phoneNumber", e.target.value)
+                          }
                           className="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
@@ -220,7 +311,9 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                       <input
                         type="email"
                         value={formData.emailAddress}
-                        onChange={(e) => handleInputChange('emailAddress', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("emailAddress", e.target.value)
+                        }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -234,7 +327,9 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                     <input
                       type="text"
                       value={formData.homeAddress}
-                      onChange={(e) => handleInputChange('homeAddress', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("homeAddress", e.target.value)
+                      }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
@@ -248,7 +343,12 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                       <input
                         type="text"
                         value={formData.emergencyContactName}
-                        onChange={(e) => handleInputChange('emergencyContactName', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "emergencyContactName",
+                            e.target.value,
+                          )
+                        }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -264,7 +364,12 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                         <input
                           type="tel"
                           value={formData.emergencyContactNumber}
-                          onChange={(e) => handleInputChange('emergencyContactNumber', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "emergencyContactNumber",
+                              e.target.value,
+                            )
+                          }
                           className="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
@@ -299,7 +404,7 @@ export default function PersonalDetails({onNext, onBack, progress}) {
                     onClick={handleNext}
                     className="px-8 py-3 rounded-full flex items-center gap-2 text-white font-medium transition-all duration-200 hover:opacity-90"
                     style={{
-                      background: 'linear-gradient(135deg, #0575E6, #021B79)'
+                      background: "linear-gradient(135deg, #0575E6, #021B79)",
                     }}
                   >
                     Next
@@ -312,5 +417,5 @@ export default function PersonalDetails({onNext, onBack, progress}) {
         </div>
       </div>
     </div>
-  )
+  );
 }

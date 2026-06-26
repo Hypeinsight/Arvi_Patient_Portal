@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from app.extensions import db
 
 class IntakeSession(db.Model):
@@ -11,11 +11,11 @@ class IntakeSession(db.Model):
     current_step   = db.Column(db.String(60))
     appointment_id = db.Column(db.String(100))
     doctor_id      = db.Column(db.String(100))
-    created_at     = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    created_at     = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
     submitted_at   = db.Column(db.DateTime(timezone=True))
     expires_at     = db.Column(
         db.DateTime(timezone=True),
-        default=lambda: datetime.utcnow() + timedelta(hours=48)
+        default=lambda: datetime.now(timezone.utc) + timedelta(hours=48)
     )
 
     # Relationships — lets you do session.uploads, session.form_data, session.summary
@@ -24,7 +24,7 @@ class IntakeSession(db.Model):
     summary   = db.relationship("IntakeSummary",  backref="session", uselist=False,  cascade="all, delete-orphan")
 
     def is_active(self):
-        return self.status == "in_progress" and datetime.utcnow() < self.expires_at
+        return self.status == "in_progress" and datetime.now(timezone.utc) < self.expires_at
 
     def to_dict(self):
         return {

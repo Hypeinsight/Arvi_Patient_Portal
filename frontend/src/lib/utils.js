@@ -208,6 +208,31 @@ export const isClient = typeof window !== "undefined"
  */
 export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
+/**
+ * Parses raw OCR text into form field values.
+ * All fields fall back to "" if not found — form stays editable either way.
+ */
+export function parseOcrText(text) {
+  if (!text) return {}
+
+  const get = (pattern) => {
+    const match = text.match(pattern)
+    return match ? match[1].trim() : ""
+  }
+
+  return {
+    firstName:              get(/First\s*Name[:\s]+([A-Za-z]+)/i),
+    lastName:               get(/(?:Last|Sur)\s*Name[:\s]+([A-Za-z]+)/i),
+    dateOfBirth:            get(/(?:DOB|Date\s*of\s*Birth)[:\s]+([\d\/\-]+)/i),
+    gender:                 get(/Gender[:\s]+(Male|Female|Other)/i),
+    phoneNumber:            get(/(?:Phone|Mobile|Tel)[:\s]+([\+\d\s\-()]+)/i),
+    emailAddress:           get(/Email[:\s]+([\w.\-]+@[\w.\-]+\.[a-z]{2,})/i),
+    homeAddress:            get(/(?:Address|Home)[:\s]+(.+)/i),
+    emergencyContactName:   get(/Emergency\s*Contact\s*Name[:\s]+([A-Za-z\s]+)/i),
+    emergencyContactNumber: get(/Emergency\s*Contact\s*(?:Number|Phone)[:\s]+([\+\d\s]+)/i),
+  }
+}
+
 // Default export of all utilities
 export default {
   cn,
@@ -220,4 +245,5 @@ export default {
   formatCurrency,
   isClient,
   delay,
+  parseOcrText,
 }
