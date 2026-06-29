@@ -6,9 +6,9 @@ import { User, Users, ArrowLeft, ArrowRight } from "lucide-react"
 import useIntakeStore from '@/lib/intakeStore';
 
 export default function AppointmentType({onNext}) {
+  const { getProgress, formData: storeData } = useIntakeStore()
   const [selectedType, setSelectedType] = useState(null)
   const [loading, setLoading] = useState(false)
-  const { getProgress } = useIntakeStore()
 
   const progress = getProgress();
 

@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import ProgressSteps from "@/components/ProgressSteps"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import useIntakeStore from '@/lib/intakeStore';
 
 export default function PrivacyConsent({onNext, onBack, progress}) {
-  const [acceptedTerms, setAcceptedTerms] = useState(false)
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
-  const [consentMarketing, setConsentMarketing] = useState(false)
+  const { formData: storeData } = useIntakeStore()
+
+  const [acceptedTerms, setAcceptedTerms]= useState(storeData.consent?.accepted_terms     ?? false)  
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(storeData.consent?.accepted_privacy ?? false)
+  const [consentMarketing, setConsentMarketing] = useState(storeData.consent?.consent_marketing ?? false)
 
   const handlePrevious = () => {
     // Handle navigation to previous step
@@ -17,9 +19,16 @@ export default function PrivacyConsent({onNext, onBack, progress}) {
   }
 
   const handleNext = () => {
-    // Handle navigation to next step
-    console.log("Navigate to next step")
-    onNext()
+    if (isNextDisabled) return
+    onNext(
+      {
+        accepted_terms:     acceptedTerms,
+        accepted_privacy:   acceptedPrivacy,
+        consent_marketing:  consentMarketing,
+        timestamp:          new Date().toISOString(),
+      },
+      "consent"
+    )
   }
 
   const isNextDisabled = !acceptedTerms || !acceptedPrivacy

@@ -7,6 +7,7 @@ import { submitSession } from "@/lib/api"
 
 export default function ReviewAndSubmit({ onNext, onBack, progress }) {
   const { formData, patientType, sessionId } = useIntakeStore()
+  console.log("ReviewAndSubmit formData:", formData)
 
   const handlePrevious = () => {
     console.log("Navigate to previous step");

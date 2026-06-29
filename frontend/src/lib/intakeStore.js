@@ -69,6 +69,18 @@ const useIntakeStore = create((set, get) => ({
 
   clearOcrResult: () =>
     set({ uploadedFile: null, ocrText: null }),
+  clearFormData: () =>
+    set({
+      formData: {
+        appointment: null,
+        consent: null,
+        account: null,
+        personal: null,
+        medical: null,
+        referral: null,
+      },
+      uploadedFiles: [],
+    }),
 
   reset: () =>
     set({

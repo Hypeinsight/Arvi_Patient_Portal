@@ -8,9 +8,13 @@ import useIntakeStore from '@/lib/intakeStore';
 import { createSession } from "@/lib/api";
 
 export default function MainPage({onNext}) {
-  const [selectedMethod, setSelectedMethod] = useState(null)
+  const { initSession, patientType, clearFormData } = useIntakeStore()
+
+  const [selectedMethod, setSelectedMethod] = useState(
+    patientType === "guest" ? "guest" :
+    patientType === "new"   ? "create" : null
+  )
   const [loading, setLoading] = useState(false)
-  const { initSession } = useIntakeStore()
 
   const handleLogin = () => {
     console.log("Login clicked")
@@ -33,12 +37,13 @@ export default function MainPage({onNext}) {
     setSelectedMethod(method)
     setLoading(true)
 
-    // Map selection to patient type
-    // "create" = new user, "guest" = guest
-    // For follow-up types, those come from AppointmentType screen
-    const patientType = method === "guest" ? "guest" : "new"
+    const newPatientType = method === "guest" ? "guest" : "new"
 
-    const data = await createSession(patientType, "doc-123", "apt-456")
+    if (newPatientType !== patientType) {
+      clearFormData()
+    }
+
+    const data = await createSession(newPatientType, "doc-123", "apt-456")
 
     if (data.success) {
       initSession(data.session_id, data.patient_type, data.screens)

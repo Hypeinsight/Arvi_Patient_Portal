@@ -1,19 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import ProgressSteps from "@/components/ProgressSteps";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import useIntakeStore from "@/lib/intakeStore";
-import { ocrPersonalId } from "@/lib/api";
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import ProgressSteps from "@/components/ProgressSteps"
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
+import useIntakeStore from "@/lib/intakeStore"
+import { ocrPersonalId } from "@/lib/api"  // ← add this import at the top
 
-export default function UploadPersonalDetails({ onNext, onBack, progress }) {
-  const { sessionId, uploadedFile, setOcrResult, clearOcrResult } =
-    useIntakeStore();
+export default function UploadPersonalDetails({onNext, onBack, progress}) {
+   const { sessionId, uploadedFile, setOcrResult, clearOcrResult } = useIntakeStore()
 
-  // Restore file state from store on back-navigation
-  const [selectedFile, setSelectedFile] = useState(uploadedFile ?? null);
-  const [ocrLoading, setOcrLoading] = useState(false);
-  const [ocrError, setOcrError] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(uploadedFile ?? null)
+  const [ocrLoading, setOcrLoading]     = useState(false)
+  const [ocrError, setOcrError]         = useState(null)
 
   const handlePrevious = () => {
     console.log("Navigate to previous step");
@@ -24,12 +23,10 @@ export default function UploadPersonalDetails({ onNext, onBack, progress }) {
     console.log("Navigate to next step");
     onNext();
   };
-
-  const handleFileSelect = async (event) => {
-    const file = event.target.files[0];
+    
+    const handleFileSelect = async (event) => {
+      const file = event.target.files[0]
     if (!file) return;
-
-    if (file) {
       // Check file size (10MB = 10 * 1024 * 1024 bytes)
       if (file.size > 10 * 1024 * 1024) {
         alert("File size must be less than 10MB");
@@ -58,25 +55,27 @@ export default function UploadPersonalDetails({ onNext, onBack, progress }) {
         if (!data.success) throw new Error(data.message);
         setOcrResult(file, data.text);
       } catch (err) {
-        setOcrError("Could not read document automatically. Please fill in your details below.");
+        setOcrError(
+          "Could not read document automatically. Please fill in your details below.",
+        );
         clearOcrResult();
       } finally {
         setOcrLoading(false);
       }
-    }
+    
   };
 
   const handleRemoveFile = () => {
-    setSelectedFile(null);
-    setOcrError(null);
-    clearOcrResult();
-  };
+    setSelectedFile(null)
+    setOcrError(null)
+    clearOcrResult()
+  }
 
   const handleSkip = () => {
-    console.log("Skip this step");
-    clearOcrResult();
-    onNext();
-  };
+    console.log("Skip this step")
+    clearOcrResult()
+    onNext()
+  }
 
   return (
     <div className="min-h-screen">
@@ -196,182 +195,190 @@ export default function UploadPersonalDetails({ onNext, onBack, progress }) {
                 </p>
 
                 {/* File Upload Area */}
-                <div className="border-2 border-dashed border-blue-300 rounded-lg p-16 text-center bg-gray-50 relative">
-                  <input
-                    type="file"
-                    id="fileInput"
-                    accept=".jpg,.jpeg,.png,.pdf"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
+                <div className="border-2 border-dashed border-blue-300 rounded-2xl p-6 text-center relative">
+                  <div className="bg-gray-50 py-14 px-6 rounded-2xl">
+                    <img
+                      src="/bgImage1.png"
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-contain opacity-100 pointer-events-none select-none"
+                      aria-hidden="true"
+                    />
+                    <input
+                      type="file"
+                      id="fileInput"
+                      accept=".jpg,.jpeg,.png,.pdf"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
 
-                  {!selectedFile ? (
-                    <div className="flex flex-col items-center">
-                      {/* Upload Icon */}
-                      <div className="mb-4">
-                        <img
-                          src="/upload.png"
-                          alt="Upload"
-                          width="48"
-                          height="48"
-                          className="mx-auto"
-                        />
-                      </div>
+                    {!selectedFile ? (
+                      <div className="flex flex-col items-center">
+                        {/* Upload Icon */}
+                        <div className="mb-4">
+                          <img
+                            src="/upload.png"
+                            alt="Upload"
+                            width="48"
+                            height="48"
+                            className="mx-auto"
+                          />
+                        </div>
 
-                      {/* Upload Text */}
-                      <h3 className="text-xl font-medium text-gray-900 mb-2">
-                        Identity Document
-                      </h3>
-                      <p className="text-gray-600 mb-6">
-                        Passport, National ID, Driver's License
-                      </p>
+                        {/* Upload Text */}
+                        <h3 className="text-xl font-medium text-gray-900 mb-2">
+                          Identity Document
+                        </h3>
+                        <p className="text-gray-600 mb-6">
+                          Passport, National ID, Driver's License
+                        </p>
 
-                      {/* Choose File Button */}
-                      <label
-                        htmlFor="fileInput"
-                        className="px-6 py-3 text-white rounded-full hover:opacity-90 transition-all duration-200 font-medium flex items-center gap-2 cursor-pointer"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #0575E6, #021B79)",
-                        }}
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
+                        {/* Choose File Button */}
+                        <label
+                          htmlFor="fileInput"
+                          className="px-6 py-3 text-white rounded-full hover:opacity-90 transition-all duration-200 font-medium flex items-center gap-2 cursor-pointer"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #0575E6, #021B79)",
+                          }}
                         >
-                          <path
-                            d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
-                            stroke="white"
-                            strokeWidth="2"
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
                             fill="none"
-                          />
-                          <polyline
-                            points="14,2 14,8 20,8"
-                            stroke="white"
-                            strokeWidth="2"
-                            fill="none"
-                          />
-                        </svg>
-                        Choose File
-                      </label>
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+                              stroke="white"
+                              strokeWidth="2"
+                              fill="none"
+                            />
+                            <polyline
+                              points="14,2 14,8 20,8"
+                              stroke="white"
+                              strokeWidth="2"
+                              fill="none"
+                            />
+                          </svg>
+                          Choose File
+                        </label>
 
-                      {/* File Format Info */}
-                      <p className="text-sm text-gray-500 mt-4">
-                        Format: JPG, PNG, PDF | Max size: 10 MB
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      {ocrLoading ? (
-                        <>
-                          <div className="mb-4 animate-pulse">
-                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto">
+                        {/* File Format Info */}
+                        <p className="text-sm text-gray-500 mt-4">
+                          Format: JPG, PNG, PDF | Max size: 10 MB
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        {ocrLoading ? (
+                          <>
+                            <div className="mb-4 animate-pulse">
+                              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto">
+                                <svg
+                                  className="w-6 h-6 text-blue-600 animate-spin"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  />
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v8z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                            <h3 className="text-xl font-medium text-gray-900 mb-2">
+                              Reading document...
+                            </h3>
+                            <p className="text-gray-600">
+                              Extracting your details
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <div className="mb-4">
                               <svg
-                                className="w-6 h-6 text-blue-600 animate-spin"
-                                fill="none"
+                                width="48"
+                                height="48"
                                 viewBox="0 0 24 24"
+                                fill="none"
                               >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                />
                                 <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8v8z"
+                                  d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+                                  stroke="#10B981"
+                                  strokeWidth="2"
+                                  fill="#F0FDF4"
+                                />
+                                <polyline
+                                  points="14,2 14,8 20,8"
+                                  stroke="#10B981"
+                                  strokeWidth="2"
+                                  fill="none"
+                                />
+                                <polyline
+                                  points="9,11 12,14 16,10"
+                                  stroke="#10B981"
+                                  strokeWidth="2"
+                                  fill="none"
                                 />
                               </svg>
                             </div>
-                          </div>
-                          <h3 className="text-xl font-medium text-gray-900 mb-2">
-                            Reading document...
-                          </h3>
-                          <p className="text-gray-600">
-                            Extracting your details
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <div className="mb-4">
-                            <svg
-                              width="48"
-                              height="48"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <path
-                                d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
-                                stroke="#10B981"
-                                strokeWidth="2"
-                                fill="#F0FDF4"
-                              />
-                              <polyline
-                                points="14,2 14,8 20,8"
-                                stroke="#10B981"
-                                strokeWidth="2"
-                                fill="none"
-                              />
-                              <polyline
-                                points="9,11 12,14 16,10"
-                                stroke="#10B981"
-                                strokeWidth="2"
-                                fill="none"
-                              />
-                            </svg>
-                          </div>
 
-                          {ocrError ? (
-                            <>
-                              <h3 className="text-xl font-medium text-gray-900 mb-2">
-                                File uploaded
-                              </h3>
-                              <p className="text-amber-600 text-sm mb-2">
-                                {ocrError}
-                              </p>
-                              <p className="text-gray-500 text-sm mb-6">
-                                {selectedFile.name}
-                              </p>
-                            </>
-                          ) : (
-                            <>
-                              <h3 className="text-xl font-medium text-gray-900 mb-2">
-                                Details extracted successfully
-                              </h3>
-                              <p className="text-gray-600 mb-1">
-                                {selectedFile.name}
-                              </p>
-                              <p className="text-sm text-gray-500 mb-6">
-                                {(selectedFile.size / 1024 / 1024).toFixed(2)}{" "}
-                                MB
-                              </p>
-                            </>
-                          )}
+                            {ocrError ? (
+                              <>
+                                <h3 className="text-xl font-medium text-gray-900 mb-2">
+                                  File uploaded
+                                </h3>
+                                <p className="text-amber-600 text-sm mb-2">
+                                  {ocrError}
+                                </p>
+                                <p className="text-gray-500 text-sm mb-6">
+                                  {selectedFile.name}
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <h3 className="text-xl font-medium text-gray-900 mb-2">
+                                  Details extracted successfully
+                                </h3>
+                                <p className="text-gray-600 mb-1">
+                                  {selectedFile.name}
+                                </p>
+                                <p className="text-sm text-gray-500 mb-6">
+                                  {(selectedFile.size / 1024 / 1024).toFixed(2)}{" "}
+                                  MB
+                                </p>
+                              </>
+                            )}
 
-                          <div className="flex gap-3">
-                            <label
-                              htmlFor="fileInput"
-                              className="px-4 py-2 border-2 border-blue-600 text-blue-600 bg-white rounded-lg hover:bg-blue-50 transition-colors font-medium cursor-pointer"
-                            >
-                              Replace File
-                            </label>
-                            <button
-                              onClick={handleRemoveFile}
-                              className="px-4 py-2 border-2 border-red-600 text-red-600 bg-white rounded-lg hover:bg-red-50 transition-colors font-medium"
-                            >
-                              Remove File
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
+                            <div className="flex gap-3">
+                              <label
+                                htmlFor="fileInput"
+                                className="px-4 py-2 border-2 border-blue-600 text-blue-600 bg-white rounded-lg hover:bg-blue-50 transition-colors font-medium cursor-pointer"
+                              >
+                                Replace File
+                              </label>
+                              <button
+                                onClick={handleRemoveFile}
+                                className="px-4 py-2 border-2 border-red-600 text-red-600 bg-white rounded-lg hover:bg-red-50 transition-colors font-medium"
+                              >
+                                Remove File
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 

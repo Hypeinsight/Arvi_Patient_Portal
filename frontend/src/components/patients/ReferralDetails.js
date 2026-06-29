@@ -4,9 +4,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { useState } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
+import useIntakeStore from '@/lib/intakeStore';
 
 export default function ReferralDetails({ onNext, onBack, progress }) {
-  const [selectedMethod, setSelectedMethod] = useState(null);
+  const { formData: storeData } = useIntakeStore()
+
+  const [selectedMethod, setSelectedMethod] = useState(
+    storeData.referral?.has_referral === true  ? "yes" :
+    storeData.referral?.has_referral === false ? "no"  : null
+  )
   const [loading, setLoading] = useState(false);
 
   const handlePrevious = () => {

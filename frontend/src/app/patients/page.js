@@ -39,6 +39,8 @@ export default function PatientsPage() {
     getProgress,
   } = useIntakeStore();
 
+  // return <UploadPersonalDetails onNext={() => {}} onBack={() => {}} progress={{ percent: 100 }} />;
+
   if (!screens.length) {
     return (
       <MainPage

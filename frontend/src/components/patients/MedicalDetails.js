@@ -3,18 +3,51 @@
 import { useState } from "react"
 import ProgressSteps from "@/components/ProgressSteps"
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
+import useIntakeStore from '@/lib/intakeStore';
+
+const REQUIRED_FIELDS = [
+  "currentConditions",
+  "currentMedications",
+  "allergies",
+  "previousSurgeries",
+  "familyMedicalHistory",
+]
+
+const FIELD_LABELS = {
+  currentConditions: "Current Medical Conditions",
+  currentMedications: "Current Medications",
+  allergies: "Allergies",
+  previousSurgeries: "Previous Surgeries",
+  familyMedicalHistory: "Family Medical History",
+}
 
 export default function MedicalDetails({onNext, onBack, progress}) {
+  const {formData: storeData} = useIntakeStore()
+
   const [formData, setFormData] = useState({
-    currentConditions: "",
-    currentMedications: "",
-    allergies: "",
-    previousSurgeries: "",
-    familyMedicalHistory: "",
+    currentConditions: storeData.medical?.conditions?.join(", ") ?? "",
+    currentMedications: storeData.medical?.medications?.join(", ") ?? "",
+    allergies: storeData.medical?.allergies?.join(", ") ?? "",
+    previousSurgeries: storeData.medical?.previous_surgeries ?? "",
+    familyMedicalHistory: storeData.medical?.family_history ?? "",
   })
+
+  const [errors, setErrors] = useState({})
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: "" }))
+  }
+
+  const validate = () => {
+    const newErrors = {}
+    for (const field of REQUIRED_FIELDS) {
+      if (!formData[field]?.trim()) {
+        newErrors[field] = `${FIELD_LABELS[field]} is required.`
+      }
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   const handlePrevious = () => {
@@ -23,6 +56,10 @@ export default function MedicalDetails({onNext, onBack, progress}) {
   }
 
   const handleNext = () => {
+    if (!validate()) {
+      console.log("Validation failed")
+      return
+    }
     console.log("Navigate to next step")
     onNext(
       {
@@ -41,6 +78,16 @@ export default function MedicalDetails({onNext, onBack, progress}) {
       "medical"
     )
   }
+
+  const textareaClass = (field) =>
+    `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 placeholder:text-gray-300 ${
+      errors[field] ? "border-red-500 bg-red-50" : "border-gray-300"
+    }`
+ 
+  const ErrorMsg = ({ field }) =>
+    errors[field] ? (
+      <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+    ) : null
 
   return (
     <div className="min-h-screen">
@@ -146,8 +193,9 @@ export default function MedicalDetails({onNext, onBack, progress}) {
                         value={formData.currentConditions}
                         onChange={e => handleInputChange("currentConditions", e.target.value)}
                         placeholder="List any current medical conditions you have"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                        className={textareaClass("currentConditions")}
                       />
+                      <ErrorMsg field="currentConditions" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -158,8 +206,9 @@ export default function MedicalDetails({onNext, onBack, progress}) {
                         value={formData.currentMedications}
                         onChange={e => handleInputChange("currentMedications", e.target.value)}
                         placeholder="List all medications you are currently taking"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                        className={textareaClass("currentMedications")}
                       />
+                      <ErrorMsg field="currentMedications" />
                     </div>
                   </div>
 
@@ -174,8 +223,9 @@ export default function MedicalDetails({onNext, onBack, progress}) {
                         value={formData.allergies}
                         onChange={e => handleInputChange("allergies", e.target.value)}
                         placeholder="List any known allergies (Medications, food, environment)"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                        className={textareaClass("allergies")}
                       />
+                      <ErrorMsg field="allergies" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -186,8 +236,9 @@ export default function MedicalDetails({onNext, onBack, progress}) {
                         value={formData.previousSurgeries}
                         onChange={e => handleInputChange("previousSurgeries", e.target.value)}
                         placeholder="List any previous surgeries with dates"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                        className={textareaClass("previousSurgeries")}
                       />
+                      <ErrorMsg field="previousSurgeries" />
                     </div>
                   </div>
 
@@ -201,8 +252,9 @@ export default function MedicalDetails({onNext, onBack, progress}) {
                       value={formData.familyMedicalHistory}
                       onChange={e => handleInputChange("familyMedicalHistory", e.target.value)}
                       placeholder="Relevant family medical history (Heart Disease, diabetes, etc.)"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      className={textareaClass("familyMedicalHistory")}
                     />
+                    <ErrorMsg field="familyMedicalHistory" />
                   </div>
                 </form>
 

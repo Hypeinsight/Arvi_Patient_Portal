@@ -208,29 +208,147 @@ export const isClient = typeof window !== "undefined"
  */
 export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-/**
- * Parses raw OCR text into form field values.
- * All fields fall back to "" if not found — form stays editable either way.
- */
-export function parseOcrText(text) {
-  if (!text) return {}
+// export function parseOcrText(text) {
+//   if (!text) return {}
 
-  const get = (pattern) => {
-    const match = text.match(pattern)
-    return match ? match[1].trim() : ""
+//   const get = (pattern) => {
+//     const match = text.match(pattern)
+//     return match ? match[1].trim() : ""
+//   }
+
+//   return {
+//     firstName:              get(/First\s*Name[:\s]+([A-Za-z]+)/i),
+//     lastName:               get(/(?:Last|Sur)\s*Name[:\s]+([A-Za-z]+)/i),
+//     dateOfBirth:            get(/(?:DOB|Date\s*of\s*Birth)[:\s]+([\d\/\-]+)/i),
+//     gender:                 get(/Gender[:\s]+(Male|Female|Other)/i),
+//     phoneNumber:            get(/(?:Phone|Mobile|Tel)[:\s]+([\+\d\s\-()]+)/i),
+//     emailAddress:           get(/Email[:\s]+([\w.\-]+@[\w.\-]+\.[a-z]{2,})/i),
+//     homeAddress:            get(/(?:Address|Home)[:\s]+(.+)/i),
+//     emergencyContactName:   get(/Emergency\s*Contact\s*Name[:\s]+([A-Za-z\s]+)/i),
+//     emergencyContactNumber: get(/Emergency\s*Contact\s*(?:Number|Phone)[:\s]+([\+\d\s]+)/i),
+//   }
+// }
+
+export function parseOcrText(text) {
+  if (!text) return {};
+
+  let lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  let firstName = "";
+  let lastName = "";
+  let dateOfBirth = "";
+  let homeAddress = "";
+
+  // 1. EXTRACT & STRIP DATES FIRST
+  const dateRegex = /\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/g;
+  const rawText = lines.join(" ");
+  const datesFound = [];
+  let match;
+
+  while ((match = dateRegex.exec(rawText)) !== null) {
+    const [fullDate, day, month, year] = match;
+    datesFound.push({
+      raw: fullDate,
+      iso: `${year}-${month}-${day}`,
+      year: parseInt(year, 10)
+    });
   }
+
+  if (datesFound.length > 0) {
+    datesFound.sort((a, b) => a.year - b.year);
+    dateOfBirth = datesFound[0].iso;
+
+    lines = lines.map(line => {
+      let cleanLine = line;
+      datesFound.forEach(d => {
+        cleanLine = cleanLine.replace(d.raw, "");
+      });
+      return cleanLine.replace(/\\|\s+/g, " ").trim();
+    }).filter(line => line.length > 0);
+  }
+
+  // 2. DEFINE SYSTEM WORD BLOCKLIST
+  const strictlyNotNames = [
+    "licence", "license", "driver", "drivers", "card", "permit", "identification", "id",
+    "australia", "victoria", "queensland", "tasmania", "nsw", "vic", "qld", "tas", "act", "nt", "wa",
+    "south", "wales", "northern", "territory", "western", 
+    "class", "expiry", "expires", "date", "issue", "issued", "success", "text", "customer", 
+    "status", "number", "no", "type", "conditions", "donor", "address", "signature", "flat", "level"
+  ];
+
+  // 3. CLEAN ARTIFACTS AND EXTRACT NAMES
+  const candidateNameLines = lines
+    .map(line => {
+      // Clean out common OCR trailing inline document numbers and noise characters
+      // e.g., "JANE CITIZEN \u201c987054321" -> "JANE CITIZEN"
+      let clean = line.replace(/[\d\u201c\u201d\u2018\u2019\"'<>\\\/\|}\[]/g, "").trim();
+      return clean;
+    })
+    .filter(line => {
+      if (line.length < 3) return false;
+
+      const lowerLine = line.toLowerCase();
+      const hasBlocklistWord = strictlyNotNames.some(keyword => {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+        return regex.test(lowerLine);
+      });
+
+      return !hasBlocklistWord;
+    });
+
+  if (candidateNameLines.length > 0) {
+    const firstLineParts = candidateNameLines[0]
+      .split(/\s+/)
+      .filter(p => /^[A-Za-z\-]+$/.test(p));
+    
+    if (firstLineParts.length >= 2) {
+      firstName = firstLineParts[0];
+      lastName = firstLineParts.slice(1).join(" ");
+    } else if (firstLineParts.length === 1 && candidateNameLines[1]) {
+      firstName = firstLineParts[0];
+      const secondLineParts = candidateNameLines[1]
+        .split(/\s+/)
+        .filter(p => /^[A-Za-z\-]+$/.test(p));
+      if (secondLineParts.length > 0) {
+        lastName = secondLineParts.join(" ");
+      }
+    }
+  }
+
+  // 4. EXTRACT ADDRESS
+  const addressRoadRegex = /\b(ST|STREET|ROAD|RD|AVE|AVENUE|DR|DRIVE|CT|COURT|PL|PLACE|HIGHWAY|HWY|VIC|NSW|QLD|SA|WA|TAS|ACT|NT|FLAT|UNIT)\b/i;
+  const postcodeRegex = /\b[0-9]{4}\b/;
+
+  const addressLines = lines.filter(line => {
+    const cleanLine = line.toLowerCase();
+    const isAlreadyParsedName = (firstName && cleanLine.includes(firstName.toLowerCase())) || 
+                                (lastName && cleanLine.includes(lastName.toLowerCase()));
+    
+    return (addressRoadRegex.test(line) || postcodeRegex.test(line)) && !isAlreadyParsedName;
+  });
+
+  if (addressLines.length > 0) {
+    homeAddress = addressLines.join(" ").replace(/\s+/g, " ").trim();
+    // Quick layout fix for loose symbols leftover in addresses
+    homeAddress = homeAddress.replace(/[\\\/\|>}\[\]\u201c\u201d]/g, "").replace(/\s+/g, " ").trim();
+  }
+
+  const formatCasing = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
   return {
-    firstName:              get(/First\s*Name[:\s]+([A-Za-z]+)/i),
-    lastName:               get(/(?:Last|Sur)\s*Name[:\s]+([A-Za-z]+)/i),
-    dateOfBirth:            get(/(?:DOB|Date\s*of\s*Birth)[:\s]+([\d\/\-]+)/i),
-    gender:                 get(/Gender[:\s]+(Male|Female|Other)/i),
-    phoneNumber:            get(/(?:Phone|Mobile|Tel)[:\s]+([\+\d\s\-()]+)/i),
-    emailAddress:           get(/Email[:\s]+([\w.\-]+@[\w.\-]+\.[a-z]{2,})/i),
-    homeAddress:            get(/(?:Address|Home)[:\s]+(.+)/i),
-    emergencyContactName:   get(/Emergency\s*Contact\s*Name[:\s]+([A-Za-z\s]+)/i),
-    emergencyContactNumber: get(/Emergency\s*Contact\s*(?:Number|Phone)[:\s]+([\+\d\s]+)/i),
-  }
+    firstName: firstName.split(" ").map(formatCasing).join(" "),
+    lastName: lastName.split(" ").map(formatCasing).join(" "),
+    dateOfBirth,
+    gender: "Male", 
+    phoneNumber: "",
+    emailAddress: "",
+    homeAddress,
+    emergencyContactName: "",
+    emergencyContactNumber: "",
+  };
 }
 
 // Default export of all utilities
