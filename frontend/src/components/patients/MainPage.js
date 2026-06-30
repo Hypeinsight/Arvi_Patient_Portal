@@ -76,8 +76,8 @@ export default function MainPage({onNext}) {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Existing Patient Login</h3>
-                    <p className="text-gray-600 text-sm">Already have an account? Log in now to continue with the next process.</p>
+                    <h3 className="text-md sm:text-lg font-semibold text-gray-900 mb-1">Existing Patient Login</h3>
+                    <p className="text-gray-600 text-xs sm:text-sm">Already have an account? Log in now to continue with the next process.</p>
                   </div>
                 </div>
                 <Button 
