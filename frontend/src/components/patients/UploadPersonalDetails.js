@@ -26,7 +26,7 @@ export default function UploadPersonalDetails({onNext, onBack, progress}) {
     
     const handleFileSelect = async (event) => {
       const file = event.target.files[0]
-    if (!file) return;
+      if (!file) return;
       // Check file size (10MB = 10 * 1024 * 1024 bytes)
       if (file.size > 10 * 1024 * 1024) {
         alert("File size must be less than 10MB");
@@ -47,21 +47,21 @@ export default function UploadPersonalDetails({onNext, onBack, progress}) {
       }
 
       setSelectedFile(file);
-      setOcrLoading(true);
-      setOcrError(null);
+      // setOcrLoading(true);
+      // setOcrError(null);
 
-      try {
-        const data = await ocrPersonalId(sessionId, file);
-        if (!data.success) throw new Error(data.message);
-        setOcrResult(file, data.text);
-      } catch (err) {
-        setOcrError(
-          "Could not read document automatically. Please fill in your details below.",
-        );
-        clearOcrResult();
-      } finally {
-        setOcrLoading(false);
-      }
+      // try {
+      //   const data = await ocrPersonalId(sessionId, file);
+      //   if (!data.success) throw new Error(data.message);
+      //   setOcrResult(file, data.text);
+      // } catch (err) {
+      //   setOcrError(
+      //     "Could not read document automatically. Please fill in your details below.",
+      //   );
+      //   clearOcrResult();
+      // } finally {
+      //   setOcrLoading(false);
+      // }
     
   };
 
