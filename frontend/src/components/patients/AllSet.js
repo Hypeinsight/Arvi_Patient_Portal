@@ -15,7 +15,7 @@ export default function AllSet() {
 
   return (
     <div className="min-h-screen py-8 px-4">
-      <div className="w-full max-w-6xl rounded-3xl mx-auto pb-8 pt-16 flex flex-col items-center text-center relative overflow-hidden bg-white">
+      <div className="w-full max-w-6xl rounded-3xl mx-auto pb-8 pt-16 flex flex-col items-center text-center relative overflow-hidden bg-white h-[70vh]">
         <div className="flex flex-col items-center relative">
           <img
             src="/bgImage1.png"
