@@ -49,20 +49,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   //   return { ...EMPTY_FORM, ...parseOcrText(ocrText) };
   // });
 
-  // const [formData, setFormData] = useState({
-  //   firstName: storeData.personal?.first_name ?? "",
-  //   lastName: storeData.personal?.last_name ?? "",
-  //   dateOfBirth: storeData.personal?.date_of_birth ?? "",
-  //   gender: storeData.personal?.gender ?? "",
-  //   phoneNumber: storeData.personal?.phone ?? "",
-  //   emailAddress: storeData.personal?.email ?? "",
-  //   homeAddress: storeData.personal?.address ?? "",
-  //   emergencyContactName: storeData.personal?.emergency_contact_name ?? "",
-  //   emergencyContactNumber: storeData.personal?.emergency_contact_number ?? "",
-  // });
-
-  const [formData, setFormData] = useState(() => {
-  const baseDefaults = {
+  const [formData, setFormData] = useState({
     firstName: storeData.personal?.first_name ?? "",
     lastName: storeData.personal?.last_name ?? "",
     dateOfBirth: storeData.personal?.date_of_birth ?? "",
@@ -72,30 +59,43 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     homeAddress: storeData.personal?.address ?? "",
     emergencyContactName: storeData.personal?.emergency_contact_name ?? "",
     emergencyContactNumber: storeData.personal?.emergency_contact_number ?? "",
-  };
+  });
 
-  if (!ocrText) {
-    return { ...EMPTY_FORM, ...baseDefaults };
-  }
+  // const [formData, setFormData] = useState(() => {
+  // const baseDefaults = {
+  //   firstName: storeData.personal?.first_name ?? "",
+  //   lastName: storeData.personal?.last_name ?? "",
+  //   dateOfBirth: storeData.personal?.date_of_birth ?? "",
+  //   gender: storeData.personal?.gender ?? "",
+  //   phoneNumber: storeData.personal?.phone ?? "",
+  //   emailAddress: storeData.personal?.email ?? "",
+  //   homeAddress: storeData.personal?.address ?? "",
+  //   emergencyContactName: storeData.personal?.emergency_contact_name ?? "",
+  //   emergencyContactNumber: storeData.personal?.emergency_contact_number ?? "",
+  // };
 
-  return { 
-    ...EMPTY_FORM, 
-    ...baseDefaults, 
-    ...parseOcrText(ocrText) 
-  };
-});
+  // if (!ocrText) {
+  //   return { ...EMPTY_FORM, ...baseDefaults };
+  // }
+
+  // return { 
+  //   ...EMPTY_FORM, 
+  //   ...baseDefaults, 
+  //   ...parseOcrText(ocrText) 
+  // };
+  // });
 
   const [errors, setErrors] = useState({});
 
   // Re-parse if user went back, changed document, and came forward again
-  useEffect(() => {
-    if (!ocrText) {
-      setFormData(EMPTY_FORM);
-    } else {
-      setFormData({ ...EMPTY_FORM, ...parseOcrText(ocrText) });
-      console.log("Parsed OCR text:", parseOcrText(ocrText));
-    }
-  }, [ocrText]);
+  // useEffect(() => {
+  //   if (!ocrText) {
+  //     setFormData(EMPTY_FORM);
+  //   } else {
+  //     setFormData({ ...EMPTY_FORM, ...parseOcrText(ocrText) });
+  //     console.log("Parsed OCR text:", parseOcrText(ocrText));
+  //   }
+  // }, [ocrText]);
 
   const handlePhoneInput = (field, value) => {
     const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -452,7 +452,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
                           <span className="w-6 h-4 bg-blue-500 rounded-sm mr-2"></span>
-                          <span className="text-sm text-gray-600">🇦🇺</span>
+                          {/* <span className="text-sm text-gray-600">🇦🇺</span> */}
                         </div>
                         <input
                           type="tel"
@@ -505,7 +505,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Emergency Contact Number*
+                        Emergency Contact Number
                       </label>
                       <input
                         type="text"
@@ -522,7 +522,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Emergency Contact Number*
+                        Emergency Contact Number
                       </label>
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">

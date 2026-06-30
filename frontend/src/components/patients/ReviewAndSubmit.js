@@ -149,7 +149,7 @@ export default function ReviewAndSubmit({ onNext, onBack, progress }) {
                   <Card className="border border-gray-200 h-20">
                     <CardContent className="p-4">
                       <p className="text-sm text-gray-500 mb-1">Name:</p>
-                      <p className="text-gray-900 font-medium">{name}</p>
+                      <p className="text-gray-900 font-medium capitalize">{name}</p>
                     </CardContent>
                   </Card>
 
@@ -237,7 +237,7 @@ export default function ReviewAndSubmit({ onNext, onBack, progress }) {
                       background: "linear-gradient(135deg, #0575E6, #021B79)",
                     }}
                   >
-                    Next
+                    Submit
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>

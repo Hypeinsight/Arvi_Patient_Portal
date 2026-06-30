@@ -370,7 +370,7 @@ export default function AccountSetup({ onNext, onBack, progress }) {
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
                           <span className="w-6 h-4 bg-blue-500 rounded-sm mr-2"></span>
-                          <span className="text-sm text-gray-600">🇦🇺</span>
+                          {/* <span className="text-sm text-gray-600">🇦🇺</span> */}
                         </div>
                         <input
                           type="tel"
