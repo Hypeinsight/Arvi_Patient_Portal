@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProgressSteps from "@/components/ProgressSteps";
 import useIntakeStore from "@/lib/intakeStore"
-import { submitSession } from "@/lib/api"
+import { goToChat } from "@/lib/api"
 
 export default function ReviewAndSubmit({ onNext, onBack, progress }) {
   const { formData, patientType, sessionId } = useIntakeStore()
@@ -16,7 +16,7 @@ export default function ReviewAndSubmit({ onNext, onBack, progress }) {
 
   const handleNext = async () => {
     console.log("Navigate to next step");
-    const result = await submitSession(sessionId, formData)
+    const result = await goToChat(sessionId, formData)
     if (result.success) {
       onNext()
     }
@@ -237,7 +237,7 @@ export default function ReviewAndSubmit({ onNext, onBack, progress }) {
                       background: "linear-gradient(135deg, #0575E6, #021B79)",
                     }}
                   >
-                    Next
+                    Submit
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>

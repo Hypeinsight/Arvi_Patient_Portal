@@ -6,8 +6,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import useIntakeStore from '@/lib/intakeStore';
 import { createSession } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 export default function MainPage({onNext}) {
+  const router = useRouter();
   const { initSession, patientType, clearFormData } = useIntakeStore()
 
   const [selectedMethod, setSelectedMethod] = useState(
@@ -17,8 +19,7 @@ export default function MainPage({onNext}) {
   const [loading, setLoading] = useState(false)
 
   const handleLogin = () => {
-    console.log("Login clicked")
-    // Add your login logic here
+    router.push("/login")
   }
 
   const handleCreateAccount = () => {
@@ -39,6 +40,7 @@ export default function MainPage({onNext}) {
 
     const newPatientType = method === "guest" ? "guest" : "new"
 
+    // Clear form data only if the patient type has changed
     if (newPatientType !== patientType) {
       clearFormData()
     }

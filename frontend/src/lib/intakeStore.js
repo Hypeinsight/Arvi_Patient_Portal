@@ -40,12 +40,12 @@ const useIntakeStore = create((set, get) => ({
 
   goNext: () =>
     set((state) => ({
-      currentIndex: Math.min(state.currentIndex + 1, state.screens.length - 1),
+      currentIndex: Math.min(state.currentIndex + 1, state.screens.length - 1), // To prevent going beyond the last screen
     })),
 
   goBack: () =>
     set((state) => ({
-      currentIndex: Math.max(state.currentIndex - 1, 0),
+      currentIndex: Math.max(state.currentIndex - 1, 0), // To prevent going before the first screen
     })),
 
   saveStepData: (section, data) =>

@@ -13,25 +13,6 @@ export async function createSession(patientType, doctorId, appointmentId) {
   return res.json();
 }
 
-export async function uploadFile(sessionId, file, uploadType) {
-  const form = new FormData();
-  form.append("file", file);
-  form.append("upload_type", uploadType);
-  const res = await fetch(`${BASE_URL}/sessions/${sessionId}/uploads`, {
-    method: "POST",
-    body: form,
-  });
-  return res.json();
-}
-
-export async function deleteFile(sessionId, uploadId) {
-  const res = await fetch(
-    `${BASE_URL}/sessions/${sessionId}/uploads/${uploadId}`,
-    { method: "DELETE" }
-  );
-  return res.json();
-}
-
 export async function submitSession(sessionId, formData) {
   const res = await fetch(`${BASE_URL}/sessions/${sessionId}/submit`, {
     method: "POST",
@@ -58,5 +39,23 @@ export async function ocrPersonalId(sessionId, file) {
     method: "POST",
     body: form,
   });
+  return res.json();
+}
+
+export async function loginUser(email, password) {
+  const res = await fetch(`${BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  return res.json();
+}
+
+export const goToChat = async (sessionId, formData) => {
+  const res = await fetch(`${BASE_URL}/sessions/${sessionId}/prepare-chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(formData),
+  })
   return res.json();
 }

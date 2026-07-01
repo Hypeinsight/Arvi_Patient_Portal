@@ -1,7 +1,8 @@
 "use client";
 
-import useIntakeStore from '@/lib/intakeStore';
-import { createSession } from "@/lib/api";
+import { useEffect } from "react";
+
+import useIntakeStore from "@/lib/intakeStore";
 
 import MainPage from "@/components/patients/MainPage";
 import AppointmentType from "@/components/patients/AppointmentType";
@@ -14,6 +15,7 @@ import MedicalDetails from "@/components/patients/MedicalDetails";
 import ReferralDetails from "@/components/patients/ReferralDetails";
 import ReviewAndSubmit from "@/components/patients/ReviewAndSubmit";
 import AllSet from "@/components/patients/AllSet";
+import { useRouter } from "next/navigation";
 
 const SCREEN_MAP = {
   choose_access_method: MainPage,
@@ -29,7 +31,10 @@ const SCREEN_MAP = {
   all_set: AllSet,
 };
 
+const PUBLIC_SCREENS = new Set(["choose_access_method"]);
+
 export default function PatientsPage() {
+  const router = useRouter();
   const {
     screens,
     currentIndex,
@@ -37,23 +42,57 @@ export default function PatientsPage() {
     goBack,
     saveStepData,
     getProgress,
+    patientType,
+    sessionId,
   } = useIntakeStore();
 
   // return <UploadPersonalDetails onNext={() => {}} onBack={() => {}} progress={{ percent: 100 }} />;
+  const currentScreen = screens[currentIndex];
+  const isPublic = PUBLIC_SCREENS.has(currentScreen);
+
+  useEffect(() => {
+    if (!screens.length) return;
+    if (isPublic) return;
+
+    const needsToken =
+      patientType === "followup_lt12" || patientType === "followup_gt12";
+
+    if (needsToken) {
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("user_token")
+          : null;
+      if (!token) router.replace("/");
+    } else {
+      // guest / new — just need a valid session, no token expected
+      if (!sessionId) router.replace("/");
+    }
+  }, [screens, currentIndex, isPublic, patientType, sessionId, router]);
 
   if (!screens.length) {
-    return (
-      <MainPage
-        onNext={() => goNext()}
-      />
-    );
+    console.log("No screens available, showing MainPage");
+    return <MainPage onNext={() => goNext()} />;
   }
 
-  const currentScreen = screens[currentIndex];
+  if (!isPublic) {
+    const needsToken =
+      patientType === "followup_lt12" || patientType === "followup_gt12";
+    if (needsToken) {
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("user_token")
+          : null;
+      if (!token) return null;
+    } else if (!sessionId) {
+      return null;
+    }
+  }
+
   const CurrentComponent = SCREEN_MAP[currentScreen];
   const progress = getProgress();
 
   if (!CurrentComponent) {
+    log("Unknown screen: ", currentScreen);
     return <p>Unknown screen: {currentScreen}</p>;
   }
 
