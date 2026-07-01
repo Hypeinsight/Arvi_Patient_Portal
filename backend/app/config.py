@@ -11,6 +11,8 @@ class Config:
     STORAGE_BUCKET                 = os.getenv("STORAGE_BUCKET")
     DOCTOR_API_URL                 = os.getenv("DOCTOR_API_URL")
     DOCTOR_API_KEY                 = os.getenv("DOCTOR_API_KEY")
+    JWT_SECRET_KEY                 = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret")
+    REDIS_URL                      = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 class DevelopmentConfig(Config):
     DEBUG = True
