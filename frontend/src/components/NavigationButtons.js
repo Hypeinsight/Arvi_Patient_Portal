@@ -25,7 +25,7 @@ export default function NavigationButtons({
         <button
           type="button"
           onClick={onBack}
-          className="w-full sm:w-auto px-6 py-3 border-2 border-blue-600 text-blue-600 bg-white rounded-full hover:bg-blue-50 flex items-center justify-start gap-2 transition-all duration-200 font-medium"
+          className="w-full sm:w-auto px-6 py-3 border-2 border-blue-600 text-blue-600 bg-white rounded-full cursor-pointer hover:bg-blue-50 flex items-center justify-start gap-2 transition-all duration-200 font-medium"
         >
           <ChevronLeft className="w-4 h-4" />
           {backText}
@@ -35,7 +35,7 @@ export default function NavigationButtons({
           type="button"
           onClick={onNext}
           disabled={isNextDisabled}
-          className={`w-full sm:w-auto px-8 py-3 rounded-full flex items-center justify-end gap-2 text-white font-medium transition-all duration-200 ${
+          className={`w-full sm:w-auto px-8 py-3 rounded-full cursor-pointer flex items-center justify-end gap-2 text-white font-medium transition-all duration-200 ${
             isNextDisabled
               ? "bg-gray-400 cursor-not-allowed"
               : "hover:opacity-90"

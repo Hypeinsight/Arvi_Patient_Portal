@@ -59,8 +59,8 @@ export default function MainPage({ onNext }) {
     <div className="min-h-screen px-4 md:px-8 lg:px-16">
       <div className="max-w-8xl mx-auto">
         {/* Page Title */}
-        <div className="mb-4 md:mb-10">
-          <h1 className="md:h-12 text-3xl md:text-[40px] font-medium text-gray-900 font-poppins">
+        <div className="mb-4">
+          <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900 font-poppins">
             Patient Intake Form
           </h1>
         </div>

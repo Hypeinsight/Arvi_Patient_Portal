@@ -7,6 +7,7 @@ import useIntakeStore from "@/lib/intakeStore";
 import { parseOcrText } from "@/lib/utils";
 import ProgressIndicator from "@/components/ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 const EMPTY_FORM = {
   firstName: "",
@@ -213,7 +214,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   };
 
   const fieldClass = (field) =>
-    `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-300 ${
+    `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-300 ${
       errors[field] ? "border-red-500 bg-red-50" : "border-gray-300"
     }`;
 
@@ -247,13 +248,13 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen xs:px-4 md:px-8 lg:px-16">
       {/* Main Content */}
-      <div className="py-8 px-4">
+      <div className="pb-8 px-4 xs:px-0">
         <div className="max-w-8xl mx-auto ">
           {/* Page Title */}
-          <div className="mb-12">
-            <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900">
+          <div className="mb-4">
+            <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900 font-poppins">
               Patient Intake Form
             </h1>
           </div>
@@ -395,21 +396,20 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Gender*
                       </label>
-                      <select
+                      <Select
                         value={formData.gender}
-                        onChange={(e) =>
-                          handleInputChange("gender", e.target.value)
-                        }
-                        className={fieldClass("gender")}
+                        onValueChange={(value) => handleInputChange("gender", value)}
                       >
-                        <option value="">Select gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                        <option value="Prefer not to say">
-                          Prefer not to say
-                        </option>
-                      </select>
+                        <SelectTrigger className={fieldClass("gender")}>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <ErrorMsg field="gender" />
                     </div>
                     <div>
