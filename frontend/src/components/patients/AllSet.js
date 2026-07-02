@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ShieldCheck, LockKeyhole } from "lucide-react";
+import { Check } from "lucide-react";
 
 export default function AllSet() {
   const [dots, setDots] = useState("");
@@ -15,7 +15,7 @@ export default function AllSet() {
 
   return (
     <div className="min-h-screen py-8 px-4">
-      <div className="w-full max-w-6xl rounded-3xl mx-auto pb-8 pt-16 flex flex-col items-center text-center relative overflow-hidden bg-white">
+      <div className="w-full max-w-6xl rounded-3xl mx-auto pb-8 pt-16 p-4 md:p-8 flex flex-col items-center text-center relative overflow-hidden bg-white">
         <div className="flex flex-col items-center relative">
           <img
             src="/bgImage1.png"
@@ -25,49 +25,21 @@ export default function AllSet() {
           />
           {/* Check Icon — badge/seal shape matching Figma */}
           <div className="relative z-10 mb-2">
-            <svg
-              width="64"
-              height="64"
-              viewBox="0 0 64 64"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M32 4
-          C33.5 4 35.5 7.5 37 8
-          C38.5 8.5 42 6.5 43.5 7.5
-          C45 8.5 44.5 12.5 45.5 14
-          C46.5 15.5 50.5 16 51.5 17.5
-          C52.5 19 51 23 51.5 24.5
-          C52 26 56 27.5 56 29
-          C56 30.5 52 32 51.5 33.5
-          C51 35 52.5 39 51.5 40.5
-          C50.5 42 46.5 42.5 45.5 44
-          C44.5 45.5 45 49.5 43.5 50.5
-          C42 51.5 38.5 49.5 37 50
-          C35.5 50.5 33.5 54 32 54
-          C30.5 54 28.5 50.5 27 50
-          C25.5 49.5 22 51.5 20.5 50.5
-          C19 49.5 19.5 45.5 18.5 44
-          C17.5 42.5 13.5 42 12.5 40.5
-          C11.5 39 13 35 12.5 33.5
-          C12 32 8 30.5 8 29
-          C8 27.5 12 26 12.5 24.5
-          C13 23 11.5 19 12.5 17.5
-          C13.5 16 17.5 15.5 18.5 14
-          C19.5 12.5 19 8.5 20.5 7.5
-          C22 6.5 25.5 8.5 27 8
-          C28.5 7.5 30.5 4 32 4Z"
-                fill="#16a34a"
+            <div className="relative h-12 w-12 md:h-16 md:w-16">
+              <div className="absolute left-1/2 top-0 h-5 w-5 -translate-x-1/2 rounded-full bg-[#10B36B] md:h-7 md:w-7" />
+              <div className="absolute right-1 top-1 h-5 w-5 rounded-full bg-[#10B36B] md:h-7 md:w-7" />
+              <div className="absolute right-0 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-[#10B36B] md:h-7 md:w-7" />
+              <div className="absolute bottom-1 right-1 h-5 w-5 rounded-full bg-[#10B36B] md:h-7 md:w-7" />
+              <div className="absolute bottom-0 left-1/2 h-5 w-5 -translate-x-1/2 rounded-full bg-[#10B36B] md:h-7 md:w-7" />
+              <div className="absolute bottom-1 left-1 h-5 w-5 rounded-full bg-[#10B36B] md:h-7 md:w-7" />
+              <div className="absolute left-0 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-[#10B36B] md:h-7 md:w-7" />
+              <div className="absolute left-1 top-1 h-5 w-5 rounded-full bg-[#10B36B] md:h-7 md:w-7" />
+              <div className="absolute inset-1.5 rounded-[14px] bg-[#10B36B] md:inset-2 md:rounded-[18px]" />
+              <Check
+                className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 text-white md:h-9 md:w-9"
+                strokeWidth={4}
               />
-              <path
-                d="M21 30l8 8 14-14"
-                stroke="white"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            </div>
           </div>
 
           {/* Title */}
@@ -152,7 +124,20 @@ export default function AllSet() {
 
         {/* Footer */}
         <div className="relative z-10 flex flex-col items-center gap-2 text-gray-400 text-xs">
-          <LockKeyhole className="w-4 h-4" />
+          <svg
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              fill="currentColor"
+              d="M7 10V7a5 5 0 0 1 10 0v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1Zm2 0h6V7a3 3 0 0 0-6 0v3Z"
+            />
+            <path
+              fill="white"
+              d="M12 14a1.75 1.75 0 0 0-.75 3.33V19a.75.75 0 0 0 1.5 0v-1.67A1.75 1.75 0 0 0 12 14Z"
+            />
+          </svg>
           <span>
             All your medical data is stored securely and treated with strict
             confidentiality.

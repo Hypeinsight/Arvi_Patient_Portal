@@ -2,15 +2,13 @@
 
 import { useState } from "react"
 import ProgressSteps from "@/components/ProgressSteps"
-import { User, Users, ArrowLeft, ArrowRight } from "lucide-react"
-import useIntakeStore from '@/lib/intakeStore';
+import { User, Users, ArrowLeft, ArrowRight, Info } from "lucide-react"
+import ProgressIndicator from "../ProgressIndicator"
+import useIntakeStore from "@/lib/intakeStore"
 
 export default function AppointmentType({onNext}) {
-  const { getProgress, formData: storeData } = useIntakeStore()
-  const [selectedType, setSelectedType] = useState(null)
+  const { patientType, formData, clearFormData } = useIntakeStore()
   const [loading, setLoading] = useState(false)
-
-  const progress = getProgress();
 
   const appointmentTypes = [
     {
@@ -40,8 +38,20 @@ export default function AppointmentType({onNext}) {
     }
   ]
 
+  const [selectedType, setSelectedType] = useState(
+    appointmentTypes.find(
+      type => type.patientType === formData.appointment?.type
+    )?.id ?? null
+  )
+
  const handleSelect = async (type) => {
   setSelectedType(type.id)
+
+  const currentAppointmentType = formData.appointment?.type ?? patientType
+  if (type.patientType !== currentAppointmentType) {
+    clearFormData()
+  }
+
   onNext({ type: type.patientType }, "appointment")
 }
 
@@ -59,10 +69,10 @@ export default function AppointmentType({onNext}) {
           <ProgressSteps currentStep={1} />
 
           {/* Main White Container */}
-          <div className="relative mt-7 h-186">
+          <div className="relative mt-7 min-h-[700px]  bg-white rounded-4xl md:bg-transparent">
             {/* Custom SVG Background */}
             <svg 
-  className="absolute inset-0 w-full h-full" 
+  className="absolute inset-0 w-full h-full hidden md:block" 
   viewBox="0 0 1320 600" 
   preserveAspectRatio="none"
   style={{ filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1))' }}
@@ -76,65 +86,37 @@ export default function AppointmentType({onNext}) {
 </svg>
             
             {/* Content Container */}
-            <div className="relative z-10 p-8">
+            <div className="relative z-10 p-4 md:p-8">
             {/* Progress Indicator - Positioned in top right */}
-            <div className="absolute top-8 right-8 flex flex-col gap-2 w-80">
-              {/* Text and Percentage Row */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm">
-                  <div 
-                    className="w-4 h-4 rounded-full flex items-center justify-center"
-                    style={{
-                      background: 'linear-gradient(135deg, #0575E6, #021B79)'
-                    }}
-                  >
-                    <span className="text-white text-xs font-bold">i</span>
-                  </div>
-                  <span className="text-gray-700">Completing your registration...</span>
-                </div>
-                <span className="font-medium text-gray-900 text-sm">{progress?.percent ?? 0}%</span>
+            <ProgressIndicator/>
+
+            <div className="mt-16 md:mt-0 mb-8">
+                <h2 className="text-base sm:text-[1.25rem] lg:text-3xl xl:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
+                  Choose Your Appointment Type
+                </h2>
               </div>
-              
-              {/* Progress Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="h-2 rounded-full transition-all duration-300"
-                  style={{
-                    background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                    width: `${progress?.percent ?? 0}%`
-                  }}
-                ></div>
-              </div>
-            </div>
 
             {/* Choose your appointment Type Section */}
-            <div className="mt-16">
-              <h2 className="text-2xl font-medium text-gray-900 mb-8">
-                Choose Your Appointment Type
-              </h2>
+            <div className="mt-8 md:mt-16 mb-16">
 
               {/* Discount Information */}
               <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <div 
-                    className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                    style={{
-                      background: 'linear-gradient(135deg, #0575E6, #021B79)'
-                    }}
-                  >
-                    <span className="text-white text-xs font-bold">i</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900 mb-1">Important Discount Information</h3>
-                    <p className="text-sm text-gray-700 mb-1">
-                      Patients with a valid referral, Medicare number, and uploaded referral letter are eligible for our referral discount.
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      Patients without a referral will be charged standard consultation fees.
-                    </p>
+                  <div className="flex items-start gap-3">
+                     <Info
+                        className="w-5 md:w-8 text-blue-600 stroke-white"
+                        fill="currentColor"
+                      />
+                    <div>
+                      <h3 className="text-md md:text-lg font-semibold text-gray-900 mb-1">
+                        Important Discount Information
+                      </h3>
+                      <p className="text-gray-600 text-xs md:text-sm">
+                        Patients with a valid referral, Medicare number, and uploaded referral letter are eligible for our referral discount.
+                        Patients without a referral will be charged standard consultation fees.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
   {appointmentTypes.map((type) => {
@@ -144,7 +126,7 @@ export default function AppointmentType({onNext}) {
         key={type.id}
         className={`
           relative cursor-pointer transition-all duration-200 hover:shadow-lg 
-          border-2 rounded-lg bg-white p-3 text-center h-88 flex flex-col justify-center
+          border-2 rounded-lg bg-white p-3 text-center h-40 md:h-88 flex flex-col justify-center
           ${selectedType === type.id 
             ? 'border-blue-600 shadow-lg' 
             : 'border-gray-200 hover:border-gray-300'

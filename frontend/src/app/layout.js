@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
           backgroundImage: "url('/new-bg.png')",
         }}>
         <TopNav />
-        <main className="p-4">{children}</main>
+        <main className="">{children}</main>
       </body>
     </html>
   );

@@ -6,7 +6,7 @@ export default function ProgressSteps({ currentStep, completedSteps = [] }) {
   
   return (
     <div className="flex items-center bg-blue-100/70 rounded-full px-2 py-0 shadow-sm relative z-0 mt-8">
-      <div className="w-full">
+      <div className="w-full overflow-auto no-scrollbar">
         <div className="flex items-center justify-between gap-2">
           
           {/* Step 1 - Appointment Type */}

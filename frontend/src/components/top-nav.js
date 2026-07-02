@@ -63,11 +63,11 @@ export default function TopNav() {
   return (
     <>
       <header
-        className={`relative z-20 max-w-[1920px] mx-auto w-full transition-colors duration-300 min-h-[60px] justify-center mt-10`}
+        className={`relative z-20 max-w-8xl mx-auto w-full transition-colors duration-300 min-h-[60px] justify-center my-4 md:my-10`}
       >
-        <div className="grid grid-cols-[auto_1fr_auto] items-center h-20 px-6 relative pt-[10px]">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center h-20 px-4 md:px-8 lg:px-16 relative pt-[10px]">
           {/* Logo Section */}
-          <div className="flex items-center md:ml-12">
+          <div className="flex items-center">
             <Link href="/patients/" className="flex items-center">
               <Image src="/main_logo.png" alt="Health Logo" width={128} height={75} className="md:w-32 md:h-auto w-20 h-auto"/>
             </Link>

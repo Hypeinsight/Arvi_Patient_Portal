@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Info } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import { parseOcrText } from "@/lib/utils";
+import ProgressIndicator from "@/components/ProgressIndicator";
+import NavigationButtons from "@/components/NavigationButtons";
 
 const EMPTY_FORM = {
   firstName: "",
@@ -260,10 +262,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
           <ProgressSteps currentStep={4} completedSteps={[1, 2, 3]} />
 
           {/* Main White Container */}
-          <div className="relative mt-7 min-h-[700px]">
+          <div className="relative mt-7 min-h-[700px] bg-white rounded-4xl md:bg-transparent">
             {/* Custom SVG Background */}
             <svg
-              className="absolute inset-0 w-full h-full"
+              className="absolute inset-0 w-full h-full hidden md:block"
               viewBox="0 0 1320 600"
               preserveAspectRatio="none"
               style={{ filter: "drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1))" }}
@@ -271,75 +273,40 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
               <path
                 fillRule="evenodd"
                 clipRule="evenodd"
-                d="M1292 80C1307.464 80 1320 92.536 1320 108V568C1320 583.464 1307.464 596 1292 596H36C16.1178 596 0 579.882 0 560V540V528V36C0 16.1178 16.1178 0 36 0H670.123C680.863 0 688.794 5.1585 693.994 11.5561L761.498 68.556C766.429 75.469 775.812 80 785.998 80H1292Z"
+                d="M1292 65C1307.464 65 1320 77.536 1320 93V568C1320 583.464 1307.464 596 1292 596H36C16.1178 596 0 579.882 0 560V540V528V36C0 16.1178 16.1178 0 36 0H570.123C580.863 0 588.794 5.1585 593.994 11.5561L661.498 55.556C666.429 61.469 675.812 65 685.998 65H1292Z"
                 fill="white"
               />
             </svg>
 
             {/* Content Container */}
-            <div className="relative z-10 p-8">
+            <div className="relative z-10 p-4 md:p-8">
               {/* Progress Indicator - Positioned in top right */}
-              <div className="absolute top-8 right-8 flex flex-col gap-2 w-80">
-                {/* Text and Percentage Row */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm">
-                    <div
-                      className="w-4 h-4 rounded-full flex items-center justify-center"
-                      style={{
-                        background: "linear-gradient(135deg, #0575E6, #021B79)",
-                      }}
-                    >
-                      <span className="text-white text-xs font-bold">i</span>
-                    </div>
-                    <span className="text-gray-700">
-                      Completing your registration...
-                    </span>
-                  </div>
-                  <span className="font-medium text-gray-900 text-sm">
-                    {progress?.percent ?? 0}%
-                  </span>
-                </div>
+              <ProgressIndicator/>
 
-                {/* Progress Bar */}
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="h-2 rounded-full transition-all duration-300"
-                    style={{
-                      background: "linear-gradient(135deg, #0575E6, #021B79)",
-                      width: `${progress?.percent ?? 0}%`,
-                    }}
-                  ></div>
-                </div>
+              <div className="mt-16 md:mt-0 mb-8">
+                <h2 className="text-base sm:text-[1.25rem] lg:text-3xl xl:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
+                  Personal Details
+                </h2>
               </div>
 
               {/* Personal Details Section */}
-              <div className="mt-8 mb-16">
-                <h2 className="text-4xl font-medium text-gray-900 mb-12">
-                  Personal Details
-                </h2>
+              <div className="mt-8 md:mt-16 mb-16">
 
                 {/* Information */}
                 <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="flex items-start gap-3">
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                      style={{
-                        background: "linear-gradient(135deg, #0575E6, #021B79)",
-                      }}
-                    >
-                      <span className="text-white text-xs font-bold">i</span>
-                    </div>
+                    <Info
+                        className="w-5 md:w-8 text-blue-600 stroke-white"
+                        fill="currentColor"
+                      />
 
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-1">
-                        Scanned Documents Overview
-                      </h3>
                       {ocrText ? (
                         <>
-                          <h3 className="font-medium text-gray-900 mb-1">
-                            Details Pre-filled
+                          <h3 className="text-md md:text-lg font-semibold text-gray-900 mb-1">
+                            Scanned Documents Overview
                           </h3>
-                          <p className="text-sm text-gray-700">
+                          <p className="text-xs md:text-sm text-gray-700">
                             Below is a list of all the details we've received.
                             Double-check the files and update or remove any if
                             needed.
@@ -347,10 +314,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                         </>
                       ) : (
                         <>
-                          <h3 className="font-medium text-gray-900 mb-1">
+                          <h3 className="text-md md:text-lg font-semibold text-gray-900 mb-1">
                             Enter Your Details
                           </h3>
-                          <p className="text-sm text-gray-700">
+                          <p className="text-xs md:text-sm text-gray-700">
                             No document was uploaded. Please fill in your
                             personal details below.
                           </p>
@@ -554,39 +521,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between items-center mt-16">
-                {/* Footer Links */}
-                <div className="flex gap-4 text-sm text-gray-600">
-                  <button className="hover:text-gray-900 transition-colors underline">
-                    Privacy Policy
-                  </button>
-                  <span>|</span>
-                  <button className="hover:text-gray-900 transition-colors underline">
-                    Terms of Use
-                  </button>
-                </div>
-
-                {/* Navigation Buttons */}
-                <div className="flex gap-4">
-                  <button
-                    onClick={handlePrevious}
-                    className="px-6 py-3 border-2 border-blue-600 text-blue-600 bg-white rounded-full hover:bg-blue-50 flex items-center gap-2 transition-all duration-200 font-medium"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
-                  </button>
-                  <button
-                    onClick={handleNext}
-                    className="px-8 py-3 rounded-full flex items-center gap-2 text-white font-medium transition-all duration-200 hover:opacity-90"
-                    style={{
-                      background: "linear-gradient(135deg, #0575E6, #021B79)",
-                    }}
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              <NavigationButtons 
+                onBack={handlePrevious} 
+                onNext={handleNext} 
+              />
             </div>
           </div>
         </div>
