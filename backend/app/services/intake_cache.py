@@ -3,6 +3,9 @@ from app.extensions import redis_client
 
 TTL_SECONDS = 1800  # 30 min
 
+def create_session_cache(session_id: str):
+    redis_client.setex(f"intake:{session_id}", TTL_SECONDS, json.dumps({}))
+
 def save_intake_data(session_id: str, form_data: dict):
     redis_client.setex(f"intake:{session_id}", TTL_SECONDS, json.dumps(form_data))
 

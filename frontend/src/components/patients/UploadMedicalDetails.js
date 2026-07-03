@@ -6,9 +6,20 @@ import ProgressSteps from "@/components/ProgressSteps";
 import { ChevronLeft, ChevronRight, Calendar, Info } from "lucide-react";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
+import useIntakeStore from "@/lib/intakeStore";
+import { ocrPersonalId } from "@/lib/api" 
 
 export default function UploadMedicalDetails({ onNext, onBack, progress }) {
+  const {
+    sessionId,
+    uploadedFile,
+    setMedicalOcrResult,
+    clearMedicalOcrResult,
+  } = useIntakeStore();
+
   const [selectedFile, setSelectedFile] = useState(null);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrError, setOcrError] = useState(null);
 
   const handlePrevious = () => {
     console.log("Navigate to previous step");
@@ -20,7 +31,7 @@ export default function UploadMedicalDetails({ onNext, onBack, progress }) {
     onNext();
   };
 
-  const handleFileSelect = (event) => {
+  const handleFileSelect = async (event) => {
     const file = event.target.files[0];
     if (file) {
       // Check file size (10MB = 10 * 1024 * 1024 bytes)
@@ -32,6 +43,7 @@ export default function UploadMedicalDetails({ onNext, onBack, progress }) {
       // Check file type
       const allowedTypes = [
         "image/jpeg",
+        "image/jfif",
         "image/jpg",
         "image/png",
         "application/pdf",
@@ -42,11 +54,28 @@ export default function UploadMedicalDetails({ onNext, onBack, progress }) {
       }
 
       setSelectedFile(file);
+      setOcrLoading(true);
+      setOcrError(null);
+
+      try {
+        const data = await ocrPersonalId(sessionId, file);
+        if (!data.success) throw new Error(data.message);
+        setMedicalOcrResult(file, data.text);
+      } catch (err) {
+        setOcrError(
+          "Could not read document automatically. Please fill in your details below.",
+        );
+        clearMedicalOcrResult();
+      } finally {
+        setOcrLoading(false);
+      }
     }
   };
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
+    setOcrError(null);
+    clearMedicalOcrResult();
   };
 
   const handleSkip = () => {
@@ -89,17 +118,16 @@ export default function UploadMedicalDetails({ onNext, onBack, progress }) {
             {/* Content Container */}
             <div className="relative z-10 p-4 md:p-8">
               {/* Progress Indicator - Positioned in top right */}
-              <ProgressIndicator/>
+              <ProgressIndicator />
 
-                <div className="mt-16 md:mt-0 mb-8">
-                  <h2 className="text-base sm:text-[1.25rem] lg:text-3xl xl:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
-                    Upload Your Medical Details
-                  </h2>
-                </div>
+              <div className="mt-16 md:mt-0 mb-8">
+                <h2 className="text-base sm:text-[1.25rem] lg:text-3xl xl:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
+                  Upload Your Medical Details
+                </h2>
+              </div>
 
               {/* Upload Your Medical Details Section */}
               <div className="mt-8 mb-16">
-
                 {/* Information */}
                 <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="flex items-center justify-between gap-3">
@@ -206,63 +234,112 @@ export default function UploadMedicalDetails({ onNext, onBack, progress }) {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center">
-                        {/* File Success Icon */}
-                        <div className="mb-4">
-                          <svg
-                            width="48"
-                            height="48"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
-                              stroke="#10B981"
-                              strokeWidth="2"
-                              fill="#F0FDF4"
-                            />
-                            <polyline
-                              points="14,2 14,8 20,8"
-                              stroke="#10B981"
-                              strokeWidth="2"
-                              fill="none"
-                            />
-                            <polyline
-                              points="9,11 12,14 16,10"
-                              stroke="#10B981"
-                              strokeWidth="2"
-                              fill="none"
-                            />
-                          </svg>
-                        </div>
+                        {ocrLoading ? (
+                          <>
+                            <div className="mb-4 animate-pulse">
+                              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto">
+                                <svg
+                                  className="w-6 h-6 text-blue-600 animate-spin"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  />
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v8z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                            <h3 className="text-xl font-medium text-gray-900 mb-2">
+                              Reading document...
+                            </h3>
+                            <p className="text-gray-600">
+                              Extracting your details
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <div className="mb-4">
+                              <svg
+                                width="48"
+                                height="48"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                              >
+                                <path
+                                  d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+                                  stroke="#10B981"
+                                  strokeWidth="2"
+                                  fill="#F0FDF4"
+                                />
+                                <polyline
+                                  points="14,2 14,8 20,8"
+                                  stroke="#10B981"
+                                  strokeWidth="2"
+                                  fill="none"
+                                />
+                                <polyline
+                                  points="9,11 12,14 16,10"
+                                  stroke="#10B981"
+                                  strokeWidth="2"
+                                  fill="none"
+                                />
+                              </svg>
+                            </div>
 
-                        {/* File Info */}
-                        <h3 className="text-xl font-medium text-gray-900 mb-2">
-                          File Uploaded Successfully
-                        </h3>
-                        <p className="text-gray-600 mb-4">
-                          {selectedFile.name}
-                        </p>
-                        <p className="text-sm text-gray-500 mb-6">
-                          Size: {(selectedFile.size / 1024 / 1024).toFixed(2)}{" "}
-                          MB
-                        </p>
+                            {ocrError ? (
+                              <>
+                                <h3 className="text-xl font-medium text-gray-900 mb-2">
+                                  File uploaded
+                                </h3>
+                                <p className="text-amber-600 text-sm mb-2">
+                                  {ocrError}
+                                </p>
+                                <p className="text-gray-500 text-sm mb-6">
+                                  {selectedFile.name}
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <h3 className="text-xl font-medium text-gray-900 mb-2">
+                                  Details extracted successfully
+                                </h3>
+                                <p className="text-gray-600 mb-1">
+                                  {selectedFile.name}
+                                </p>
+                                <p className="text-sm text-gray-500 mb-6">
+                                  {(selectedFile.size / 1024 / 1024).toFixed(2)}{" "}
+                                  MB
+                                </p>
+                              </>
+                            )}
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-3">
-                          <label
-                            htmlFor="fileInput"
-                            className="px-4 py-2 border-2 border-blue-600 text-blue-600 bg-white rounded-lg hover:bg-blue-50 transition-colors font-medium cursor-pointer"
-                          >
-                            Replace File
-                          </label>
-                          <button
-                            onClick={handleRemoveFile}
-                            className="px-4 py-2 border-2 border-red-600 text-red-600 bg-white rounded-lg hover:bg-red-50 transition-colors font-medium"
-                          >
-                            Remove File
-                          </button>
-                        </div>
+                            {/* Action Buttons */}
+                            <div className="flex gap-3">
+                              <label
+                                htmlFor="fileInput"
+                                className="px-4 py-2 border-2 border-blue-600 text-blue-600 bg-white rounded-lg hover:bg-blue-50 transition-colors font-medium cursor-pointer"
+                              >
+                                Replace File
+                              </label>
+                              <button
+                                onClick={handleRemoveFile}
+                                className="px-4 py-2 border-2 border-red-600 text-red-600 bg-white rounded-lg hover:bg-red-50 transition-colors font-medium"
+                              >
+                                Remove File
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
@@ -270,10 +347,7 @@ export default function UploadMedicalDetails({ onNext, onBack, progress }) {
               </div>
 
               {/* Navigation Buttons */}
-              <NavigationButtons 
-                onBack={handlePrevious} 
-                onNext={handleNext}
-              />
+              <NavigationButtons onBack={handlePrevious} onNext={handleNext} />
             </div>
           </div>
         </div>

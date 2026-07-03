@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import ProgressSteps from "@/components/ProgressSteps"
 import { Info } from "lucide-react"
 import ProgressIndicator from "../ProgressIndicator"
 import NavigationButtons from "@/components/NavigationButtons"
 import useIntakeStore from '@/lib/intakeStore';
+import { extractMedicalDetails } from "@/lib/utils"
 
 const REQUIRED_FIELDS = [
   "currentConditions",
@@ -23,18 +24,47 @@ const FIELD_LABELS = {
   familyMedicalHistory: "Family Medical History",
 }
 
-export default function MedicalDetails({onNext, onBack}) {
-  const {formData: storeData} = useIntakeStore()
+const EMPTY_FORM = {
+  currentConditions: "",
+  currentMedications: "",
+  allergies: "",
+  previousSurgeries: "",
+  familyMedicalHistory: "",
+}
 
-  const [formData, setFormData] = useState({
-    currentConditions: storeData.medical?.conditions?.join(", ") ?? "",
-    currentMedications: storeData.medical?.medications?.join(", ") ?? "",
-    allergies: storeData.medical?.allergies?.join(", ") ?? "",
-    previousSurgeries: storeData.medical?.previous_surgeries ?? "",
-    familyMedicalHistory: storeData.medical?.family_history ?? "",
+export default function MedicalDetails({onNext, onBack}) {
+  const {formData: storeData, ocrMedicalText} = useIntakeStore()
+
+  const [formData, setFormData] = useState(() => {
+    const baseDefaults = {
+      currentConditions: storeData.medical?.conditions?.join(", ") ?? "",
+      currentMedications: storeData.medical?.medications?.join(", ") ?? "",
+      allergies: storeData.medical?.allergies?.join(", ") ?? "",
+      previousSurgeries: storeData.medical?.previous_surgeries ?? "",
+      familyMedicalHistory: storeData.medical?.family_history ?? "",
+    }
+
+    if (!ocrMedicalText) {
+      return { ...EMPTY_FORM, ...baseDefaults }
+    }
+
+    const { data } = extractMedicalDetails(ocrMedicalText)
+    return { ...EMPTY_FORM, ...baseDefaults, ...data }
   })
 
   const [errors, setErrors] = useState({})
+
+  useEffect(() => {
+    if (!ocrMedicalText) {
+      setFormData(EMPTY_FORM)
+      // setExtractionStatus(null)
+    } else {
+      const { data, extractionStatus: status } = extractMedicalDetails(ocrMedicalText)
+      setFormData({ ...EMPTY_FORM, ...data })
+      // setExtractionStatus(status)
+      console.log("Extracted medical details:", data, status)
+    }
+  }, [ocrMedicalText])
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))

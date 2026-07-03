@@ -21,8 +21,11 @@ const useIntakeStore = create((set, get) => ({
   uploadedFiles: [],
 
   // OCR state — personal ID document only
-  ocrText: null,        // raw string returned by backend
-  uploadedFile: null,   // JS File object — lives in memory for this session
+  ocrPersonalText: null,        // raw string returned by backend
+  uploadedPersonalFile: null,   // JS File object — lives in memory for this session
+
+  ocrMedicalText: null,        // raw string returned by backend
+  uploadedMedicalFile: null,   // JS File object — lives in memory for this session
 
   // Progress
   getProgress: () => {
@@ -64,11 +67,17 @@ const useIntakeStore = create((set, get) => ({
     })),
 
   // OCR actions
-  setOcrResult: (file, text) =>    // file = JS File object, text = raw OCR string
-    set({ uploadedFile: file, ocrText: text }),
+  setPersonalOcrResult: (file, text) =>    // file = JS File object, text = raw OCR string
+    set({ uploadedPersonalFile: file, ocrPersonalText: text }),
 
-  clearOcrResult: () =>
-    set({ uploadedFile: null, ocrText: null }),
+  clearPersonalOcrResult: () =>
+    set({ uploadedPersonalFile: null, ocrPersonalText: null }),
+
+  setMedicalOcrResult: (file, text) =>    // file = JS File object, text = raw OCR string
+    set({ uploadedMedicalFile: file, ocrMedicalText: text }),
+
+  clearMedicalOcrResult: () =>
+    set({ uploadedMedicalFile: null, ocrMedicalText: null }),
   clearFormData: () =>
     set({
       formData: {

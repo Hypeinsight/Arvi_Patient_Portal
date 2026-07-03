@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
 import { ChevronLeft, ChevronRight, Calendar, Info } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
-import { parseOcrText } from "@/lib/utils";
 import ProgressIndicator from "@/components/ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {extractPersonalDetails} from "@/lib/utils";
 
 const EMPTY_FORM = {
   firstName: "",
@@ -44,25 +44,7 @@ const FIELD_LABELS = {
 
 
 export default function PersonalDetails({ onNext, onBack, progress }) {
-  const { formData: storeData, ocrText, saveStepData } = useIntakeStore();
-
-  //  const [formData, setFormData] = useState(() => {
-  //   // Initial parse on mount
-  //   if (!ocrText) return EMPTY_FORM;
-  //   return { ...EMPTY_FORM, ...parseOcrText(ocrText) };
-  // });
-
-  // const [formData, setFormData] = useState({
-  //   firstName: storeData.personal?.first_name ?? "",
-  //   lastName: storeData.personal?.last_name ?? "",
-  //   dateOfBirth: storeData.personal?.date_of_birth ?? "",
-  //   gender: storeData.personal?.gender ?? "",
-  //   phoneNumber: storeData.personal?.phone ?? "",
-  //   emailAddress: storeData.personal?.email ?? "",
-  //   homeAddress: storeData.personal?.address ?? "",
-  //   emergencyContactName: storeData.personal?.emergency_contact_name ?? "",
-  //   emergencyContactNumber: storeData.personal?.emergency_contact_number ?? "",
-  // });
+  const { formData: storeData, ocrPersonalText, saveStepData } = useIntakeStore();
 
   const [formData, setFormData] = useState(() => {
   const baseDefaults = {
@@ -77,28 +59,34 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     emergencyContactNumber: storeData.personal?.emergency_contact_number ?? "",
   };
 
-  if (!ocrText) {
+  if (!ocrPersonalText) {
     return { ...EMPTY_FORM, ...baseDefaults };
   }
+
+  const { data } = extractPersonalDetails(ocrPersonalText);
 
   return { 
     ...EMPTY_FORM, 
     ...baseDefaults, 
-    ...parseOcrText(ocrText) 
+    ...data 
   };
 });
 
   const [errors, setErrors] = useState({});
+  // const [extractionStatus, setExtractionStatus] = useState(null);
 
   // Re-parse if user went back, changed document, and came forward again
   useEffect(() => {
-    if (!ocrText) {
+    if (!ocrPersonalText) {
       setFormData(EMPTY_FORM);
+      // setExtractionStatus(null);
     } else {
-      setFormData({ ...EMPTY_FORM, ...parseOcrText(ocrText) });
-      console.log("Parsed OCR text:", parseOcrText(ocrText));
+      const { data, extractionStatus: status } = extractPersonalDetails(ocrPersonalText);
+      setFormData({ ...EMPTY_FORM, ...data });
+      // setExtractionStatus(status);
+      console.log("Extracted personal details:", data, status);
     }
-  }, [ocrText]);
+  }, [ocrPersonalText]);
 
   const handlePhoneInput = (field, value) => {
     const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -302,7 +290,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       />
 
                     <div>
-                      {ocrText ? (
+                      {ocrPersonalText ? (
                         <>
                           <h3 className="text-md md:text-lg font-semibold text-gray-900 mb-1">
                             Scanned Documents Overview

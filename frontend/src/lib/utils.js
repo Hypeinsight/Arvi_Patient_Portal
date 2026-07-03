@@ -208,27 +208,6 @@ export const isClient = typeof window !== "undefined"
  */
 export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-// export function parseOcrText(text) {
-//   if (!text) return {}
-
-//   const get = (pattern) => {
-//     const match = text.match(pattern)
-//     return match ? match[1].trim() : ""
-//   }
-
-//   return {
-//     firstName:              get(/First\s*Name[:\s]+([A-Za-z]+)/i),
-//     lastName:               get(/(?:Last|Sur)\s*Name[:\s]+([A-Za-z]+)/i),
-//     dateOfBirth:            get(/(?:DOB|Date\s*of\s*Birth)[:\s]+([\d\/\-]+)/i),
-//     gender:                 get(/Gender[:\s]+(Male|Female|Other)/i),
-//     phoneNumber:            get(/(?:Phone|Mobile|Tel)[:\s]+([\+\d\s\-()]+)/i),
-//     emailAddress:           get(/Email[:\s]+([\w.\-]+@[\w.\-]+\.[a-z]{2,})/i),
-//     homeAddress:            get(/(?:Address|Home)[:\s]+(.+)/i),
-//     emergencyContactName:   get(/Emergency\s*Contact\s*Name[:\s]+([A-Za-z\s]+)/i),
-//     emergencyContactNumber: get(/Emergency\s*Contact\s*(?:Number|Phone)[:\s]+([\+\d\s]+)/i),
-//   }
-// }
-
 export function parseOcrText(text) {
   if (!text) return {};
 
@@ -242,7 +221,7 @@ export function parseOcrText(text) {
   let dateOfBirth = "";
   let homeAddress = "";
 
-  // 1. EXTRACT & STRIP DATES FIRST
+  // EXTRACT & STRIP DATES FIRST
   const dateRegex = /\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/g;
   const rawText = lines.join(" ");
   const datesFound = [];
@@ -270,7 +249,7 @@ export function parseOcrText(text) {
     }).filter(line => line.length > 0);
   }
 
-  // 2. DEFINE SYSTEM WORD BLOCKLIST
+  // DEFINE SYSTEM WORD BLOCKLIST
   const strictlyNotNames = [
     "licence", "license", "driver", "drivers", "card", "permit", "identification", "id",
     "australia", "victoria", "queensland", "tasmania", "nsw", "vic", "qld", "tas", "act", "nt", "wa",
@@ -279,11 +258,9 @@ export function parseOcrText(text) {
     "status", "number", "no", "type", "conditions", "donor", "address", "signature", "flat", "level"
   ];
 
-  // 3. CLEAN ARTIFACTS AND EXTRACT NAMES
+  // CLEAN ARTIFACTS AND EXTRACT NAMES
   const candidateNameLines = lines
     .map(line => {
-      // Clean out common OCR trailing inline document numbers and noise characters
-      // e.g., "JANE CITIZEN \u201c987054321" -> "JANE CITIZEN"
       let clean = line.replace(/[\d\u201c\u201d\u2018\u2019\"'<>\\\/\|}\[]/g, "").trim();
       return clean;
     })
@@ -318,7 +295,7 @@ export function parseOcrText(text) {
     }
   }
 
-  // 4. EXTRACT ADDRESS
+  // EXTRACT ADDRESS
   const addressRoadRegex = /\b(ST|STREET|ROAD|RD|AVE|AVENUE|DR|DRIVE|CT|COURT|PL|PLACE|HIGHWAY|HWY|VIC|NSW|QLD|SA|WA|TAS|ACT|NT|FLAT|UNIT)\b/i;
   const postcodeRegex = /\b[0-9]{4}\b/;
 
@@ -350,6 +327,311 @@ export function parseOcrText(text) {
     emergencyContactNumber: "",
   };
 }
+
+function firstMatch(text, patterns) {
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1] && match[1].trim()) {
+      return match[1].trim();
+    }
+  }
+  return null;
+}
+
+function normalizeDate(raw) {
+  if (!raw) return null;
+  const ymd = raw.match(/(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/);
+  const dmy = raw.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+
+  let day, month, year;
+  if (ymd) {
+    [, year, month, day] = ymd;
+  } else if (dmy) {
+    [, day, month, year] = dmy;
+    if (year.length === 2) {
+      year = (parseInt(year, 10) > 30 ? "19" : "20") + year;
+    }
+  } else {
+    return null;
+  }
+
+  day = day.padStart(2, "0");
+  month = month.padStart(2, "0");
+
+  const parsed = new Date(`${year}-${month}-${day}`);
+  if (isNaN(parsed.getTime())) return null;
+  if (parsed > new Date()) return null;
+  if (parseInt(month, 10) > 12 || parseInt(day, 10) > 31) return null;
+
+  return `${year}-${month}-${day}`;
+}
+
+function splitFullName(fullName) {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return { firstName: parts[0], lastName: "" };
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts[parts.length - 1],
+  };
+}
+
+function normalizeGender(raw) {
+  if (!raw) return null;
+  const val = raw.trim().toLowerCase();
+  if (["m", "male"].includes(val)) return "Male";
+  if (["f", "female"].includes(val)) return "Female";
+  if (["x", "other", "non-binary", "nonbinary"].includes(val)) return "Other";
+  return null;
+}
+
+function normalizeAuPhone(raw) {
+  if (!raw) return null;
+  const digits = raw.replace(/\D/g, "");
+
+  const withCountryCode = digits.match(/^61(4|5|2|3|7|8|1300|1800)\d+/);
+  const clean = withCountryCode ? "0" + digits.slice(2) : digits;
+
+  const mobileRegex = /^(04|05)\d{8}$/;
+  const landlineRegex = /^(02|03|07|08)\d{8}$/;
+  const tollfreeRegex = /^(1300|1800)\d{6}$/;
+
+  if (
+    !mobileRegex.test(clean) &&
+    !landlineRegex.test(clean) &&
+    !tollfreeRegex.test(clean)
+  ) {
+    return null;
+  }
+
+  if (clean.length !== 10) return null;
+  return `${clean.slice(0, 4)} ${clean.slice(4, 7)} ${clean.slice(7)}`;
+}
+
+function cleanBlock(raw) {
+  if (!raw) return null;
+  const cleaned = raw
+    .replace(/^[\-\*\u2022]\s*/gm, "")
+    .replace(/\n+/g, ", ")
+    .replace(/\s{2,}/g, " ")
+    .replace(/,\s*,/g, ",")
+    .replace(/,\s*$/, "")
+    .trim();
+  return cleaned || null;
+}
+
+export function extractPersonalDetails(ocrText) {
+  const result = {
+    firstName: null,
+    lastName: null,
+    dateOfBirth: null,
+    gender: null,
+    phoneNumber: null,
+    emailAddress: null,
+    homeAddress: null,
+    emergencyContactName: null,
+    emergencyContactNumber: null,
+  };
+
+  if (!ocrText || !ocrText.trim()) {
+    const fieldStatus = Object.fromEntries(
+      Object.keys(result).map((k) => [k, false])
+    );
+    const emptyData = Object.fromEntries(
+      Object.keys(result).map((k) => [k, ""])
+    );
+    return { data: emptyData, fieldStatus, extractionStatus: "failed" };
+  }
+
+  console.log("Ocr text: ", ocrText);
+  
+  const text = ocrText.replace(/\r/g, "");
+
+  console.log("Ocr text text: ", text);
+
+  // --- Name (first + last) ---
+  const givenName = firstMatch(text, [
+    /given\s*names?\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+    /first\s*name\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+    /forename\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+  ]);
+  const surname = firstMatch(text, [
+    /surname\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+    /last\s*name\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+    /family\s*name\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+  ]);
+
+  if (givenName || surname) {
+    result.firstName = givenName || null;
+    result.lastName = surname || null;
+  } else {
+    const fullName = firstMatch(text, [
+      /full\s*name\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+      /(?:^|\n)name\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+    ]);
+    if (fullName) {
+      const split = splitFullName(fullName);
+      result.firstName = split.firstName || null;
+      result.lastName = split.lastName || null;
+    }
+  }
+
+  // --- Date of birth ---
+  const dobRaw = firstMatch(text, [
+    /date\s*of\s*birth\s*[:\-]?\s*([\d\/\-\.]{6,10})/i,
+    /d\.?o\.?b\.?\s*[:\-]?\s*([\d\/\-\.]{6,10})/i,
+    /birth\s*date\s*[:\-]?\s*([\d\/\-\.]{6,10})/i,
+  ]);
+  result.dateOfBirth = normalizeDate(dobRaw);
+
+  // --- Gender ---
+  const genderRaw = firstMatch(text, [
+    /gender\s*[:\-]?\s*([A-Za-z]+)/i,
+    /sex\s*[:\-]?\s*([A-Za-z]+)/i,
+  ]);
+  result.gender = normalizeGender(genderRaw);
+
+  // --- Phone number ---
+  const phoneRaw = firstMatch(text, [
+    /phone\s*number\s*[:\-]?\s*([\d\s\+\(\)]{8,15})/i,
+    /mobile\s*[:\-]?\s*([\d\s\+\(\)]{8,15})/i,
+    /contact\s*number\s*[:\-]?\s*([\d\s\+\(\)]{8,15})/i,
+    /tel(?:ephone)?\s*[:\-]?\s*([\d\s\+\(\)]{8,15})/i,
+  ]);
+  result.phoneNumber = normalizeAuPhone(phoneRaw);
+
+  // --- Email address ---
+  const emailRaw = firstMatch(text, [
+    /email\s*address\s*[:\-]?\s*([A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,})/i,
+    /email\s*[:\-]?\s*([A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,})/i,
+    /([A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,})/,
+  ]);
+  result.emailAddress = emailRaw || null;
+
+  // --- Home address ---
+  const addressRaw = firstMatch(text, [
+    /home\s*address\s*[:\-]?\s*([A-Za-z0-9,'\-\/ ]+)\n/i,
+    /residential\s*address\s*[:\-]?\s*([A-Za-z0-9,'\-\/ ]+)\n/i,
+    /address\s*[:\-]?\s*([A-Za-z0-9,'\-\/ ]+)\n/i,
+  ]);
+  result.homeAddress = addressRaw || null;
+
+  // --- Emergency contact name ---
+  const emergencyNameRaw = firstMatch(text, [
+    /emergency\s*contact\s*name\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+    /emergency\s*contact\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+    /next\s*of\s*kin\s*[:\-]?\s*([A-Za-z'\- ]+)\n/i,
+  ]);
+  result.emergencyContactName = emergencyNameRaw || null;
+
+  // --- Emergency contact number ---
+  const emergencyNumberRaw = firstMatch(text, [
+    /emergency\s*contact\s*number\s*[:\-]?\s*([\d\s\+\(\)]{8,15})/i,
+    /emergency\s*(?:phone|number)\s*[:\-]?\s*([\d\s\+\(\)]{8,15})/i,
+  ]);
+  result.emergencyContactNumber = normalizeAuPhone(emergencyNumberRaw);
+
+  // --- Build per-field status and overall status ---
+  const fieldStatus = {};
+  let anySuccess = false;
+  for (const key of Object.keys(result)) {
+    const found = result[key] !== null && result[key] !== "";
+    fieldStatus[key] = found;
+    if (found) anySuccess = true;
+    if (!found) result[key] = "";
+  }
+
+  return {
+    data: result,
+    fieldStatus,
+    extractionStatus: anySuccess ? "success" : "failed",
+  };
+}
+
+export function extractMedicalDetails(ocrText) {
+  const result = {
+    currentConditions: null,
+    currentMedications: null,
+    allergies: null,
+    previousSurgeries: null,
+    familyMedicalHistory: null,
+  };
+
+  if (!ocrText || !ocrText.trim()) {
+    const fieldStatus = Object.fromEntries(
+      Object.keys(result).map((k) => [k, false])
+    );
+    const emptyData = Object.fromEntries(
+      Object.keys(result).map((k) => [k, ""])
+    );
+    return { data: emptyData, fieldStatus, extractionStatus: "failed" };
+  }
+
+  const text = ocrText.replace(/\r/g, "");
+
+  const ALL_LABELS_FOR_LOOKAHEAD =
+    "current\\s*medical\\s*conditions|medical\\s*conditions|conditions|" +
+    "current\\s*medications|medications|meds|" +
+    "allerg(?:y|ies)|" +
+    "previous\\s*surgeries|surgical\\s*history|surgeries|" +
+    "family\\s*(?:medical\\s*)?history";
+
+  function sectionCapture(labelAlternatives) {
+    return new RegExp(
+      `(?:${labelAlternatives})\\s*[:\\-]?\\s*\\n?` +
+        `([\\s\\S]*?)` +
+        `(?=\\n\\s*\\n|\\n(?:${ALL_LABELS_FOR_LOOKAHEAD})\\s*[:\\-]|$)`,
+      "i"
+    );
+  }
+
+  // --- Current medical conditions ---
+  result.currentConditions = firstMatch(text, [
+    sectionCapture(
+      "current\\s*medical\\s*conditions|medical\\s*conditions|conditions"
+    ),
+  ]);
+
+  // --- Current medications ---
+  result.currentMedications = firstMatch(text, [
+    sectionCapture("current\\s*medications|medications|meds"),
+  ]);
+
+  // --- Allergies ---
+  result.allergies = firstMatch(text, [sectionCapture("allerg(?:y|ies)")]);
+
+  // --- Previous surgeries ---
+  result.previousSurgeries = firstMatch(text, [
+    sectionCapture("previous\\s*surgeries|surgical\\s*history|surgeries"),
+  ]);
+
+  // --- Family medical history ---
+  result.familyMedicalHistory = firstMatch(text, [
+    sectionCapture("family\\s*(?:medical\\s*)?history"),
+  ]);
+
+  // --- Clean up captured multi-line blocks ---
+  for (const key of Object.keys(result)) {
+    result[key] = cleanBlock(result[key]);
+  }
+
+  // --- Build per-field status and overall status ---
+  const fieldStatus = {};
+  let anySuccess = false;
+  for (const key of Object.keys(result)) {
+    const found = result[key] !== null && result[key] !== "";
+    fieldStatus[key] = found;
+    if (found) anySuccess = true;
+    if (!found) result[key] = "";
+  }
+
+  return {
+    data: result,
+    fieldStatus,
+    extractionStatus: anySuccess ? "success" : "failed",
+  };
+}
+
+
 
 // Default export of all utilities
 export default {
