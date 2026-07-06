@@ -6,6 +6,8 @@ import { ChevronLeft, ChevronRight, BatteryMedium } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
+import Title from "../Title";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function PrivacyConsent({ onNext, onBack, progress }) {
   const { formData: storeData } = useIntakeStore();
@@ -42,24 +44,24 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
   const isNextDisabled = !acceptedTerms || !acceptedPrivacy;
 
   return (
-    <div className="min-h-screen xs:px-4 md:px-8 lg:px-16">
+    <div className="px-4 md:px-8 lg:px-16">
       {/* Main Content */}
-      <div className="pb-8 px-4 xs:px-0">
+      <div className="pb-8">
         <div className="max-w-8xl mx-auto">
           {/* Page Title */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900 font-poppins">
               Patient Intake Form
             </h1>
-          </div>
+          </div> */}
 
           {/* Progress Steps */}
           <ProgressSteps currentStep={2} completedSteps={[1]} />
 
           {/* Main White Container */}
-          <div className="relative mt-7 min-h-[700px] bg-white rounded-4xl md:bg-transparent">
+          <div className="relative bg-white rounded-4xl mt-4">
             {/* Custom SVG Background */}
-            <svg
+            {/* <svg
               className="absolute inset-0 w-full h-full hidden md:block"
               viewBox="0 0 1320 600"
               preserveAspectRatio="none"
@@ -73,35 +75,29 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
   
                 fill="white"
               />
-            </svg>
+            </svg> */}
 
             {/* Content Container */}
             <div className="relative z-10 p-4 md:p-8">
-              {/* Progress Indicator - Positioned in top right */}
-              <ProgressIndicator/>
+              <Title title="Privacy & Consent" />
 
-              <div className="mt-16 md:mt-0 mb-8">
-                <h2 className="text-base sm:text-[1.25rem] lg:text-3xl xl:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
-                  Privacy & Consent
-                </h2>
-              </div>
+              {/* Progress Indicator - Positioned in top right */}
+              <ProgressIndicator />
 
               {/* Privacy & Consent Section */}
-              <div className="mt-8 md:mt-16 mb-16">
+              <div className="mt-8 mb-16">
                 {/* Consent Checkboxes */}
                 <div className="space-y-6 max-w-8xl">
                   {/* Terms of Use Checkbox */}
-                  <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-start gap-4 p-3 md:p-4 bg-blue-50 rounded-2xl">
                     <div className="relative mt-0.5">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         id="terms"
                         checked={acceptedTerms}
-                        onChange={(e) => setAcceptedTerms(e.target.checked)}
-                        className="w-5 h-5 rounded border-2 border-blue-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
-                        style={{
-                          accentColor: "#0575E6",
-                        }}
+                        onCheckedChange={(checked) =>
+                          setAcceptedTerms(!!checked)
+                        }
+                        className="w-4 md:w-5 h-4 md:h-5 rounded-sm md:rounded-md cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-[#0575E6] data-[state=checked]:border-[#0575E6]"
                       />
                     </div>
                     <label
@@ -113,17 +109,15 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
                   </div>
 
                   {/* Privacy Policy Checkbox */}
-                  <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-start gap-4 p-3 md:p-4 bg-blue-50 rounded-2xl">
                     <div className="relative mt-0.5">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         id="privacy"
                         checked={acceptedPrivacy}
-                        onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                        className="w-5 h-5 rounded border-2 border-blue-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
-                        style={{
-                          accentColor: "#0575E6",
-                        }}
+                        onCheckedChange={(checked) =>
+                          setAcceptedPrivacy(!!checked)
+                        }
+                        className="w-4 md:w-5 h-4 md:h-5 rounded-sm md:rounded-md cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-[#0575E6] data-[state=checked]:border-[#0575E6]"
                       />
                     </div>
                     <label
@@ -136,17 +130,15 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
                   </div>
 
                   {/* Marketing Consent Checkbox */}
-                  <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-start gap-4 p-3 md:p-4 bg-blue-50 rounded-2xl">
                     <div className="relative mt-0.5">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         id="marketing"
                         checked={consentMarketing}
-                        onChange={(e) => setConsentMarketing(e.target.checked)}
-                        className="w-5 h-5 rounded border-2 border-blue-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
-                        style={{
-                          accentColor: "#0575E6",
-                        }}
+                        onCheckedChange={(checked) =>
+                          setConsentMarketing(!!checked)
+                        }
+                        className="w-4 md:w-5 h-4 md:h-5 rounded-sm md:rounded-md cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-[#0575E6] data-[state=checked]:border-[#0575E6]"
                       />
                     </div>
                     <label
@@ -161,11 +153,11 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
               </div>
 
               {/* Navigation Buttons */}
-             <NavigationButtons 
-              onBack={handlePrevious} 
-              onNext={handleNext} 
-              isNextDisabled={!acceptedTerms || !acceptedPrivacy} 
-            />
+              <NavigationButtons
+                onBack={handlePrevious}
+                onNext={handleNext}
+                isNextDisabled={!acceptedTerms || !acceptedPrivacy}
+              />
             </div>
           </div>
         </div>

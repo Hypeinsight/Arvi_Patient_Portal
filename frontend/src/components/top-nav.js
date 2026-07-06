@@ -63,7 +63,7 @@ export default function TopNav() {
   return (
     <>
       <header
-        className={`relative z-20 max-w-8xl mx-auto w-full transition-colors duration-300 min-h-[60px] justify-center mt-4 mb-1 md:mt-8 md:mb-2`}
+        className={`relative z-20 max-w-8xl mx-auto w-full transition-colors duration-300 min-h-[60px] justify-center mb-1 md:mb-2`}
       >
         <div className="grid grid-cols-[auto_1fr_auto] items-center h-20 px-4 md:px-8 lg:px-16 relative pt-[10px]">
           {/* Logo Section */}
@@ -74,9 +74,8 @@ export default function TopNav() {
           </div>
 
           {/* Action Buttons & User Info */}
-          <div className="hidden md:flex items-center justify-end gap-4">
+          {/* <div className="hidden md:flex items-center justify-end gap-4">
             <div className="flex items-center gap-4">
-              {/* Good Morning Section */}
               <div className="text-left">
                 <div className="text-lg font-medium text-gray-800">
                   {isMounted ? getDynamicGreeting() : "Good Morning"}
@@ -84,7 +83,6 @@ export default function TopNav() {
                 <div className="text-sm text-gray-600">{user?.firstname || ""} {user?.lastname || "Doctor"}</div>
               </div>
 
-              {/* Time Display Container */}
               <div className="flex items-center bg-blue-100/70 rounded-full px-6 py-3 shadow-sm relative z-0">
                 <span className="text-2xl font-bold text-[#2563EB] font-mono tracking-normal mr-4 relative z-0">
                   {isMounted ? (
@@ -99,7 +97,6 @@ export default function TopNav() {
                   )}
                 </span>
 
-                {/* Profile Dropdown */}
                 <div className="relative z-0">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -133,7 +130,7 @@ export default function TopNav() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Mobile Menu - Add your mobile menu content here */}

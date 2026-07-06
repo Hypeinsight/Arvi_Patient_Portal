@@ -7,7 +7,7 @@ function ProgressIndicator() {
   const progress = getProgress();
   
   return (
-    <div className="absolute top-6 right-4 md:right-8 left-4 md:left-auto flex flex-col gap-2 w-auto md:w-64 lg:w-80">
+    <div className="md:absolute top-6 right-4 md:right-8 left-4 md:left-auto flex flex-col gap-2 w-auto md:w-64 lg:w-80">
       {/* Text and Percentage Row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm">

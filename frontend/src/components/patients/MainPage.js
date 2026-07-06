@@ -8,6 +8,9 @@ import useIntakeStore from "@/lib/intakeStore";
 import { createSession } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { CircleAlert, Info } from "lucide-react";
+import Title from "@/components/Title";
+import Footer from "@/components/Footer";
+import InfoCard from "@/components/InfoCard";
 
 export default function MainPage({ onNext }) {
   const router = useRouter();
@@ -56,60 +59,32 @@ export default function MainPage({ onNext }) {
   };
 
   return (
-    <div className="min-h-screen px-4 md:px-8 lg:px-16">
+    <div className="px-4 md:px-8 lg:px-16">
       <div className="max-w-8xl mx-auto">
         {/* Page Title */}
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900 font-poppins">
             Patient Intake Form
           </h1>
-        </div>
+        </div> */}
 
         {/* Choose Your Access Method Section */}
-        <div className="mb-8 bg-white rounded-2xl p-4 md:p-8 shadow-sm">
-          <h2 className="text-base sm:text-2xl md:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
-            Choose Your Access Method
-          </h2>
+        <div className="bg-white rounded-2xl p-4 md:p-8 shadow-sm">
+          <Title title="Choose Your Access Method" />
 
-          {/* Existing Patient Login Card */}
-          <Card className="mb-6 border-blue-200 bg-blue-50 h-20">
-            <CardContent className="p-2 xs:p-4 md:p-6 h-full flex items-center">
-              <div className="flex items-center justify-between gap-0.5 w-full">
-                <div className="flex items-start gap-2 md:gap-4">
-                  {/* <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div> */}
-                  <Info
-                    className="w-5 md:w-8 text-blue-600 stroke-white"
-                    fill="currentColor"
-                  />
-                  <div>
-                    <h3 className="text-md md:text-lg font-semibold text-gray-900 mb-1">
-                      Existing Patient Login
-                    </h3>
-                    <p className="text-gray-600 text-xs md:text-sm">
-                      Already have an account? Log in now to continue with the
-                      next process.
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  onClick={handleLogin}
-                  className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white rounded-full px-2 xs:px-3 sm:px-4 md:px-6 min-w-16 sm:min-w-[90px] md:min-w-[100px] h-9 sm:h-10 md:h-auto text-xs sm:text-sm md:text-base flex-1 sm:flex-none"
-                >
-                  Login
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Existing Patient Login Card */} 
+          <InfoCard
+            title="Existing Patient Login"
+            description="Already have an account? Log in now to continue with the next process."
+            buttonText="Login"
+            onClick={handleLogin}
+          />
 
           {/* Access Method Options */}
           <div className="grid md:grid-cols-2 gap-6">
             {/* Create Account Card */}
             <Card
-              className={`cursor-pointer transition-all duration-200 hover:shadow-lg border-2 h-80 ${
+              className={`cursor-pointer transition-all duration-200 hover:shadow-lg border-2 h-60 2xl:h-80 ${
                 selectedMethod === "create"
                   ? "border-blue-500 bg-blue-50"
                   : "border-gray-200 hover:border-blue-300"
@@ -140,7 +115,7 @@ export default function MainPage({ onNext }) {
 
             {/* Continue as Guest Card */}
             <Card
-              className={`cursor-pointer transition-all duration-200 hover:shadow-lg border-2 h-80 ${
+              className={`cursor-pointer transition-all duration-200 hover:shadow-lg border-2 h-60 2xl:h-80 ${
                 selectedMethod === "guest"
                   ? "border-green-500 bg-green-50"
                   : "border-gray-200 hover:border-green-300"
@@ -172,15 +147,7 @@ export default function MainPage({ onNext }) {
         </div>
 
         {/* Footer Links */}
-        <div className="flex gap-4 text-sm text-gray-600 mt-12">
-          <button className="hover:text-gray-900 transition-colors underline">
-            Privacy Policy
-          </button>
-          <span>|</span>
-          <button className="hover:text-gray-900 transition-colors underline">
-            Terms of Use
-          </button>
-        </div>
+        {/* <Footer/> */}
       </div>
     </div>
   );

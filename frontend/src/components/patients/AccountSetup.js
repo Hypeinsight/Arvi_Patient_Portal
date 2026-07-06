@@ -7,7 +7,16 @@ import useIntakeStore from "@/lib/intakeStore";
 import { BatteryMedium, Info } from "lucide-react";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import InfoCard from "../InfoCard";
+import { AU } from "country-flag-icons/react/3x2";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import Title from "../Title";
 
 const REQUIRED_FIELDS = [
   "firstName",
@@ -182,7 +191,7 @@ export default function AccountSetup({ onNext, onBack, progress }) {
   };
 
   const fieldClass = (field) =>
-    `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-300 ${
+    `w-full px-4 py-2 border rounded-lg text-sm font-poppins focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-300 ${
       errors[field] ? "border-red-500 bg-red-50" : "border-gray-300"
     }`;
 
@@ -192,24 +201,17 @@ export default function AccountSetup({ onNext, onBack, progress }) {
     ) : null;
 
   return (
-    <div className="min-h-screen xs:px-4 md:px-8 lg:px-16">
+    <div className="px-4 md:px-8 lg:px-16">
       {/* Main Content */}
       <div className="pb-8 px-4 xs:px-0">
         <div className="max-w-8xl mx-auto ">
-          {/* Page Title */}
-          <div className="mb-4">
-            <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900 font-poppins">
-              Patient Intake Form
-            </h1>
-          </div>
-
           {/* Progress Steps */}
           <ProgressSteps currentStep={3} completedSteps={[1, 2]} />
 
           {/* Main White Container */}
-          <div className="relative mt-7 min-h-[700px] bg-white rounded-4xl md:bg-transparent">
+          <div className="relative mt-7 min-h-[700px] bg-white rounded-4xl">
             {/* Custom SVG Background */}
-            <svg
+            {/* <svg
               className="absolute inset-0 w-full h-full hidden md:block"
               viewBox="0 0 1320 600"
               preserveAspectRatio="none"
@@ -220,24 +222,25 @@ export default function AccountSetup({ onNext, onBack, progress }) {
                 clipRule="evenodd"
                 d="M1292 65C1307.464 65 1320 77.536 1320 93V568C1320 583.464 1307.464 596 1292 596H36C16.1178 596 0 579.882 0 560V540V528V36C0 16.1178 16.1178 0 36 0H570.123C580.863 0 588.794 5.1585 593.994 11.5561L661.498 55.556C666.429 61.469 675.812 65 685.998 65H1292Z"                fill="white"
               />
-            </svg>
+            </svg> */}
 
             {/* Content Container */}
             <div className="relative z-10 p-4 md:p-8">
+              <Title title="Account Setup" />
               {/* Progress Indicator - Positioned in top right */}
-                <ProgressIndicator/>
-
-              <div className="mt-16 md:mt-0 mb-8">
-                <h2 className="text-base sm:text-[1.25rem] lg:text-3xl xl:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
-                  Account Setup
-                </h2>
-              </div>
+              <ProgressIndicator />
 
               {/* Account Setup Section */}
-              <div className="mt-8 md:mt-16 mb-16">
+              <div className="mt-8 mb-16">
+                <InfoCard
+                  title="Scanned Documents Overview"
+                  description="Below is a list of all the details we've received.
+                        Double-check the files and update or remove any if
+                        needed."
+                />
 
                 {/* Information */}
-                <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                {/* <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="flex items-start gap-3">
                      <Info
                         className="w-5 md:w-8 text-blue-600 stroke-white"
@@ -254,14 +257,14 @@ export default function AccountSetup({ onNext, onBack, progress }) {
                       </p>
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Form Fields */}
                 <form className="space-y-6">
                   {/* First Row: First Name, Last Name, Date of Birth */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         First Name*
                       </label>
                       <input
@@ -276,7 +279,7 @@ export default function AccountSetup({ onNext, onBack, progress }) {
                       <ErrorMsg field="firstName" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Last Name*
                       </label>
                       <input
@@ -291,7 +294,7 @@ export default function AccountSetup({ onNext, onBack, progress }) {
                       <ErrorMsg field="lastName" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Date of Birth*
                       </label>
                       <div className="relative">
@@ -303,7 +306,11 @@ export default function AccountSetup({ onNext, onBack, progress }) {
                           }
                           onBlur={(e) => handleDobBlur(e.target.value)}
                           max={new Date().toISOString().split("T")[0]} // prevents future dates
-                          className={`${fieldClass("dateOfBirth")} [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                          className={`${fieldClass("dateOfBirth")} font-poppins ${
+                            !formData.dateOfBirth
+                              ? "text-gray-300 [&::-webkit-datetime-edit]:text-gray-300"
+                              : "text-gray-900 [&::-webkit-datetime-edit]:text-gray-900"
+                          } [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                         />
                         <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                       </div>
@@ -314,33 +321,44 @@ export default function AccountSetup({ onNext, onBack, progress }) {
                   {/* Second Row: Gender, Phone Number, Email */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Gender*
                       </label>
                       <Select
                         value={formData.gender}
-                        onValueChange={(value) => handleInputChange("gender", value)}
+                        onValueChange={(value) =>
+                          handleInputChange("gender", value)
+                        }
                       >
-                        <SelectTrigger className={fieldClass("gender")}>
-                          <SelectValue placeholder="Select gender" />
+                        <SelectTrigger
+                          className={`${fieldClass("gender")} ${
+                            !formData.gender
+                              ? "text-gray-300 text-sm"
+                              : "text-gray-900"
+                          }`}
+                        >
+                          <SelectValue placeholder="Select Gender" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Male">Male</SelectItem>
                           <SelectItem value="Female">Female</SelectItem>
                           <SelectItem value="Other">Other</SelectItem>
-                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                          <SelectItem value="Prefer not to say">
+                            Prefer not to say
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <ErrorMsg field="gender" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Phone Number*
                       </label>
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
-                          <span className="w-6 h-4 bg-blue-500 rounded-sm mr-2"></span>
-                          <span className="text-sm text-gray-600">🇦🇺</span>
+                          {/* <span className="w-6 h-4 bg-blue-500 rounded-sm mr-2"></span> */}
+                          <AU className="w-5 h-auto rounded-xs border border-gray-100 shadow-2xs" />
+                          {/* <span className="text-sm text-gray-600">🇦🇺</span> */}
                         </div>
                         <input
                           type="tel"
@@ -363,7 +381,7 @@ export default function AccountSetup({ onNext, onBack, progress }) {
                       <ErrorMsg field="phoneNumber" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Email Address*
                       </label>
                       <input
@@ -382,7 +400,7 @@ export default function AccountSetup({ onNext, onBack, progress }) {
 
                   {/* Third Row: Home Address */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                       Home Address*
                     </label>
                     <input
@@ -400,7 +418,7 @@ export default function AccountSetup({ onNext, onBack, progress }) {
                   {/* Fourth Row: Emergency Contacts */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Emergency Contact (Optional)
                       </label>
                       <input
@@ -418,13 +436,12 @@ export default function AccountSetup({ onNext, onBack, progress }) {
                       <ErrorMsg field="emergencyContactName" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Emergency Contact Number
                       </label>
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
-                          <span className="w-6 h-4 bg-blue-500 rounded-sm mr-2"></span>
-                          <span className="text-sm text-gray-600">🇦🇺</span>
+                          <AU className="w-5 h-auto rounded-xs border border-gray-100 shadow-2xs" />
                         </div>
                         <input
                           type="tel"
@@ -451,10 +468,7 @@ export default function AccountSetup({ onNext, onBack, progress }) {
               </div>
 
               {/* Navigation Buttons */}
-              <NavigationButtons 
-                onBack={handlePrevious} 
-                onNext={handleNext} 
-              />
+              <NavigationButtons onBack={handlePrevious} onNext={handleNext} />
             </div>
           </div>
         </div>

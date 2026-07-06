@@ -5,7 +5,7 @@ export default function ProgressSteps({ currentStep, completedSteps = [] }) {
   const isCompleted = (stepNumber) => completedSteps.includes(stepNumber)
   
   return (
-    <div className="flex items-center bg-blue-100/70 rounded-full px-2 py-0 shadow-sm relative z-0 mt-8">
+    <div className="flex items-center bg-blue-100/70 rounded-full px-2 py-0 shadow-sm relative z-0">
       <div className="w-full overflow-auto no-scrollbar">
         <div className="flex items-center justify-between gap-2">
           

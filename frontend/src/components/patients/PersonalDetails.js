@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
-import { ChevronLeft, ChevronRight, Calendar, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
+import { AU } from "country-flag-icons/react/3x2";
 import ProgressIndicator from "@/components/ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
+import InfoCard from "../InfoCard";
+import Title from "../Title";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import {extractPersonalDetails} from "@/lib/utils";
 
@@ -202,7 +205,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   };
 
   const fieldClass = (field) =>
-    `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-300 ${
+    `w-full px-4 py-2 border rounded-lg text-sm font-poppins focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-300 ${
       errors[field] ? "border-red-500 bg-red-50" : "border-gray-300"
     }`;
 
@@ -236,100 +239,41 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   };
 
   return (
-    <div className="min-h-screen xs:px-4 md:px-8 lg:px-16">
+    <div className="px-4 md:px-8 lg:px-16">
       {/* Main Content */}
-      <div className="pb-8 px-4 xs:px-0">
+      <div className="pb-8">
         <div className="max-w-8xl mx-auto ">
-          {/* Page Title */}
-          <div className="mb-4">
-            <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900 font-poppins">
-              Patient Intake Form
-            </h1>
-          </div>
-
           {/* Progress Steps */}
           <ProgressSteps currentStep={4} completedSteps={[1, 2, 3]} />
 
           {/* Main White Container */}
-          <div className="relative mt-7 min-h-[700px] bg-white rounded-4xl md:bg-transparent">
-            {/* Custom SVG Background */}
-            <svg
-              className="absolute inset-0 w-full h-full hidden md:block"
-              viewBox="0 0 1320 600"
-              preserveAspectRatio="none"
-              style={{ filter: "drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1))" }}
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M1292 65C1307.464 65 1320 77.536 1320 93V568C1320 583.464 1307.464 596 1292 596H36C16.1178 596 0 579.882 0 560V540V528V36C0 16.1178 16.1178 0 36 0H570.123C580.863 0 588.794 5.1585 593.994 11.5561L661.498 55.556C666.429 61.469 675.812 65 685.998 65H1292Z"
-                fill="white"
-              />
-            </svg>
-
+          <div className="relative mt-4 bg-white rounded-4xl">
             {/* Content Container */}
             <div className="relative z-10 p-4 md:p-8">
-              {/* Progress Indicator - Positioned in top right */}
-              <ProgressIndicator/>
-
-              <div className="mt-16 md:mt-0 mb-8">
-                <h2 className="text-base sm:text-[1.25rem] lg:text-3xl xl:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
-                  Personal Details
-                </h2>
-              </div>
+              <Title title="Personal Details" />
+              <ProgressIndicator />
 
               {/* Personal Details Section */}
-              <div className="mt-8 md:mt-16 mb-16">
-
-                {/* Information */}
-                <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <Info
-                        className="w-5 md:w-8 text-blue-600 stroke-white"
-                        fill="currentColor"
-                      />
-
-                    <div>
-                      {ocrPersonalText ? (
-                        <>
-                          <h3 className="text-md md:text-lg font-semibold text-gray-900 mb-1">
-                            Scanned Documents Overview
-                          </h3>
-                          <p className="text-xs md:text-sm text-gray-700">
-                            Below is a list of all the details we've received.
-                            Double-check the files and update or remove any if
-                            needed.
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <h3 className="text-md md:text-lg font-semibold text-gray-900 mb-1">
-                            Enter Your Details
-                          </h3>
-                          <p className="text-xs md:text-sm text-gray-700">
-                            No document was uploaded. Please fill in your
-                            personal details below.
-                          </p>
-                        </>
-                      )}
-                    </div>
-                    {/* <div>
-                      <h3 className="font-medium text-gray-900 mb-1">Scanned Documents Overview</h3>
-                      <p className="text-sm text-gray-700 mb-1">
-                        Below is a list of all the details we've received.
-                        Double-check the files and update or remove any if
-                        needed.
-                      </p>
-                    </div> */}
-                  </div>
-                </div>
+              <div className="mt-8 mb-16">
+                <InfoCard
+                  title={
+                    ocrPersonalText
+                      ? "Scanned Documents Overview"
+                      : "Enter Your Details"
+                  }
+                  description={
+                    ocrPersonalText
+                      ? "Below is a list of all the details we've received. Double-check the files and update or remove any if needed."
+                      : "No document was uploaded. Please fill in your personal details below."
+                  }
+                />
 
                 {/* Form Fields */}
                 <form className="space-y-6">
                   {/* First Row: First Name, Last Name, Date of Birth */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         First Name*
                       </label>
                       <input
@@ -339,11 +283,12 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                           handleInputChange("firstName", e.target.value)
                         }
                         className={fieldClass("firstName")}
+                        placeholder="First Name"
                       />
                       <ErrorMsg field="firstName" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Last Name*
                       </label>
                       <input
@@ -353,11 +298,12 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                           handleInputChange("lastName", e.target.value)
                         }
                         className={fieldClass("lastName")}
+                        placeholder="Last Name"
                       />
                       <ErrorMsg field="lastName" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Date of Birth*
                       </label>
                       <div className="relative">
@@ -369,7 +315,11 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                           }
                           onBlur={(e) => handleDobBlur(e.target.value)}
                           max={new Date().toISOString().split("T")[0]}
-                          className={`${fieldClass("dateOfBirth")} [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                          className={`${fieldClass("dateOfBirth")} font-poppins ${
+                            !formData.dateOfBirth
+                              ? "text-gray-300 [&::-webkit-datetime-edit]:text-gray-300"
+                              : "text-gray-900 [&::-webkit-datetime-edit]:text-gray-900"
+                          } [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                           placeholder="DD/MM/YYYY"
                         />
                         <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -381,33 +331,42 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                   {/* Second Row: Gender, Phone Number, Email */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Gender*
                       </label>
                       <Select
                         value={formData.gender}
-                        onValueChange={(value) => handleInputChange("gender", value)}
+                        onValueChange={(value) =>
+                          handleInputChange("gender", value)
+                        }
                       >
-                        <SelectTrigger className={fieldClass("gender")}>
-                          <SelectValue placeholder="Select gender" />
+                        <SelectTrigger
+                          className={`${fieldClass("gender")} ${
+                            !formData.gender
+                              ? "text-gray-300 text-sm"
+                              : "text-gray-900"
+                          }`}
+                        >
+                          <SelectValue placeholder="Select Gender" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Male">Male</SelectItem>
                           <SelectItem value="Female">Female</SelectItem>
                           <SelectItem value="Other">Other</SelectItem>
-                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                          <SelectItem value="Prefer not to say">
+                            Prefer not to say
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <ErrorMsg field="gender" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Phone Number*
                       </label>
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
-                          <span className="w-6 h-4 bg-blue-500 rounded-sm mr-2"></span>
-                          <span className="text-sm text-gray-600">🇦🇺</span>
+                          <AU className="w-5 h-auto rounded-xs border border-gray-100 shadow-2xs" />
                         </div>
                         <input
                           type="tel"
@@ -418,13 +377,14 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                           onBlur={(e) =>
                             handlePhoneBlur("phoneNumber", e.target.value)
                           }
-                          className={`${fieldClass("phoneNumber")} pl-16 pr-4`}
+                          maxLength={12}
+                          className={`${fieldClass("phoneNumber")} pl-10`}
                         />
                       </div>
                       <ErrorMsg field="phoneNumber" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Email Address*
                       </label>
                       <input
@@ -435,6 +395,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                         }
                         onBlur={(e) => handleEmailBlur(e.target.value)}
                         className={fieldClass("emailAddress")}
+                        placeholder="Email Address"
                       />
                       <ErrorMsg field="emailAddress" />
                     </div>
@@ -442,7 +403,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
 
                   {/* Third Row: Home Address */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                       Home Address*
                     </label>
                     <input
@@ -452,6 +413,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                         handleInputChange("homeAddress", e.target.value)
                       }
                       className={fieldClass("homeAddress")}
+                      placeholder="Home Address"
                     />
                     <ErrorMsg field="homeAddress" />
                   </div>
@@ -459,8 +421,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                   {/* Fourth Row: Emergency Contacts */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Emergency Contact Number*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
+                        Emergency Contact Name
                       </label>
                       <input
                         type="text"
@@ -472,17 +434,17 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                           )
                         }
                         className={fieldClass("emergencyContactName")}
+                        placeholder="Emergency Contact Name"
                       />
                       <ErrorMsg field="emergencyContactName" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Emergency Contact Number*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
+                        Emergency Contact Number
                       </label>
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
-                          <span className="w-6 h-4 bg-blue-500 rounded-sm mr-2"></span>
-                          <span className="text-sm text-gray-600">🇦🇺</span>
+                          <AU className="w-5 h-auto rounded-xs border border-gray-100 shadow-2xs" />
                         </div>
                         <input
                           type="tel"
@@ -499,7 +461,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                               e.target.value,
                             )
                           }
-                          className={`${fieldClass("emergencyContactNumber")} pl-16 pr-4`}
+                          className={`${fieldClass("emergencyContactNumber")} pl-10`}
                         />
                       </div>
                       <ErrorMsg field="emergencyContactNumber" />
@@ -509,10 +471,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
               </div>
 
               {/* Navigation Buttons */}
-              <NavigationButtons 
-                onBack={handlePrevious} 
-                onNext={handleNext} 
-              />
+              <NavigationButtons onBack={handlePrevious} onNext={handleNext} />
             </div>
           </div>
         </div>
