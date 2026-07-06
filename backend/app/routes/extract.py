@@ -1,7 +1,8 @@
 import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 from flask import Blueprint, request, jsonify
-from app.services.intake_cache import get_intake_data
+from app.extensions import db
+from app.models.session import IntakeSession
 import fitz  # PyMuPDF
 import io
 from PIL import Image
@@ -255,7 +256,7 @@ def _extract_text(file_bytes: bytes, mime_type: str) -> dict:
 
 @extract_bp.post("/sessions/<uuid:session_id>/ocr")
 def ocr_personal_id(session_id):
-    if get_intake_data(session_id) is None:
+    if db.session.get(IntakeSession, session_id) is None:
         return jsonify({"success": False, "message": "Session not found"}), 404
 
     file = request.files.get("file")

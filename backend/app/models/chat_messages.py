@@ -6,12 +6,12 @@ from sqlalchemy import CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 
 
-class User(db.Model):
-    __tablename__ = "users"
+class ChatMessage(db.Model):
+    __tablename__ = "chat_messages"
     __table_args__ = (
         CheckConstraint(
-            "user_type IN ('registered', 'guest')",
-            name="ck_users_user_type",
+            "role IN ('user', 'assistant')",
+            name="ck_chat_messages_role",
         ),
     )
 
@@ -21,14 +21,13 @@ class User(db.Model):
         default=uuid.uuid4,
         server_default=db.text("gen_random_uuid()"),
     )
-    user_type = db.Column(
-        db.String(20),
+    session_id = db.Column(
+        UUID(as_uuid=True),
+        db.ForeignKey("intake_sessions.id", ondelete="CASCADE"),
         nullable=False,
-        default="registered",
-        server_default="registered",
     )
-    email = db.Column(db.String(255), unique=True)
-    password_hash = db.Column(db.String(255))
+    role = db.Column(db.String(20), nullable=False)
+    content = db.Column(db.Text, nullable=False)
     created_at = db.Column(
         db.DateTime(timezone=True),
         nullable=False,
