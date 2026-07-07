@@ -9,8 +9,18 @@ import ProgressIndicator from "@/components/ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import InfoCard from "../InfoCard";
 import Title from "../Title";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import {extractPersonalDetails} from "@/lib/utils";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { extractPersonalDetails } from "@/lib/utils";
+import {
+  createPatientProfile,
+  updatePatientProfile,
+} from "@/lib/api/patient_profiles";
 
 const EMPTY_FORM = {
   firstName: "",
@@ -44,36 +54,37 @@ const FIELD_LABELS = {
   homeAddress: "Home Address",
 };
 
-
-
 export default function PersonalDetails({ onNext, onBack, progress }) {
-  const { formData: storeData, ocrPersonalText, saveStepData } = useIntakeStore();
+  const { formData: storeData, ocrPersonalText, sessionId } = useIntakeStore();
+
+  console.log("store data.personal:", storeData.personal);
 
   const [formData, setFormData] = useState(() => {
-  const baseDefaults = {
-    firstName: storeData.personal?.first_name ?? "",
-    lastName: storeData.personal?.last_name ?? "",
-    dateOfBirth: storeData.personal?.date_of_birth ?? "",
-    gender: storeData.personal?.gender ?? "",
-    phoneNumber: storeData.personal?.phone ?? "",
-    emailAddress: storeData.personal?.email ?? "",
-    homeAddress: storeData.personal?.address ?? "",
-    emergencyContactName: storeData.personal?.emergency_contact_name ?? "",
-    emergencyContactNumber: storeData.personal?.emergency_contact_number ?? "",
-  };
+    const baseDefaults = {
+      firstName: storeData.personal?.first_name ?? "",
+      lastName: storeData.personal?.last_name ?? "",
+      dateOfBirth: storeData.personal?.date_of_birth ?? "",
+      gender: storeData.personal?.gender ?? "",
+      phoneNumber: storeData.personal?.phone ?? "",
+      emailAddress: storeData.personal?.email ?? "",
+      homeAddress: storeData.personal?.address ?? "",
+      emergencyContactName: storeData.personal?.emergency_contact_name ?? "",
+      emergencyContactNumber:
+        storeData.personal?.emergency_contact_number ?? "",
+    };
 
-  if (!ocrPersonalText) {
-    return { ...EMPTY_FORM, ...baseDefaults };
-  }
+    if (!ocrPersonalText) {
+      return { ...EMPTY_FORM, ...baseDefaults };
+    }
 
-  const { data } = extractPersonalDetails(ocrPersonalText);
+    const { data } = extractPersonalDetails(ocrPersonalText);
 
-  return { 
-    ...EMPTY_FORM, 
-    ...baseDefaults, 
-    ...data 
-  };
-});
+    return {
+      ...EMPTY_FORM,
+      ...baseDefaults,
+      ...data,
+    };
+  });
 
   const [errors, setErrors] = useState({});
   // const [extractionStatus, setExtractionStatus] = useState(null);
@@ -81,14 +92,12 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   // Re-parse if user went back, changed document, and came forward again
   useEffect(() => {
     if (!ocrPersonalText) {
-      setFormData(EMPTY_FORM);
-      // setExtractionStatus(null);
-    } else {
-      const { data, extractionStatus: status } = extractPersonalDetails(ocrPersonalText);
-      setFormData({ ...EMPTY_FORM, ...data });
-      // setExtractionStatus(status);
-      console.log("Extracted personal details:", data, status);
+      return; // don't reset — initial useState already handles store data
     }
+    const { data, extractionStatus: status } =
+      extractPersonalDetails(ocrPersonalText);
+    setFormData({ ...EMPTY_FORM, ...data });
+    console.log("Extracted personal details:", data, status);
   }, [ocrPersonalText]);
 
   const handlePhoneInput = (field, value) => {
@@ -206,7 +215,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
 
   const fieldClass = (field) =>
     `w-full px-4 py-2 border rounded-lg text-sm font-poppins focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-300 ${
-      errors[field] ? "border-red-500 bg-red-50" : "border-gray-300"
+      errors[field] ? "border-red-500" : "border-gray-300"
     }`;
 
   const ErrorMsg = ({ field }) =>
@@ -219,23 +228,29 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     onBack();
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     console.log("Navigate to next step");
     if (!validate()) return;
-    onNext(
-      {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        date_of_birth: formData.dateOfBirth,
-        gender: formData.gender,
-        phone: formData.phoneNumber,
-        email: formData.emailAddress,
-        address: formData.homeAddress,
-        emergency_contact_name: formData.emergencyContactName,
-        emergency_contact_number: formData.emergencyContactNumber,
-      },
-      "personal", // matches the formData section key in the store
-    );
+
+    const payload = {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      date_of_birth: formData.dateOfBirth,
+      gender: formData.gender,
+      phone: formData.phoneNumber,
+      email: formData.emailAddress,
+      address: formData.homeAddress,
+      emergency_contact_name: formData.emergencyContactName,
+      emergency_contact_number: formData.emergencyContactNumber,
+    };
+
+    const data = storeData.personal
+      ? await updatePatientProfile(sessionId, payload)
+      : await createPatientProfile(sessionId, payload);
+
+    if (data.success) {
+      onNext(payload, "personal");
+    }
   };
 
   return (

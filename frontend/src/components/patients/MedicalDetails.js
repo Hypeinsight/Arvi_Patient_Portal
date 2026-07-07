@@ -9,6 +9,7 @@ import useIntakeStore from "@/lib/intakeStore";
 import { extractMedicalDetails } from "@/lib/utils";
 import Title from "../Title";
 import InfoCard from "@/components/InfoCard";
+import {createMedicalDetails, updateMedicalDetails} from "@/lib/api/medical_details";
 
 const REQUIRED_FIELDS = [
   "currentConditions",
@@ -35,7 +36,7 @@ const EMPTY_FORM = {
 };
 
 export default function MedicalDetails({ onNext, onBack }) {
-  const { formData: storeData, ocrMedicalText } = useIntakeStore();
+  const { formData: storeData, ocrMedicalText, sessionId } = useIntakeStore();
 
   const [formData, setFormData] = useState(() => {
     const baseDefaults = {
@@ -58,8 +59,7 @@ export default function MedicalDetails({ onNext, onBack }) {
 
   useEffect(() => {
     if (!ocrMedicalText) {
-      setFormData(EMPTY_FORM);
-      // setExtractionStatus(null)
+      return;
     } else {
       const { data, extractionStatus: status } =
         extractMedicalDetails(ocrMedicalText);
@@ -90,28 +90,34 @@ export default function MedicalDetails({ onNext, onBack }) {
     onBack();
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validate()) {
       console.log("Validation failed");
       return;
     }
     console.log("Navigate to next step");
-    onNext(
-      {
-        conditions: formData.currentConditions
-          ? formData.currentConditions.split(",").map((s) => s.trim())
-          : [],
-        medications: formData.currentMedications
-          ? formData.currentMedications.split(",").map((s) => s.trim())
-          : [],
-        allergies: formData.allergies
-          ? formData.allergies.split(",").map((s) => s.trim())
-          : [],
-        previous_surgeries: formData.previousSurgeries,
-        family_history: formData.familyMedicalHistory,
-      },
-      "medical",
-    );
+
+    const payload = {
+      conditions: formData.currentConditions
+        ? formData.currentConditions.split(",").map((s) => s.trim())
+        : [],
+      medications: formData.currentMedications
+        ? formData.currentMedications.split(",").map((s) => s.trim())
+        : [],
+      allergies: formData.allergies
+        ? formData.allergies.split(",").map((s) => s.trim())
+        : [],
+      previous_surgeries: formData.previousSurgeries,
+      family_history: formData.familyMedicalHistory,
+    };
+
+    const data = storeData.medical
+      ? await updateMedicalDetails(sessionId, payload)
+      : await createMedicalDetails(sessionId, payload);
+
+    if (data.success) {
+      onNext(payload, "medical");
+    }
   };
 
   const textareaClass = (field) =>

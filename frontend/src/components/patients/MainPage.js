@@ -1,20 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import useIntakeStore from "@/lib/intakeStore";
-import { createSession } from "@/lib/api";
+import { createSession } from "@/lib/api/session";
 import { useRouter } from "next/navigation";
-import { CircleAlert, Info } from "lucide-react";
 import Title from "@/components/Title";
-import Footer from "@/components/Footer";
 import InfoCard from "@/components/InfoCard";
 
 export default function MainPage({ onNext }) {
   const router = useRouter();
-  const { initSession, patientType, clearFormData } = useIntakeStore();
+  const { initSession, patientType, clearFormData, sessionId } =
+    useIntakeStore();
 
   const [selectedMethod, setSelectedMethod] = useState(
     patientType === "guest" ? "guest" : patientType === "new" ? "create" : null,
@@ -41,20 +39,38 @@ export default function MainPage({ onNext }) {
     setSelectedMethod(method);
     setLoading(true);
 
+    if (method === "create") {
+      router.push("/register");
+      setLoading(false);
+      return;
+    }
+
     const newPatientType = method === "guest" ? "guest" : "new";
+    // const newPatientType = "guest";
 
     // Clear form data only if the patient type has changed
     if (newPatientType !== patientType) {
       clearFormData();
     }
 
-    const data = await createSession(newPatientType, "doc-123", "apt-456");
+    // const data = await createSession(newPatientType, "doc-123", "apt-456");
 
-    if (data.success) {
-      initSession(data.session_id, data.patient_type, data.screens);
-      onNext(); // no data to save for this screen, just advance
+    // if (data.success) {
+    //   initSession(data.session_id, data.patient_type, data.screens);
+    //   onNext(); // no data to save for this screen, just advance
+    // }
+
+    if (newPatientType !== patientType || !sessionId) {
+      const data = await createSession(newPatientType, null, "doc-123", "apt-456");
+      if (data.success) {
+        initSession(data.session_id, data.patient_type, data.screens);
+      } else {
+        setLoading(false);
+        return;
+      }
     }
 
+    onNext();
     setLoading(false);
   };
 
@@ -72,7 +88,7 @@ export default function MainPage({ onNext }) {
         <div className="bg-white rounded-2xl p-4 md:p-8 shadow-sm">
           <Title title="Choose Your Access Method" />
 
-          {/* Existing Patient Login Card */} 
+          {/* Existing Patient Login Card */}
           <InfoCard
             title="Existing Patient Login"
             description="Already have an account? Log in now to continue with the next process."

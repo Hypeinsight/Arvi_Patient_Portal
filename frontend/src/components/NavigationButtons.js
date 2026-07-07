@@ -7,7 +7,6 @@ export default function NavigationButtons({
   backText = "Previous",
   nextText = "Next",
 }) {
-  console.log("is disabled: ", isNextDisabled)
   return (
     <div className="flex flex-col-reverse sm:flex-row justify-end gap-4 sm:gap-0 items-center sm:items-end mt-16 w-full">
       {/* Footer Links */}

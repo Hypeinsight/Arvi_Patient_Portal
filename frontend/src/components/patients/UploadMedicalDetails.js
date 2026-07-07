@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ProgressSteps from "@/components/ProgressSteps";
-import { ChevronLeft, ChevronRight, Calendar, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Info, File } from "lucide-react";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import useIntakeStore from "@/lib/intakeStore";
-import { ocrPersonalId } from "@/lib/api" 
+import { ocrPersonalId } from "@/lib/api";
+import InfoCard from "../InfoCard";
+import Title from "../Title";
 
 export default function UploadMedicalDetails({ onNext, onBack, progress }) {
   const {
@@ -84,71 +86,31 @@ export default function UploadMedicalDetails({ onNext, onBack, progress }) {
   };
 
   return (
-    <div className="min-h-screen xs:px-4 md:px-8 lg:px-16">
+    <div className="px-4 md:px-8 lg:px-16">
       {/* Main Content */}
-      <div className="pb-8 px-4 xs:px-0">
+      <div className="pb-8">
         <div className="max-w-8xl mx-auto ">
-          {/* Page Title */}
-          <div className="mb-4">
-            <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900 font-poppins">
-              Patient Intake Form
-            </h1>
-          </div>
-
           {/* Progress Steps */}
           <ProgressSteps currentStep={5} completedSteps={[1, 2, 3, 4]} />
 
           {/* Main White Container */}
-          <div className="relative mt-7 min-h-[700px] bg-white rounded-4xl md:bg-transparent">
-            {/* Custom SVG Background */}
-            <svg
-              className="absolute inset-0 w-full h-full hidden md:block"
-              viewBox="0 0 1320 600"
-              preserveAspectRatio="none"
-              style={{ filter: "drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1))" }}
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M1292 65C1307.464 65 1320 77.536 1320 93V568C1320 583.464 1307.464 596 1292 596H36C16.1178 596 0 579.882 0 560V540V528V36C0 16.1178 16.1178 0 36 0H570.123C580.863 0 588.794 5.1585 593.994 11.5561L661.498 55.556C666.429 61.469 675.812 65 685.998 65H1292Z"
-                fill="white"
-              />
-            </svg>
-
+          <div className="relative mt-4 bg-white rounded-4xl">
             {/* Content Container */}
             <div className="relative z-10 p-4 md:p-8">
+              <Title title="Upload Your Medical Details" className="md:!text-2xl"/>
+
               {/* Progress Indicator - Positioned in top right */}
               <ProgressIndicator />
-
-              <div className="mt-16 md:mt-0 mb-8">
-                <h2 className="text-base sm:text-[1.25rem] lg:text-3xl xl:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
-                  Upload Your Medical Details
-                </h2>
-              </div>
 
               {/* Upload Your Medical Details Section */}
               <div className="mt-8 mb-16">
                 {/* Information */}
-                <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <Info
-                        className="w-5 md:w-8 text-blue-600 stroke-white"
-                        fill="currentColor"
-                      />
-                      <div>
-                        <h3 className="text-md md:text-lg font-semibold text-gray-900 mb-">
-                          Document Upload Required
-                        </h3>
-                        <p className="text-xs md:text-sm text-gray-700">
-                          To complete this process, uploading your medical
+                <InfoCard
+                  title="Document Upload Required"
+                  description="To complete this process, uploading your medical
                           documents is required. Ensure your files are clear and
-                          accurate.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                          accurate."
+                />
 
                 {/* File Upload Description */}
                 <p className="text-gray-700 mb-6 text-center sm:text-left">
@@ -198,33 +160,18 @@ export default function UploadMedicalDetails({ onNext, onBack, progress }) {
                         {/* Choose File Button */}
                         <label
                           htmlFor="fileInput"
-                          className="px-6 py-3 text-white rounded-full hover:opacity-90 transition-all duration-200 font-medium flex items-center gap-2 cursor-pointer"
-                          style={{
-                            background:
-                              "linear-gradient(135deg, #0575E6, #021B79)",
-                          }}
+                          className="cursor-pointer inline-block"
                         >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                          <Button
+                            type="button"
+                            asChild
+                            className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white rounded-full cursor-pointer hover:opacity-90 transition-opacity duration-500 ease-in-out px-2 sm:px-3 md:px-5 min-w-[70px] sm:min-w-[90px] text-xs sm:text-sm md:text-base flex items-center gap-2"
                           >
-                            <path
-                              d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
-                              stroke="white"
-                              strokeWidth="2"
-                              fill="none"
-                            />
-                            <polyline
-                              points="14,2 14,8 20,8"
-                              stroke="white"
-                              strokeWidth="2"
-                              fill="none"
-                            />
-                          </svg>
-                          Choose File
+                            <span>
+                              Choose File
+                              <File className="w-4 h-4 inline" />
+                            </span>
+                          </Button>
                         </label>
 
                         {/* File Format Info */}

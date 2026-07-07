@@ -5,9 +5,10 @@ import ProgressSteps from "@/components/ProgressSteps"
 import { User, Users, ArrowLeft, ArrowRight, Info } from "lucide-react"
 import ProgressIndicator from "../ProgressIndicator"
 import useIntakeStore from "@/lib/intakeStore"
+import { createAppointmentDetails, updateAppointmentDetails } from "@/lib/api/appointment_details"
 
 export default function AppointmentType({onNext}) {
-  const { patientType, formData, clearFormData } = useIntakeStore()
+  const { patientType, formData, clearFormData, sessionId } = useIntakeStore()
   const [loading, setLoading] = useState(false)
 
   const appointmentTypes = [
@@ -52,7 +53,18 @@ export default function AppointmentType({onNext}) {
     clearFormData()
   }
 
-  onNext({ type: type.patientType }, "appointment")
+  const payload = {
+    appointment_type: type.patientType
+  }
+
+   const data = formData.appointment
+            ? await updateAppointmentDetails(sessionId, payload)
+            : await createAppointmentDetails(sessionId, payload);
+
+    if (data.success) {
+      onNext(payload, "appointment")
+    }
+
 }
 
   return (

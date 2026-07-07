@@ -8,9 +8,10 @@ import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import Title from "../Title";
 import { Checkbox } from "@/components/ui/checkbox";
+import { createConsent, updateConsent } from "@/lib/api/consent";
 
 export default function PrivacyConsent({ onNext, onBack, progress }) {
-  const { formData: storeData } = useIntakeStore();
+  const { formData: storeData, sessionId } = useIntakeStore();
 
   const [acceptedTerms, setAcceptedTerms] = useState(
     storeData.consent?.accepted_terms ?? false,
@@ -28,17 +29,29 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
     onBack();
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (isNextDisabled) return;
-    onNext(
-      {
-        accepted_terms: acceptedTerms,
-        accepted_privacy: acceptedPrivacy,
-        consent_marketing: consentMarketing,
-        timestamp: new Date().toISOString(),
-      },
-      "consent",
-    );
+
+    const payload = {
+      accepted_terms: acceptedTerms,
+      accepted_privacy: acceptedPrivacy,
+      consent_marketing: consentMarketing,
+      timestamp: new Date().toISOString(),
+    };
+
+    const data = storeData.consent
+      ? await updateConsent(
+          sessionId,
+          payload
+        )
+      : await createConsent(
+          sessionId,
+          payload
+        );
+
+    if (data.success) {
+      onNext(payload, "consent");
+    }
   };
 
   const isNextDisabled = !acceptedTerms || !acceptedPrivacy;

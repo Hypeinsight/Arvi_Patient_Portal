@@ -35,7 +35,7 @@ export default function InfoCard({
             ) : (
               /* Default Blue Style for Info Icon (or others) */
               <IconComponent
-                className="w-5 h-5 text-blue-600 shrink-0 mt-0.5"
+                className="w-4 h-4 text-blue-600 shrink-0 mt-0.5"
               />
             )}
             <div>
@@ -54,9 +54,9 @@ export default function InfoCard({
                 onClick={onClick}
                 className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white rounded-full cursor-pointer hover:opacity-90 transition-opacity duration-500 ease-in-out px-2 sm:px-3 md:px-5 min-w-[70px] sm:min-w-[90px] text-xs sm:text-sm md:text-base flex items-center gap-2"
               >
+                {buttonText}
                 {/* Renders the button icon only if passed */}
                 {ButtonIcon && <ButtonIcon className="w-4 h-4" />}
-                {buttonText}
               </Button>
             </div>
           )}

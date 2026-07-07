@@ -41,14 +41,22 @@ def _get_session_user(patient_type):
 def create_session():
     body = request.get_json(silent=True) or {}
     patient_type = body.get("patient_type")
+    user_id = body.get("user_id")
 
     if patient_type not in VALID_PATIENT_TYPES:
         return jsonify({"success": False, "message": "Invalid patient type"}), 400
 
     try:
-        user, error = _get_session_user(patient_type)
-        if error:
-            return jsonify({"success": False, "message": error}), 400
+        if patient_type == "guest":
+            user, error = _get_session_user(patient_type)
+            if error:
+                return jsonify({"success": False, "message": error}), 400
+        else:
+            if not user_id:
+                return jsonify({"success": False, "message": "User id is required"}), 400
+            user = db.session.get(User, user_id)
+            if not user:
+                return jsonify({"success": False, "message": "User not found"}), 404
 
         session = IntakeSession(
             user_id=user.id,

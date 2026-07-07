@@ -11,9 +11,10 @@ import NavigationButtons from "@/components/NavigationButtons";
 import useIntakeStore from '@/lib/intakeStore';
 import Title from "../Title";
 import InfoCard from "../InfoCard";
+import { createReferralDetails, updateReferralDetails } from "@/lib/api/referral_details";
 
 export default function ReferralDetails({ onNext, onBack }) {
-  const { formData: storeData } = useIntakeStore()
+  const { formData: storeData, sessionId } = useIntakeStore()
 
   const [selectedMethod, setSelectedMethod] = useState(
     storeData.referral?.has_referral === true  ? "yes" :
@@ -26,10 +27,22 @@ export default function ReferralDetails({ onNext, onBack }) {
     onBack();
   };
 
-  const handleNext = () => {
+  const handleNext = async() => {
     if (!selectedMethod) return;
     console.log("Navigate to next step");
-    onNext({ has_referral: selectedMethod === "yes" }, "referral");
+
+    const payload = {
+      has_referral: selectedMethod === "yes"
+    };
+
+    const data = storeData.referral
+          ? await updateReferralDetails(sessionId, payload)
+          : await createReferralDetails(sessionId, payload);
+
+    if (data.success) {
+      onNext(payload, "referral");
+    }
+
   };
 
   const handleSelect = async (method) => {

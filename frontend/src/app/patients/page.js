@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import useIntakeStore from "@/lib/intakeStore";
 
 import MainPage from "@/components/patients/MainPage";
+import RegisterForm from "@/components/patients/RegisterForm";
 import AppointmentType from "@/components/patients/AppointmentType";
 import PrivacyConsent from "@/components/patients/PrivacyConsent";
 import AccountSetup from "@/components/patients/AccountSetup";
@@ -19,9 +20,10 @@ import { useRouter } from "next/navigation";
 
 const SCREEN_MAP = {
   choose_access_method: MainPage,
+  register: RegisterForm,
   choose_appointment_type: AppointmentType,
   privacy_consent: PrivacyConsent,
-  account_setup: AccountSetup,
+  // account_setup: AccountSetup,
   upload_personal_details: UploadPersonalDetails,
   personal_details: PersonalDetails,
   upload_medical_details: UploadMedicalDetails,
@@ -92,7 +94,7 @@ export default function PatientsPage() {
   const progress = getProgress();
 
   if (!CurrentComponent) {
-    log("Unknown screen: ", currentScreen);
+    console.log("Unknown screen: ", currentScreen);
     return <p>Unknown screen: {currentScreen}</p>;
   }
 

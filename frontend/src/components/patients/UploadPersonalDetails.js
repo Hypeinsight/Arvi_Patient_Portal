@@ -1,21 +1,28 @@
 "use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import ProgressSteps from "@/components/ProgressSteps"
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
-import useIntakeStore from "@/lib/intakeStore"
-import { ocrPersonalId } from "@/lib/api" 
-import { BatteryMedium, Info, SkipForward } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import ProgressSteps from "@/components/ProgressSteps";
+import { ChevronLeft, ChevronRight, Calendar, File } from "lucide-react";
+import useIntakeStore from "@/lib/intakeStore";
+import { ocrPersonalId } from "@/lib/api";
+import { BatteryMedium, Info, SkipForward } from "lucide-react";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
+import InfoCard from "@/components/InfoCard";
+import Title from "@/components/Title";
 
-export default function UploadPersonalDetails({onNext, onBack, progress}) {
-   const { sessionId, uploadedFile, setPersonalOcrResult, clearPersonalOcrResult } = useIntakeStore()
+export default function UploadPersonalDetails({ onNext, onBack, progress }) {
+  const {
+    sessionId,
+    uploadedFile,
+    setPersonalOcrResult,
+    clearPersonalOcrResult,
+  } = useIntakeStore();
 
-  const [selectedFile, setSelectedFile] = useState(uploadedFile ?? null)
-  const [ocrLoading, setOcrLoading]     = useState(false)
-  const [ocrError, setOcrError]         = useState(null)
+  const [selectedFile, setSelectedFile] = useState(uploadedFile ?? null);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrError, setOcrError] = useState(null);
 
   const handlePrevious = () => {
     console.log("Navigate to previous step");
@@ -26,137 +33,88 @@ export default function UploadPersonalDetails({onNext, onBack, progress}) {
     console.log("Navigate to next step");
     onNext();
   };
-    
-    const handleFileSelect = async (event) => {
-      const file = event.target.files[0]
-      if (!file) return;
-      // Check file size (10MB = 10 * 1024 * 1024 bytes)
-      if (file.size > 10 * 1024 * 1024) {
-        alert("File size must be less than 10MB");
-        return;
-      }
 
-      // Check file type
-      const allowedTypes = [
-        "image/jpeg",
-        "image/jfif",
-        "image/jpg",
-        "image/png",
-        "application/pdf",
-      ];
-      if (!allowedTypes.includes(file.type)) {
-        alert("Please select a JPG, PNG, or PDF file");
-        return;
-      }
+  const handleFileSelect = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    // Check file size (10MB = 10 * 1024 * 1024 bytes)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File size must be less than 10MB");
+      return;
+    }
 
-      setSelectedFile(file);
-      setOcrLoading(true);
-      setOcrError(null);
+    // Check file type
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jfif",
+      "image/jpg",
+      "image/png",
+      "application/pdf",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Please select a JPG, PNG, or PDF file");
+      return;
+    }
 
-      try {
-        const data = await ocrPersonalId(sessionId, file);
-        if (!data.success) throw new Error(data.message);
-        setPersonalOcrResult(file, data.layout_text);
-      } catch (err) {
-        setOcrError(
-          "Could not read document automatically. Please fill in your details below.",
-        );
-        clearPersonalOcrResult();
-      } finally {
-        setOcrLoading(false);
-      }
-    
+    setSelectedFile(file);
+    setOcrLoading(true);
+    setOcrError(null);
+
+    try {
+      const data = await ocrPersonalId(sessionId, file);
+      if (!data.success) throw new Error(data.message);
+      setPersonalOcrResult(file, data.layout_text);
+    } catch (err) {
+      setOcrError(
+        "Could not read document automatically. Please fill in your details below.",
+      );
+      clearPersonalOcrResult();
+    } finally {
+      setOcrLoading(false);
+    }
   };
 
   const handleRemoveFile = () => {
-    setSelectedFile(null)
-    setOcrError(null)
-    clearPersonalOcrResult()
-  }
+    setSelectedFile(null);
+    setOcrError(null);
+    clearPersonalOcrResult();
+  };
 
   const handleSkip = () => {
-    console.log("Skip this step")
-    clearPersonalOcrResult()
-    onNext()
-  }
+    console.log("Skip this step");
+    clearPersonalOcrResult();
+    onNext();
+  };
 
   return (
-    <div className="min-h-screen xs:px-4 md:px-8 lg:px-16">
+    <div className="px-4 md:px-8 lg:px-16">
       {/* Main Content */}
-      <div className="pb-8 px-4 xs:px-0">
+      <div className="pb-8">
         <div className="max-w-8xl mx-auto ">
-          {/* Page Title */}
-          <div className="mb-4">
-            <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900 font-poppins">
-              Patient Intake Form
-            </h1>
-          </div>
 
           {/* Progress Steps */}
           <ProgressSteps currentStep={4} completedSteps={[1, 2, 3]} />
 
           {/* Main White Container */}
-          <div className="relative mt-7 min-h-[700px] bg-white rounded-4xl md:bg-transparent">
-            {/* Custom SVG Background */}
-            <svg
-              className="absolute inset-0 w-full h-full hidden md:block"
-              viewBox="0 0 1320 600"
-              preserveAspectRatio="none"
-              style={{ filter: "drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1))" }}
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M1292 65C1307.464 65 1320 77.536 1320 93V568C1320 583.464 1307.464 596 1292 596H36C16.1178 596 0 579.882 0 560V540V528V36C0 16.1178 16.1178 0 36 0H570.123C580.863 0 588.794 5.1585 593.994 11.5561L661.498 55.556C666.429 61.469 675.812 65 685.998 65H1292Z"                fill="white"
-              />
-            </svg>
-
+          <div className="relative mt-4 bg-white rounded-4xl">
             {/* Content Container */}
             <div className="relative z-10 p-4 md:p-8">
-              {/* Progress Indicator - Positioned in top right */}
-                <ProgressIndicator/>
+              <Title title="Upload Your Personal Details" className="md:!text-2xl"/>
 
-                <div className="mt-16 md:mt-0 mb-8">
-                  <h2 className="text-base sm:text-[1.25rem] lg:text-3xl xl:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
-                    Upload Your Personal Details
-                  </h2>
-                </div>
+              {/* Progress Indicator - Positioned in top right */}
+              <ProgressIndicator />
 
               {/* Upload Your Personal Details Section */}
               <div className="mt-8 mb-16">
-
                 {/* Information */}
-                <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      <Info
-                        className="w-5 md:w-8 text-blue-600 stroke-white"
-                        fill="currentColor"
-                      />
-                      <div>
-                        <h3 className="text-md md:text-lg font-semibold text-gray-900 mb-1">
-                          Optional Step
-                        </h3>
-                        <p className="text-xs md:text-sm text-gray-700">
-                          You can upload your personal documents now or skip
-                          this step and add them later in your account.
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleSkip}
-                      className="flex items-center gap-1 bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white rounded-full p-2 xs:px-3 sm:px-4 md:px-6 min-w-16 sm:min-w-[90px] md:min-w-[100px] h-9 sm:h-10 md:h-auto text-xs sm:text-sm md:text-base flex-1 sm:flex-none"
-                      style={{
-                        background: "linear-gradient(135deg, #0575E6, #021B79)",
-                      }}
-                    >
-                      <p>
-                        Skip 
-                      </p>
-                      <SkipForward className="w-4 md:w-7"/>
-                    </button>
-                  </div>
-                </div>
+                <InfoCard
+                  title="Optional Step"
+                  description="You can upload your personal documents now or skip
+                          this step and add them later in your account."
+                  buttonText="Skip"
+                  buttonIcon={SkipForward}
+                  onClick={handleSkip}
+                />
 
                 {/* File Upload Description */}
                 <p className="text-gray-700 mb-6 text-center sm:text-left">
@@ -203,7 +161,7 @@ export default function UploadPersonalDetails({onNext, onBack, progress}) {
                         </p>
 
                         {/* Choose File Button */}
-                        <label
+                        {/* <label
                           htmlFor="fileInput"
                           className="px-6 py-3 text-white rounded-full hover:opacity-90 transition-all duration-200 font-medium flex items-center gap-2 cursor-pointer"
                           style={{
@@ -232,6 +190,22 @@ export default function UploadPersonalDetails({onNext, onBack, progress}) {
                             />
                           </svg>
                           Choose File
+                        </label> */}
+
+                        <label
+                          htmlFor="fileInput"
+                          className="cursor-pointer inline-block"
+                        >
+                          <Button
+                            type="button"
+                            asChild
+                            className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white rounded-full cursor-pointer hover:opacity-90 transition-opacity duration-500 ease-in-out px-2 sm:px-3 md:px-5 min-w-[70px] sm:min-w-[90px] text-xs sm:text-sm md:text-base flex items-center gap-2"
+                          >
+                            <span>
+                              Choose File
+                              <File className="w-4 h-4 inline" />
+                            </span>
+                          </Button>
                         </label>
 
                         {/* File Format Info */}
@@ -353,10 +327,7 @@ export default function UploadPersonalDetails({onNext, onBack, progress}) {
               </div>
 
               {/* Navigation Buttons */}
-              <NavigationButtons 
-                onBack={handlePrevious} 
-                onNext={handleNext}
-              />
+              <NavigationButtons onBack={handlePrevious} onNext={handleNext} />
             </div>
           </div>
         </div>

@@ -192,7 +192,7 @@ export default function AccountSetup({ onNext, onBack, progress }) {
 
   const fieldClass = (field) =>
     `w-full px-4 py-2 border rounded-lg text-sm font-poppins focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-300 ${
-      errors[field] ? "border-red-500 bg-red-50" : "border-gray-300"
+      errors[field] ? "border-red-500" : "border-gray-300"
     }`;
 
   const ErrorMsg = ({ field }) =>
