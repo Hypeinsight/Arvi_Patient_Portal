@@ -7,9 +7,9 @@ import { Check, Info } from "lucide-react";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import useIntakeStore from "@/lib/intakeStore";
-import { goToChat } from "@/lib/api";
 import Title from "../Title";
 import InfoCard from "../InfoCard";
+import { createSummary } from "@/lib/api/summary";
 
 export default function ReviewAndSubmit({ onNext, onBack }) {
   const { formData, patientType, sessionId } = useIntakeStore();
@@ -22,8 +22,8 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
 
   const handleNext = async () => {
     console.log("Navigate to next step");
-    const result = await goToChat(sessionId, formData);
-    if (result.success) {
+    const data = await createSummary(sessionId);
+    if (data.success) {
       onNext();
     }
   };

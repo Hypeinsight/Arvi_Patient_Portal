@@ -8,7 +8,6 @@ from app.models.summaries import Summary
 from app.models.user import User
 from app.services.flow import get_screen_order
 from app.services.session_data import session_form_data, session_to_dict, update_session_sections
-from app.services.summariser import build_summary
 
 sessions_bp = Blueprint("sessions", __name__)
 
@@ -101,36 +100,6 @@ def update_session(session_id):
 
     try:
         update_session_sections(session, payload)
-        db.session.commit()
-    except (SQLAlchemyError, ValueError) as exc:
-        db.session.rollback()
-        return jsonify({"success": False, "message": str(exc)}), 400
-
-    return jsonify({
-        "success": True,
-        "session": session_to_dict(session, get_screen_order(session.patient_type)),
-    }), 200
-
-
-@sessions_bp.post("/sessions/<uuid:session_id>/prepare-chat")
-def prepare_chat(session_id):
-    session = db.session.get(IntakeSession, session_id)
-    if not session:
-        return jsonify({"success": False, "message": "Session not found"}), 404
-
-    form_data = request.get_json(silent=True) or {}
-
-    try:
-        update_session_sections(session, form_data)
-        summary_text = build_summary(
-            patient_type=session.patient_type,
-            form_data=session_form_data(session),
-            uploads=[],
-        )
-        if session.summary:
-            session.summary.summary_text = summary_text
-        else:
-            db.session.add(Summary(session_id=session.id, summary_text=summary_text))
         db.session.commit()
     except (SQLAlchemyError, ValueError) as exc:
         db.session.rollback()

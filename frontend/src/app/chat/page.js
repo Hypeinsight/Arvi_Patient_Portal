@@ -3,7 +3,7 @@ import Chat from '@/components/patients/Chat'
 
 function ChatPage() {
   return (
-    <div className="mx-auto">
+    <div className="">
         <Chat />
     </div>
   )

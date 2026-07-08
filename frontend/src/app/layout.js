@@ -17,12 +17,17 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "ARVI Patient Portal",
   description: "Patient Portal built with Next.js",
+  icons: {
+    icon: "/main_logo.png",
+    shortcut: "/main_logo.png",
+    apple: "/main_logo.png",
+  }
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased py-4 md:py-8 min-h-screen flex flex-col gap-4`} style={{
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased py-4 md:py-6 min-h-screen flex flex-col gap-4`} style={{
           backgroundImage: "url('/new-bg.png')",
           // backgroundSize: "cover",
           // backgroundPosition: "center",

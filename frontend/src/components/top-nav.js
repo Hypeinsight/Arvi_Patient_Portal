@@ -65,7 +65,7 @@ export default function TopNav() {
       <header
         className={`relative z-20 max-w-8xl mx-auto w-full transition-colors duration-300 min-h-[60px] justify-center mb-1 md:mb-2`}
       >
-        <div className="grid grid-cols-[auto_1fr_auto] items-center h-20 px-4 md:px-8 lg:px-16 relative pt-[10px]">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center h-20 px-4 md:px-8 lg:px-16 relative">
           {/* Logo Section */}
           <div className="flex items-center">
             <Link href="/patients/" className="flex items-center">
