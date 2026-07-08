@@ -36,6 +36,7 @@ def create_app():
     from app.routes.sessions import sessions_bp
     from app.routes.auth     import auth_bp
     from app.routes.summary import summary_bp
+    from app.routes.chat import chat_bp
 
     app.register_blueprint(appointment_details_bp, url_prefix="/api")
     app.register_blueprint(chat_messages_bp, url_prefix="/api")
@@ -47,4 +48,5 @@ def create_app():
     app.register_blueprint(sessions_bp, url_prefix="/api")
     app.register_blueprint(auth_bp,     url_prefix="/api")
     app.register_blueprint(summary_bp, url_prefix="/api")
+    app.register_blueprint(chat_bp, url_prefix="/api")
     return app
