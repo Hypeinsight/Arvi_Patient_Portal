@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import ProgressSteps from "@/components/ProgressSteps";
-import { ChevronLeft, ChevronRight, Calendar, Info, File } from "lucide-react";
+import { File } from "lucide-react";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import useIntakeStore from "@/lib/intakeStore";
@@ -11,17 +11,23 @@ import { ocrPersonalId } from "@/lib/api";
 import InfoCard from "../InfoCard";
 import Title from "../Title";
 
-export default function UploadMedicalDetails({ onNext, onBack, progress }) {
+export default function UploadMedicalDetails({ onNext, onBack }) {
   const {
     sessionId,
-    uploadedFile,
+    uploadedMedicalFile,
     setMedicalOcrResult,
     clearMedicalOcrResult,
+    saveStepData,
   } = useIntakeStore();
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [ocrError, setOcrError] = useState(null);
+
+  // Synchronize state if the store changes out of band
+  useEffect(() => {
+    setSelectedFile(uploadedMedicalFile);
+  }, [uploadedMedicalFile]);
 
   const handlePrevious = () => {
     console.log("Navigate to previous step");
@@ -78,6 +84,7 @@ export default function UploadMedicalDetails({ onNext, onBack, progress }) {
     setSelectedFile(null);
     setOcrError(null);
     clearMedicalOcrResult();
+    saveStepData("medical", null); // Clear medical details in the store
   };
 
   const handleSkip = () => {
@@ -97,7 +104,7 @@ export default function UploadMedicalDetails({ onNext, onBack, progress }) {
           <div className="relative mt-4 bg-white rounded-4xl">
             {/* Content Container */}
             <div className="relative z-10 p-4 md:p-8">
-              <Title title="Upload Your Medical Details" className="md:!text-2xl"/>
+              <Title title="Upload Your Medical Details" className="md:!text-2xl" />
 
               {/* Progress Indicator - Positioned in top right */}
               <ProgressIndicator />

@@ -1,28 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import ProgressSteps from "@/components/ProgressSteps";
-import { ChevronLeft, ChevronRight, Calendar, File } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import { ocrPersonalId } from "@/lib/api";
-import { BatteryMedium, Info, SkipForward } from "lucide-react";
+import { File, SkipForward } from "lucide-react";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import InfoCard from "@/components/InfoCard";
 import Title from "@/components/Title";
 
-export default function UploadPersonalDetails({ onNext, onBack, progress }) {
+export default function UploadPersonalDetails({ onNext, onBack }) {
   const {
     sessionId,
-    uploadedFile,
+    uploadedPersonalFile,
     setPersonalOcrResult,
     clearPersonalOcrResult,
+    saveStepData,
   } = useIntakeStore();
 
-  const [selectedFile, setSelectedFile] = useState(uploadedFile ?? null);
+  const [selectedFile, setSelectedFile] = useState(uploadedPersonalFile ?? null);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [ocrError, setOcrError] = useState(null);
+
+  // Synchronize state if the store changes out of band
+  useEffect(() => {
+    setSelectedFile(uploadedPersonalFile);
+  }, [uploadedPersonalFile]);
 
   const handlePrevious = () => {
     console.log("Navigate to previous step");
@@ -78,6 +83,7 @@ export default function UploadPersonalDetails({ onNext, onBack, progress }) {
     setSelectedFile(null);
     setOcrError(null);
     clearPersonalOcrResult();
+    saveStepData("personal", null); // Clear personal details in the store
   };
 
   const handleSkip = () => {

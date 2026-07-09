@@ -1,9 +1,9 @@
 // /app/register/page.js
 "use client";
 
-import { createSession } from "@/lib/api";
+import { createSession } from "@/lib/api/session";
 import useIntakeStore from "@/lib/intakeStore";
-import LoginForm from "@/components/patients/LoginForm";
+import AuthForm from "@/components/patients/AuthForm";
 import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
@@ -20,5 +20,5 @@ export default function RegisterForm() {
     }
   };
 
-  return <LoginForm isRegister onLoginSuccess={handleRegisterSuccess} />;
+  return <AuthForm isRegister onSuccess={handleRegisterSuccess} />;
 }

@@ -58,26 +58,32 @@ def create_medical_details(session_id):
     if not session:
         return jsonify({"success": False, "message": "Session not found"}), 404
 
-    if session.medical_details:
-        return jsonify({"success": False, "message": "Medical details already exist"}), 409
-
     body = request.get_json(silent=True) or {}
-    medical = MedicalDetails(
-        session_id=session.id,
-        **_medical_details_data_from_body(body),
-    )
+    data = _medical_details_data_from_body(body)
 
     try:
-        db.session.add(medical)
+        if session.medical_details:
+            medical_details = session.medical_details
+            for field, value in data.items():
+                setattr(medical_details, field, value)
+            status_code = 200
+        else:
+            medical_details = MedicalDetails(
+                session_id=session.id,
+                **data,
+            )
+            db.session.add(medical_details)
+            status_code = 201
+
         db.session.commit()
-    except SQLAlchemyError as exc:
+    except (SQLAlchemyError, ValueError) as exc:
         db.session.rollback()
         return jsonify({"success": False, "message": str(exc)}), 400
-
+    
     return jsonify({
         "success": True,
-        "medical_details": _medical_details_to_dict(medical),
-    }), 201
+        "medical_details": _medical_details_to_dict(medical_details),
+    }), status_code
 
 
 @medical_details_bp.get("/sessions/<uuid:session_id>/medical-details")

@@ -65,26 +65,29 @@ def create_patient_profile(session_id):
     if not session:
         return jsonify({"success": False, "message": "Session not found"}), 404
 
-    if session.patient_profile:
-        return jsonify({"success": False, "message": "Patient profile already exists"}), 409
-
     body = request.get_json(silent=True) or {}
-    profile = PatientProfile(
-        session_id=session.id,
-        **_patient_profile_data_from_body(body),
-    )
-
+    data = _patient_profile_data_from_body(body)
+ 
     try:
-        db.session.add(profile)
+        if session.patient_profile:
+            profile = session.patient_profile
+            for field, value in data.items():
+                setattr(profile, field, value)
+            status_code = 200
+        else:
+            profile = PatientProfile(session_id=session.id, **data)
+            db.session.add(profile)
+            status_code = 201
+ 
         db.session.commit()
     except (SQLAlchemyError, ValueError) as exc:
         db.session.rollback()
         return jsonify({"success": False, "message": str(exc)}), 400
-
+ 
     return jsonify({
         "success": True,
         "patient_profile": _patient_profile_to_dict(profile),
-    }), 201
+    }), status_code
 
 
 @patient_profiles_bp.get("/sessions/<uuid:session_id>/patient-profile")

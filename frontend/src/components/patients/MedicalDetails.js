@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
-import { Info } from "lucide-react";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import useIntakeStore from "@/lib/intakeStore";
@@ -47,12 +46,17 @@ export default function MedicalDetails({ onNext, onBack }) {
       familyMedicalHistory: storeData.medical?.family_history ?? "",
     };
 
+    // don't reparse if store has explicit manually saved items
+    if (storeData.medical && Object.values(storeData.medical).some(Boolean)) {
+      return { ...EMPTY_FORM, ...baseDefaults };
+    }
+
     if (!ocrMedicalText) {
       return { ...EMPTY_FORM, ...baseDefaults };
     }
 
     const { data } = extractMedicalDetails(ocrMedicalText);
-    return { ...EMPTY_FORM, ...baseDefaults, ...data };
+    return { ...EMPTY_FORM, ...data , ...baseDefaults};
   });
 
   const [errors, setErrors] = useState({});
@@ -68,6 +72,29 @@ export default function MedicalDetails({ onNext, onBack }) {
       console.log("Extracted medical details:", data, status);
     }
   }, [ocrMedicalText]);
+
+  useEffect(() => {
+      if (!ocrMedicalText) {
+        setFormData(EMPTY_FORM); // If file is removed, clear the form completely
+        return;
+      }
+  
+      // If data already exists inside our global store, prioritize it over raw OCR
+      if (storeData.medical && Object.values(storeData.medical).some(Boolean)) {
+        setFormData({
+          currentConditions: storeData.medical.conditions?.join(", ") ?? "",
+          currentMedications: storeData.medical.medications?.join(", ") ?? "",
+          allergies: storeData.medical.allergies?.join(", ") ?? "",
+          previousSurgeries: storeData.medical.previous_surgeries ?? "",
+          familyMedicalHistory: storeData.medical.family_history ?? "",
+        });
+        return;
+      }
+
+      const { data, extractionStatus: status } = extractMedicalDetails(ocrMedicalText);
+      setFormData({ ...EMPTY_FORM, ...data });
+      console.log("Extracted medical details:", data, status);
+    }, [ocrMedicalText, storeData.medical]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

@@ -23,18 +23,6 @@ export default function MainPage({ onNext }) {
     router.push("/login");
   };
 
-  const handleCreateAccount = () => {
-    console.log("Create Account selected");
-    setSelectedMethod("create");
-    // Add your create account logic here
-  };
-
-  const handleContinueAsGuest = () => {
-    console.log("Continue as Guest selected");
-    setSelectedMethod("guest");
-    // Add your guest logic here
-  };
-
   const handleSelect = async (method) => {
     setSelectedMethod(method);
     setLoading(true);

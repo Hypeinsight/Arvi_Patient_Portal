@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import { AU } from "country-flag-icons/react/3x2";
 import ProgressIndicator from "@/components/ProgressIndicator";
@@ -73,6 +73,11 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
         storeData.personal?.emergency_contact_number ?? "",
     };
 
+    // don't reparse if store has explicit manually saved items
+    if (storeData.personal && Object.values(storeData.personal).some(Boolean)) {
+      return { ...EMPTY_FORM, ...baseDefaults };
+    }
+
     if (!ocrPersonalText) {
       return { ...EMPTY_FORM, ...baseDefaults };
     }
@@ -81,24 +86,40 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
 
     return {
       ...EMPTY_FORM,
-      ...baseDefaults,
       ...data,
+      ...baseDefaults,
     };
   });
 
   const [errors, setErrors] = useState({});
-  // const [extractionStatus, setExtractionStatus] = useState(null);
 
-  // Re-parse if user went back, changed document, and came forward again
+  // Re-parse ONLY if storeData is completely blank and ocr text updates
   useEffect(() => {
     if (!ocrPersonalText) {
-      return; // don't reset — initial useState already handles store data
+      setFormData(EMPTY_FORM); // If file is removed, clear the form completely
+      return;
     }
-    const { data, extractionStatus: status } =
-      extractPersonalDetails(ocrPersonalText);
+
+    // If data already exists inside our global store, prioritize it over raw OCR
+    if (storeData.personal && Object.values(storeData.personal).some(Boolean)) {
+      setFormData({
+        firstName: storeData.personal.first_name ?? "",
+        lastName: storeData.personal.last_name ?? "",
+        dateOfBirth: storeData.personal.date_of_birth ?? "",
+        gender: storeData.personal.gender ?? "Male",
+        phoneNumber: storeData.personal.phone ?? "",
+        emailAddress: storeData.personal.email ?? "",
+        homeAddress: storeData.personal.address ?? "",
+        emergencyContactName: storeData.personal.emergency_contact_name ?? "",
+        emergencyContactNumber: storeData.personal.emergency_contact_number ?? "",
+      });
+      return;
+    }
+
+    const { data, extractionStatus: status } = extractPersonalDetails(ocrPersonalText);
     setFormData({ ...EMPTY_FORM, ...data });
     console.log("Extracted personal details:", data, status);
-  }, [ocrPersonalText]);
+  }, [ocrPersonalText, storeData.personal]);
 
   const handlePhoneInput = (field, value) => {
     const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -214,8 +235,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   };
 
   const fieldClass = (field) =>
-    `w-full px-4 py-2 border rounded-lg text-sm font-poppins focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-300 ${
-      errors[field] ? "border-red-500" : "border-gray-300"
+    `w-full px-4 py-2 border rounded-lg text-sm font-poppins focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-300 ${errors[field] ? "border-red-500" : "border-gray-300"
     }`;
 
   const ErrorMsg = ({ field }) =>
@@ -330,11 +350,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                           }
                           onBlur={(e) => handleDobBlur(e.target.value)}
                           max={new Date().toISOString().split("T")[0]}
-                          className={`${fieldClass("dateOfBirth")} font-poppins ${
-                            !formData.dateOfBirth
+                          className={`${fieldClass("dateOfBirth")} font-poppins ${!formData.dateOfBirth
                               ? "text-gray-300 [&::-webkit-datetime-edit]:text-gray-300"
                               : "text-gray-900 [&::-webkit-datetime-edit]:text-gray-900"
-                          } [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                            } [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                           placeholder="DD/MM/YYYY"
                         />
                         <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -356,11 +375,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                         }
                       >
                         <SelectTrigger
-                          className={`${fieldClass("gender")} ${
-                            !formData.gender
+                          className={`${fieldClass("gender")} ${!formData.gender
                               ? "text-gray-300 text-sm"
                               : "text-gray-900"
-                          }`}
+                            }`}
                         >
                           <SelectValue placeholder="Select Gender" />
                         </SelectTrigger>
