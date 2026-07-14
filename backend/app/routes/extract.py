@@ -6,19 +6,14 @@ from app.models.session import IntakeSession
 import fitz  # PyMuPDF
 import io
 from PIL import Image
+import re
+import statistics
+from pytesseract import Output, TesseractError
 
 extract_bp = Blueprint("extract", __name__)
 
 ALLOWED_MIME         = {"image/jpeg", "image/png", "image/webp", "application/pdf"}
 ALLOWED_EXTRACT_TYPES = {"personal", "medical"}
-
-import io
-import re
-import statistics
-import fitz
-import pytesseract
-from PIL import Image
-from pytesseract import Output
 
 # Keep this in sync with the label variants your frontend regex looks for.
 # Used here only to decide which OCR cells are "labels" for pairing purposes.
@@ -52,6 +47,26 @@ def _looks_like_label(text):
     if not cleaned:
         return False
     return bool(_LABEL_REGEX.match(cleaned))
+
+
+def _correct_orientation(img):
+    """
+    Run Tesseract's OSD (Orientation and Script Detection) on the image and
+    rotate it upright if it detects the page is sideways/upside-down.
+    """
+    try:
+        osd = pytesseract.image_to_osd(img, output_type=Output.DICT)
+    except TesseractError:
+        # OSD couldn't find enough text to determine orientation confidently.
+        return img
+
+    rotate_by = osd.get("rotate", 0)
+    confidence = osd.get("orientation_conf", 0)
+
+    if rotate_by and confidence >= 1.0:
+        img = img.rotate(-rotate_by, expand=True)
+
+    return img
 
 
 def _extract_words(img):
@@ -237,11 +252,13 @@ def _extract_text(file_bytes: bytes, mime_type: str) -> dict:
         for page in doc:
             pix = page.get_pixmap(dpi=300)
             img = Image.open(io.BytesIO(pix.tobytes("png")))
+            img = _correct_orientation(img)
             all_words.extend(_extract_words(img))
             plain_text_parts.append(pytesseract.image_to_string(img))
         doc.close()
     else:
         img = Image.open(io.BytesIO(file_bytes))
+        img = _correct_orientation(img)
         all_words.extend(_extract_words(img))
         plain_text_parts.append(pytesseract.image_to_string(img))
 

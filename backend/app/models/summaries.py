@@ -20,6 +20,12 @@ class Summary(db.Model):
         nullable=False,
         unique=True,
     )
+    user_id = db.Column(
+        UUID(as_uuid=True),
+        db.ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
     summary_text = db.Column(db.Text, nullable=False)
     sent_at = db.Column(db.DateTime(timezone=True))
     created_at = db.Column(

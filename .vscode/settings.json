@@ -1,0 +1,6 @@
+{
+    "js/ts.implicitProjectConfig.checkJs": true,
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportUndefinedVariable": "warning"
+    }
+}

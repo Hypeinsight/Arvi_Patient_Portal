@@ -1,5 +1,5 @@
-import { clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 /**
  * Utility function to combine Tailwind CSS classes
@@ -7,7 +7,7 @@ import { twMerge } from "tailwind-merge"
  * @returns {String} - Combined class names
  */
 export function cn(...inputs) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -16,26 +16,27 @@ export function cn(...inputs) {
  * @returns {string} Formatted date string
  */
 export function formatDate(dateString) {
-  if (!dateString) return ""
+  if (!dateString) return "";
 
   try {
-    const date = typeof dateString === "string" ? new Date(dateString) : dateString
+    const date =
+      typeof dateString === "string" ? new Date(dateString) : dateString;
 
     // Check if date is valid
     if (isNaN(date.getTime())) {
-      console.warn("Invalid date provided to formatDate:", dateString)
-      return "Invalid date"
+      console.warn("Invalid date provided to formatDate:", dateString);
+      return "Invalid date";
     }
 
     // Format as dd/mm/yyyy
-    const day = date.getDate().toString().padStart(2, "0")
-    const month = (date.getMonth() + 1).toString().padStart(2, "0")
-    const year = date.getFullYear()
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
 
-    return `${day}/${month}/${year}`
+    return `${day}/${month}/${year}`;
   } catch (error) {
-    console.error("Error formatting date:", error)
-    return "Error"
+    console.error("Error formatting date:", error);
+    return "Error";
   }
 }
 
@@ -46,92 +47,99 @@ export function formatDate(dateString) {
  */
 export function formatDateForInput(dateString) {
   if (!dateString) return "";
-  
+
   try {
     let date;
-    if (dateString.includes('/')) {
+    if (dateString.includes("/")) {
       // Handle DD/MM/YYYY format specifically
-      const parts = dateString.split('/');
+      const parts = dateString.split("/");
       if (parts.length === 3) {
-        if (parts[0].length <= 2 && parts[1].length <= 2 && parts[2].length === 4) {
+        if (
+          parts[0].length <= 2 &&
+          parts[1].length <= 2 &&
+          parts[2].length === 4
+        ) {
           // DD/MM/YYYY format - swap day and month
           const [day, month, year] = parts;
           date = new Date(year, month - 1, day);
         } else if (parts[2].length <= 2) {
           // MM/DD/YY format
           const [month, day, year] = parts;
-          const fullYear = year.length === 2 ? (parseInt(year) > 50 ? '19' + year : '20' + year) : year;
+          const fullYear =
+            year.length === 2
+              ? parseInt(year) > 50
+                ? "19" + year
+                : "20" + year
+              : year;
           date = new Date(fullYear, month - 1, day);
         }
       }
-    } else if (dateString.includes('-')) {
+    } else if (dateString.includes("-")) {
       // Handle YYYY-MM-DD format
       date = new Date(dateString);
     } else {
       // Try parsing as-is
       date = new Date(dateString);
     }
-    
+
     if (date && !isNaN(date.getTime())) {
       const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, "0");
       return `${year}-${month}-${day}`;
     }
   } catch (error) {
-    console.error('Error formatting date for input:', error);
+    console.error("Error formatting date for input:", error);
   }
-  
+
   return "";
 }
 
-
-
 export function formatDateToDDMMYYYY(dateString) {
   if (!dateString) return "Not provided";
-  
+
   // Check if it's already in DD/MM/YYYY format
-  if (dateString.includes('/') && dateString.split('/').length === 3) {
-    const parts = dateString.split('/');
+  if (dateString.includes("/") && dateString.split("/").length === 3) {
+    const parts = dateString.split("/");
     if (parts[0].length <= 2 && parts[1].length <= 2 && parts[2].length === 4) {
       // Already in DD/MM/YYYY format
       return dateString;
     }
   }
-  
+
   try {
     // Parse various date formats
     let date;
-    if (dateString.includes('-')) {
+    if (dateString.includes("-")) {
       // Handle YYYY-MM-DD format
       if (dateString.match(/^\d{4}-\d{2}-\d{2}/)) {
         date = new Date(dateString);
       } else if (dateString.match(/^\d{2}-\d{2}-\d{4}/)) {
         // DD-MM-YYYY format
-        const [day, month, year] = dateString.split('-');
+        const [day, month, year] = dateString.split("-");
         date = new Date(year, month - 1, day);
       }
-    } else if (dateString.includes('/')) {
+    } else if (dateString.includes("/")) {
       // Handle MM/DD/YYYY format
       if (dateString.match(/^\d{2}\/\d{2}\/\d{4}/)) {
-        const [month, day, year] = dateString.split('/');
+        const [month, day, year] = dateString.split("/");
         date = new Date(year, month - 1, day);
       }
     } else {
       // Try parsing as-is
       date = new Date(dateString);
     }
-    
+
     if (date && !isNaN(date.getTime())) {
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, "0");
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
       const year = date.getFullYear();
       return `${day}/${month}/${year}`;
     }
   } catch (error) {
-    console.error('Error parsing date:', error);
+    console.error("Error parsing date:", error);
   }
-  
+
   return dateString; // Return original if parsing fails
 }
 
@@ -141,16 +149,16 @@ export function formatDateToDDMMYYYY(dateString) {
  * @returns {string} Formatted date and time string
  */
 export function formatDateTime(dateString) {
-  if (!dateString) return ""
+  if (!dateString) return "";
 
-  const date = new Date(dateString)
+  const date = new Date(dateString);
   return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(date)
+  }).format(date);
 }
 
 /**
@@ -160,9 +168,9 @@ export function formatDateTime(dateString) {
  * @returns {string} Truncated string
  */
 export function truncateString(str, length = 100) {
-  if (!str) return ""
-  if (str.length <= length) return str
-  return str.slice(0, length) + "..."
+  if (!str) return "";
+  if (str.length <= length) return str;
+  return str.slice(0, length) + "...";
 }
 
 /**
@@ -171,7 +179,7 @@ export function truncateString(str, length = 100) {
  * @returns {string} Combined class names for those that are true
  */
 export function classNames(...classes) {
-  return classes.filter(Boolean).join(" ")
+  return classes.filter(Boolean).join(" ");
 }
 
 /**
@@ -179,7 +187,7 @@ export function classNames(...classes) {
  * @returns {string} Random ID string
  */
 export function generateId() {
-  return Math.random().toString(36).substring(2, 9)
+  return Math.random().toString(36).substring(2, 9);
 }
 
 /**
@@ -192,21 +200,21 @@ export function formatCurrency(amount, currency = "USD") {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
-  }).format(amount)
+  }).format(amount);
 }
 
 /**
  * Check if running on client or server
  * @returns {boolean} True if running on client
  */
-export const isClient = typeof window !== "undefined"
+export const isClient = typeof window !== "undefined";
 
 /**
  * Delay execution for a specified time
  * @param {number} ms - Milliseconds to delay
  * @returns {Promise} Promise that resolves after the delay
  */
-export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function parseOcrText(text) {
   if (!text) return {};
@@ -232,7 +240,7 @@ export function parseOcrText(text) {
     datesFound.push({
       raw: fullDate,
       iso: `${year}-${month}-${day}`,
-      year: parseInt(year, 10)
+      year: parseInt(year, 10),
     });
   }
 
@@ -240,36 +248,78 @@ export function parseOcrText(text) {
     datesFound.sort((a, b) => a.year - b.year);
     dateOfBirth = datesFound[0].iso;
 
-    lines = lines.map(line => {
-      let cleanLine = line;
-      datesFound.forEach(d => {
-        cleanLine = cleanLine.replace(d.raw, "");
-      });
-      return cleanLine.replace(/\\|\s+/g, " ").trim();
-    }).filter(line => line.length > 0);
+    lines = lines
+      .map((line) => {
+        let cleanLine = line;
+        datesFound.forEach((d) => {
+          cleanLine = cleanLine.replace(d.raw, "");
+        });
+        return cleanLine.replace(/\\|\s+/g, " ").trim();
+      })
+      .filter((line) => line.length > 0);
   }
 
   // DEFINE SYSTEM WORD BLOCKLIST
   const strictlyNotNames = [
-    "licence", "license", "driver", "drivers", "card", "permit", "identification", "id",
-    "australia", "victoria", "queensland", "tasmania", "nsw", "vic", "qld", "tas", "act", "nt", "wa",
-    "south", "wales", "northern", "territory", "western", 
-    "class", "expiry", "expires", "date", "issue", "issued", "success", "text", "customer", 
-    "status", "number", "no", "type", "conditions", "donor", "address", "signature", "flat", "level"
+    "licence",
+    "license",
+    "driver",
+    "drivers",
+    "card",
+    "permit",
+    "identification",
+    "id",
+    "australia",
+    "victoria",
+    "queensland",
+    "tasmania",
+    "nsw",
+    "vic",
+    "qld",
+    "tas",
+    "act",
+    "nt",
+    "wa",
+    "south",
+    "wales",
+    "northern",
+    "territory",
+    "western",
+    "class",
+    "expiry",
+    "expires",
+    "date",
+    "issue",
+    "issued",
+    "success",
+    "text",
+    "customer",
+    "status",
+    "number",
+    "no",
+    "type",
+    "conditions",
+    "donor",
+    "address",
+    "signature",
+    "flat",
+    "level",
   ];
 
   // CLEAN ARTIFACTS AND EXTRACT NAMES
   const candidateNameLines = lines
-    .map(line => {
-      let clean = line.replace(/[\d\u201c\u201d\u2018\u2019\"'<>\\\/\|}\[]/g, "").trim();
+    .map((line) => {
+      let clean = line
+        .replace(/[\d\u201c\u201d\u2018\u2019\"'<>\\\/\|}\[]/g, "")
+        .trim();
       return clean;
     })
-    .filter(line => {
+    .filter((line) => {
       if (line.length < 3) return false;
 
       const lowerLine = line.toLowerCase();
-      const hasBlocklistWord = strictlyNotNames.some(keyword => {
-        const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+      const hasBlocklistWord = strictlyNotNames.some((keyword) => {
+        const regex = new RegExp(`\\b${keyword}\\b`, "i");
         return regex.test(lowerLine);
       });
 
@@ -279,8 +329,8 @@ export function parseOcrText(text) {
   if (candidateNameLines.length > 0) {
     const firstLineParts = candidateNameLines[0]
       .split(/\s+/)
-      .filter(p => /^[A-Za-z\-]+$/.test(p));
-    
+      .filter((p) => /^[A-Za-z\-]+$/.test(p));
+
     if (firstLineParts.length >= 2) {
       firstName = firstLineParts[0];
       lastName = firstLineParts.slice(1).join(" ");
@@ -288,7 +338,7 @@ export function parseOcrText(text) {
       firstName = firstLineParts[0];
       const secondLineParts = candidateNameLines[1]
         .split(/\s+/)
-        .filter(p => /^[A-Za-z\-]+$/.test(p));
+        .filter((p) => /^[A-Za-z\-]+$/.test(p));
       if (secondLineParts.length > 0) {
         lastName = secondLineParts.join(" ");
       }
@@ -296,30 +346,39 @@ export function parseOcrText(text) {
   }
 
   // EXTRACT ADDRESS
-  const addressRoadRegex = /\b(ST|STREET|ROAD|RD|AVE|AVENUE|DR|DRIVE|CT|COURT|PL|PLACE|HIGHWAY|HWY|VIC|NSW|QLD|SA|WA|TAS|ACT|NT|FLAT|UNIT)\b/i;
+  const addressRoadRegex =
+    /\b(ST|STREET|ROAD|RD|AVE|AVENUE|DR|DRIVE|CT|COURT|PL|PLACE|HIGHWAY|HWY|VIC|NSW|QLD|SA|WA|TAS|ACT|NT|FLAT|UNIT)\b/i;
   const postcodeRegex = /\b[0-9]{4}\b/;
 
-  const addressLines = lines.filter(line => {
+  const addressLines = lines.filter((line) => {
     const cleanLine = line.toLowerCase();
-    const isAlreadyParsedName = (firstName && cleanLine.includes(firstName.toLowerCase())) || 
-                                (lastName && cleanLine.includes(lastName.toLowerCase()));
-    
-    return (addressRoadRegex.test(line) || postcodeRegex.test(line)) && !isAlreadyParsedName;
+    const isAlreadyParsedName =
+      (firstName && cleanLine.includes(firstName.toLowerCase())) ||
+      (lastName && cleanLine.includes(lastName.toLowerCase()));
+
+    return (
+      (addressRoadRegex.test(line) || postcodeRegex.test(line)) &&
+      !isAlreadyParsedName
+    );
   });
 
   if (addressLines.length > 0) {
     homeAddress = addressLines.join(" ").replace(/\s+/g, " ").trim();
     // Quick layout fix for loose symbols leftover in addresses
-    homeAddress = homeAddress.replace(/[\\\/\|>}\[\]\u201c\u201d]/g, "").replace(/\s+/g, " ").trim();
+    homeAddress = homeAddress
+      .replace(/[\\\/\|>}\[\]\u201c\u201d]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
-  const formatCasing = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+  const formatCasing = (str) =>
+    str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
   return {
     firstName: firstName.split(" ").map(formatCasing).join(" "),
     lastName: lastName.split(" ").map(formatCasing).join(" "),
     dateOfBirth,
-    gender: "Male", 
+    gender: "Male",
     phoneNumber: "",
     emailAddress: "",
     homeAddress,
@@ -434,16 +493,16 @@ export function extractPersonalDetails(ocrText) {
 
   if (!ocrText || !ocrText.trim()) {
     const fieldStatus = Object.fromEntries(
-      Object.keys(result).map((k) => [k, false])
+      Object.keys(result).map((k) => [k, false]),
     );
     const emptyData = Object.fromEntries(
-      Object.keys(result).map((k) => [k, ""])
+      Object.keys(result).map((k) => [k, ""]),
     );
     return { data: emptyData, fieldStatus, extractionStatus: "failed" };
   }
 
   console.log("Ocr text: ", ocrText);
-  
+
   const text = ocrText.replace(/\r/g, "");
 
   console.log("Ocr text text: ", text);
@@ -558,36 +617,52 @@ export function extractMedicalDetails(ocrText) {
 
   if (!ocrText || !ocrText.trim()) {
     const fieldStatus = Object.fromEntries(
-      Object.keys(result).map((k) => [k, false])
+      Object.keys(result).map((k) => [k, false]),
     );
     const emptyData = Object.fromEntries(
-      Object.keys(result).map((k) => [k, ""])
+      Object.keys(result).map((k) => [k, ""]),
     );
     return { data: emptyData, fieldStatus, extractionStatus: "failed" };
   }
 
   const text = ocrText.replace(/\r/g, "");
 
+  // const ALL_LABELS_FOR_LOOKAHEAD =
+  //   "current\\s*medical\\s*conditions|medical\\s*conditions|conditions|" +
+  //   "current\\s*medications|medications|meds|" +
+  //   "allerg(?:y|ies)|" +
+  //   "previous\\s*surgeries|surgical\\s*history|surgeries|" +
+  //   "family\\s*(?:medical\\s*)?history";
+
+  // function sectionCapture(labelAlternatives) {
+  //   return new RegExp(
+  //     `(?:${labelAlternatives})\\s*[:\\-]?\\s*\\n?` +
+  //       `([\\s\\S]*?)` +
+  //       `(?=\\n\\s*\\n|\\n(?:${ALL_LABELS_FOR_LOOKAHEAD})\\s*[:\\-]|$)`,
+  //     "i"
+  //   );
+  // }
+
   const ALL_LABELS_FOR_LOOKAHEAD =
     "current\\s*medical\\s*conditions|medical\\s*conditions|conditions|" +
     "current\\s*medications|medications|meds|" +
-    "allerg(?:y|ies)|" +
-    "previous\\s*surgeries|surgical\\s*history|surgeries|" +
+    "allerg(?:y|ies)\\s*&?\\s*(?:adverse\\s*drug\\s*reactions)?|" +
+    "previous\\s*surgeries(?:\\s*&\\s*medical\\s*interventions)?|surgical\\s*history|surgeries|" +
     "family\\s*(?:medical\\s*)?history";
 
   function sectionCapture(labelAlternatives) {
     return new RegExp(
-      `(?:${labelAlternatives})\\s*[:\\-]?\\s*\\n?` +
+      `^\\s*\\|?\\s*(?:${labelAlternatives})[^\\n]*\\n` +
         `([\\s\\S]*?)` +
-        `(?=\\n\\s*\\n|\\n(?:${ALL_LABELS_FOR_LOOKAHEAD})\\s*[:\\-]|$)`,
-      "i"
+        `(?=^\\s*\\|?\\s*(?:${ALL_LABELS_FOR_LOOKAHEAD})[^\\n]*$|\\n\\s*\\n\\s*\\n|(?![\\s\\S]))`,
+      "im",
     );
   }
 
   // --- Current medical conditions ---
   result.currentConditions = firstMatch(text, [
     sectionCapture(
-      "current\\s*medical\\s*conditions|medical\\s*conditions|conditions"
+      "current\\s*medical\\s*conditions|medical\\s*conditions|conditions",
     ),
   ]);
 
@@ -631,8 +706,6 @@ export function extractMedicalDetails(ocrText) {
   };
 }
 
-
-
 // Default export of all utilities
 export default {
   cn,
@@ -646,4 +719,4 @@ export default {
   isClient,
   delay,
   parseOcrText,
-}
+};

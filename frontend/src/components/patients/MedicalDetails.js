@@ -8,7 +8,10 @@ import useIntakeStore from "@/lib/intakeStore";
 import { extractMedicalDetails } from "@/lib/utils";
 import Title from "../Title";
 import InfoCard from "@/components/InfoCard";
-import {createMedicalDetails, updateMedicalDetails} from "@/lib/api/medical_details";
+import {
+  createMedicalDetails,
+  updateMedicalDetails,
+} from "@/lib/api/medical_details";
 
 const REQUIRED_FIELDS = [
   "currentConditions",
@@ -35,7 +38,12 @@ const EMPTY_FORM = {
 };
 
 export default function MedicalDetails({ onNext, onBack }) {
-  const { formData: storeData, ocrMedicalText, sessionId } = useIntakeStore();
+  const {
+    formData: storeData,
+    ocrMedicalText,
+    uploadedMedicalFile,
+    sessionId,
+  } = useIntakeStore();
 
   const [formData, setFormData] = useState(() => {
     const baseDefaults = {
@@ -56,31 +64,18 @@ export default function MedicalDetails({ onNext, onBack }) {
     }
 
     const { data } = extractMedicalDetails(ocrMedicalText);
-    return { ...EMPTY_FORM, ...data , ...baseDefaults};
+    return { ...EMPTY_FORM, ...data, ...baseDefaults };
   });
 
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (!ocrMedicalText) {
-      return;
-    } else {
-      const { data, extractionStatus: status } =
-        extractMedicalDetails(ocrMedicalText);
-      setFormData({ ...EMPTY_FORM, ...data });
-      // setExtractionStatus(status)
-      console.log("Extracted medical details:", data, status);
-    }
-  }, [ocrMedicalText]);
+    // SCENARIO 1: Explicit File Removal or Viewing an empty manual form
+    if (!ocrMedicalText && !uploadedMedicalFile) {
+      const hasStoreData =
+        storeData.medical && Object.values(storeData.medical).some(Boolean);
 
-  useEffect(() => {
-      if (!ocrMedicalText) {
-        setFormData(EMPTY_FORM); // If file is removed, clear the form completely
-        return;
-      }
-  
-      // If data already exists inside our global store, prioritize it over raw OCR
-      if (storeData.medical && Object.values(storeData.medical).some(Boolean)) {
+      if (hasStoreData) {
         setFormData({
           currentConditions: storeData.medical.conditions?.join(", ") ?? "",
           currentMedications: storeData.medical.medications?.join(", ") ?? "",
@@ -88,13 +83,59 @@ export default function MedicalDetails({ onNext, onBack }) {
           previousSurgeries: storeData.medical.previous_surgeries ?? "",
           familyMedicalHistory: storeData.medical.family_history ?? "",
         });
-        return;
+      } else {
+        setFormData(EMPTY_FORM);
       }
+      return;
+    }
 
-      const { data, extractionStatus: status } = extractMedicalDetails(ocrMedicalText);
-      setFormData({ ...EMPTY_FORM, ...data });
-      console.log("Extracted medical details:", data, status);
-    }, [ocrMedicalText, storeData.medical]);
+    // SCENARIO 2: Fresh Document Uploaded (Takes Highest Priority!)
+    if (ocrMedicalText) {
+      const { data: ocrData, extractionStatus: status } =
+        extractMedicalDetails(ocrMedicalText);
+      console.log(
+        "Extracted medical details from fresh upload:",
+        ocrData,
+        status,
+      );
+
+      // Merge: OCR data takes priority, but preserve manual store fields if OCR missed them
+      setFormData({
+        currentConditions:
+          ocrData.currentConditions ||
+          storeData.medical?.conditions?.join(", ") ||
+          "",
+        currentMedications:
+          ocrData.currentMedications ||
+          storeData.medical?.medications?.join(", ") ||
+          "",
+        allergies:
+          ocrData.allergies || storeData.medical?.allergies?.join(", ") || "",
+        // If your OCR rarely picks up heavy historical contexts like surgeries or family history,
+        // safely preserve the user's manual store entries below:
+        previousSurgeries:
+          ocrData.previousSurgeries ||
+          storeData.medical?.previous_surgeries ||
+          "",
+        familyMedicalHistory:
+          ocrData.familyMedicalHistory ||
+          storeData.medical?.family_history ||
+          "",
+      });
+      return;
+    }
+
+    // SCENARIO 3: Navigating back to the screen normally with no active OCR changes
+    if (storeData.medical && Object.values(storeData.medical).some(Boolean)) {
+      setFormData({
+        currentConditions: storeData.medical.conditions?.join(", ") ?? "",
+        currentMedications: storeData.medical.medications?.join(", ") ?? "",
+        allergies: storeData.medical.allergies?.join(", ") ?? "",
+        previousSurgeries: storeData.medical.previous_surgeries ?? "",
+        familyMedicalHistory: storeData.medical.family_history ?? "",
+      });
+    }
+  }, [ocrMedicalText, uploadedMedicalFile]); // Listens strictly to document attachment changes
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

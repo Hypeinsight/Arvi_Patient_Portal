@@ -27,10 +27,12 @@ def prepare_summary(session_id):
     try:
         if session.summary:
             session.summary.summary_text = summary_text
+            session.summary.user_id = session.user_id
         else:
             db.session.add(Summary(
                 session_id=session.id,
                 summary_text=summary_text,
+                user_id=session.user_id
             ))
         db.session.commit()
 
