@@ -6,38 +6,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.extensions import db
 from app.models.consent import ConsentRecord
 from app.models.session import IntakeSession
+from app.utils.session_helpers import _parse_datetime, _parse_bool, _consent_to_dict
 
 consent_records_bp = Blueprint("consent_records", __name__)
-
-
-def _parse_bool(value, default=False):
-    if value is None:
-        return default
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, str):
-        return value.strip().lower() in {"true", "1", "yes", "y"}
-    return bool(value)
-
-
-def _parse_datetime(value):
-    if not value:
-        return datetime.now(timezone.utc)
-    if isinstance(value, datetime):
-        return value
-    return datetime.fromisoformat(value.replace("Z", "+00:00"))
-
-
-def _consent_to_dict(consent):
-    return {
-        "id": str(consent.id),
-        "session_id": str(consent.session_id),
-        "accepted_terms": consent.accepted_terms,
-        "accepted_privacy": consent.accepted_privacy,
-        "consent_marketing": consent.consent_marketing,
-        "consented_at": consent.consented_at.isoformat(),
-    }
-
 
 def _consent_data_from_body(body, existing=None):
     return {
@@ -59,7 +30,6 @@ def _consent_data_from_body(body, existing=None):
         if body.get("consented_at") or body.get("timestamp") or not existing
         else existing.consented_at,
     }
-
 
 @consent_records_bp.post("/sessions/<uuid:session_id>/consent-record")
 def create_consent_record(session_id):

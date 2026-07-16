@@ -27,7 +27,6 @@ def create_app():
 
     # Register blueprints
     from app.routes.appointment_details import appointment_details_bp
-    from app.routes.chat_messages import chat_messages_bp
     from app.routes.consent_records import consent_records_bp
     from app.routes.medical_details import medical_details_bp
     from app.routes.patient_profiles import patient_profiles_bp
@@ -35,11 +34,9 @@ def create_app():
     from app.routes.extract import extract_bp
     from app.routes.sessions import sessions_bp
     from app.routes.auth     import auth_bp
-    from app.routes.summary import summary_bp
     from app.routes.chat import chat_bp
 
     app.register_blueprint(appointment_details_bp, url_prefix="/api")
-    app.register_blueprint(chat_messages_bp, url_prefix="/api")
     app.register_blueprint(consent_records_bp, url_prefix="/api")
     app.register_blueprint(medical_details_bp, url_prefix="/api")
     app.register_blueprint(patient_profiles_bp, url_prefix="/api")
@@ -47,6 +44,5 @@ def create_app():
     app.register_blueprint(extract_bp, url_prefix="/api")
     app.register_blueprint(sessions_bp, url_prefix="/api")
     app.register_blueprint(auth_bp,     url_prefix="/api")
-    app.register_blueprint(summary_bp, url_prefix="/api")
     app.register_blueprint(chat_bp, url_prefix="/api")
     return app

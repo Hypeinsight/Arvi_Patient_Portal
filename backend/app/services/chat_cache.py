@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timezone
 
 from app import extensions
+from app.services.azure_openai import call_chat_model
 
 TTL_SECONDS = 60 * 60 * 2
 
@@ -14,10 +15,17 @@ def _now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 def init_chat_cache(session_id: str, system_prompt: str):
-    """Called once when form is submitted. Stores system prompt + empty message list."""
+    result = call_chat_model([
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": "Begin the conversation now."},
+    ])
+
     payload = {
         "system_prompt": system_prompt,
-        "messages": []
+        "messages": [
+            {"role": "assistant", "content": result.question, "created_at": _now_iso()}
+        ],
+        "turn_count": 1,
     }
     extensions.redis_client.setex(_key(session_id), TTL_SECONDS, json.dumps(payload))
 
@@ -28,9 +36,6 @@ def get_chat_context(session_id: str) -> dict | None:
         return None
     return json.loads(raw)
 
-# def get_cached_messages(session_id):
-#     raw = extensions.redis_client.get(_key(session_id))
-#     return json.loads(raw) if raw else []
 
 def get_cached_messages(session_id: str) -> list:
     """Returns only the messages list — used for frontend display on refresh."""
@@ -39,17 +44,6 @@ def get_cached_messages(session_id: str) -> list:
         return []
     return context.get("messages", [])
 
-
-# def append_cached_message(session_id, role, content):
-#     messages = get_cached_messages(session_id)
-#     message = {
-#         "role": role,
-#         "content": content,
-#         "created_at": _now_iso(),
-#     }
-#     messages.append(message)
-#     extensions.redis_client.setex(_key(session_id), TTL_SECONDS, json.dumps(messages))
-#     return message
 
 def append_cached_message(session_id: str, role: str, content: str) -> dict:
     """Appends a single message to the messages list and writes back to Redis."""
@@ -63,8 +57,6 @@ def append_cached_message(session_id: str, role: str, content: str) -> dict:
     extensions.redis_client.setex(_key(session_id), TTL_SECONDS, json.dumps(context))
     return message
 
-# def refresh_cached_messages(session_id, messages):
-#     extensions.redis_client.setex(_key(session_id), TTL_SECONDS, json.dumps(messages))
 
 def refresh_cached_messages(session_id: str, messages: list):
     """Replaces the messages list while preserving the system prompt."""
@@ -72,5 +64,12 @@ def refresh_cached_messages(session_id: str, messages: list):
     context["messages"] = messages
     extensions.redis_client.setex(_key(session_id), TTL_SECONDS, json.dumps(context))
 
+
 def delete_cached_messages(session_id):
     extensions.redis_client.delete(_key(session_id))
+
+
+def set_turn_count(session_id: str, turn_count: int):
+    context = get_chat_context(session_id) or {"system_prompt": "", "messages": []}
+    context["turn_count"] = turn_count
+    extensions.redis_client.setex(_key(session_id), TTL_SECONDS, json.dumps(context))

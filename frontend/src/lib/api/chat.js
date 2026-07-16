@@ -10,6 +10,22 @@ export async function sendChatMessage(sessionId, message) {
 }
 
 export async function fetchChatHistory(sessionId) {
-  const res = await fetch(`${BASE_URL}/sessions/${sessionId}/chat-messages`);
+  const res = await fetch(`${BASE_URL}/sessions/${sessionId}/chat`);
+  return res.json();
+}
+
+export async function prepareSummary(sessionId) {
+  const res = await fetch(`${BASE_URL}/sessions/${sessionId}/chat/summary`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"}
+  });
+  return res.json();
+}
+
+export async function submit(sessionId){
+  const res = await fetch(`${BASE_URL}/sessions/${sessionId}/chat/submit`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"}
+  });
   return res.json();
 }

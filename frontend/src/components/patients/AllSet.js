@@ -2,9 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import useIntakeStore from "@/lib/intakeStore";
+import { prepareSummary } from "@/lib/api/chat";
 
-export default function AllSet() {
+export default function AllSet({onNext}) {
   const [dots, setDots] = useState("");
+  const [error, setError] = useState(false);
+  const router = useRouter();
+  const { sessionId } = useIntakeStore();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -12,6 +18,34 @@ export default function AllSet() {
     }, 500);
     return () => clearInterval(interval);
   }, []);
+
+  // Prepare the chat (calls backend), then redirect
+  useEffect(() => {
+    if (!sessionId) return;
+
+    let cancelled = false;
+
+    const prepareAndRedirect = async () => {
+      try {
+        const data = await prepareSummary(sessionId);
+        if (cancelled) return;
+
+        if (data.success) {
+          onNext();
+        } else {
+          setError(true);
+        }
+      } catch (err) {
+        if (!cancelled) setError(true);
+      }
+    };
+
+    prepareAndRedirect();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, router]);
 
   return (
     <div className="min-h-screen py-8 px-4">
@@ -118,7 +152,7 @@ export default function AllSet() {
 
           {/* Redirecting text */}
           <p className="relative z-10 text-gray-500 text-sm mb-16">
-            Redirecting to your chat screen{dots}
+            {error ? "Something went wrong. Please refresh to try again": `Redirecting to your chat screen${dots}`}
           </p>
         </div>
 

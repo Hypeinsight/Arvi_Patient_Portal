@@ -8,18 +8,13 @@ from app.models.medical_details import MedicalDetails
 from app.models.patient_details import PatientProfile
 from app.models.referral_details import ReferralDetails
 from app.models.summaries import Summary
+from app.utils.session_helpers import _parse_datetime
 
 
 def _parse_date(value):
     if not value or isinstance(value, date):
         return value
     return date.fromisoformat(value[:10])
-
-
-def _parse_datetime(value):
-    if not value or isinstance(value, datetime):
-        return value
-    return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
 def _as_list(value):

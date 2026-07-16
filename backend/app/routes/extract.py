@@ -1,4 +1,5 @@
 import pytesseract
+from pytesseract import Output, TesseractError
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 from flask import Blueprint, request, jsonify
 from app.extensions import db
@@ -8,7 +9,6 @@ import io
 from PIL import Image
 import re
 import statistics
-from pytesseract import Output, TesseractError
 
 extract_bp = Blueprint("extract", __name__)
 

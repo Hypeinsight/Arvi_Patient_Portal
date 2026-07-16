@@ -16,6 +16,7 @@ import MedicalDetails from "@/components/patients/MedicalDetails";
 import ReferralDetails from "@/components/patients/ReferralDetails";
 import ReviewAndSubmit from "@/components/patients/ReviewAndSubmit";
 import AllSet from "@/components/patients/AllSet";
+import Chat from "@/components/patients/Chat";
 import { useRouter } from "next/navigation";
 
 const SCREEN_MAP = {
@@ -31,6 +32,7 @@ const SCREEN_MAP = {
   referral_details: ReferralDetails,
   review_submit: ReviewAndSubmit,
   all_set: AllSet,
+  chat: Chat,
 };
 
 const PUBLIC_SCREENS = new Set(["choose_access_method"]);

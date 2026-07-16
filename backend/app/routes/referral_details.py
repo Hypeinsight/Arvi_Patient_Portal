@@ -4,18 +4,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.extensions import db
 from app.models.referral_details import ReferralDetails
 from app.models.session import IntakeSession
+from app.utils.session_helpers import _parse_bool
 
 referral_details_bp = Blueprint("referral_details", __name__)
-
-
-def _parse_bool(value, default=False):
-    if value is None:
-        return default
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, str):
-        return value.strip().lower() in {"true", "1", "yes", "y"}
-    return bool(value)
 
 
 def _referral_details_to_dict(referral):

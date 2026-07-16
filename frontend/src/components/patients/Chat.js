@@ -7,7 +7,11 @@ import logo from "../../../public/logo.png";
 import bgImg from "../../../public/bgImage1.png";
 import { SendHorizontal } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
-import { fetchChatHistory, sendChatMessage } from "@/lib/api/chat";
+import {
+  fetchChatHistory,
+  sendChatMessage,
+  submit as submitChat,
+} from "@/lib/api/chat";
 
 export default function Chat() {
   const { sessionId } = useIntakeStore();
@@ -15,7 +19,11 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
+  const [chatEnded, setChatEnded] = useState(false);
   const bottomRef = useRef(null);
+  const inputRef = useRef(null);
+
+  console.log("Session ID:", sessionId);
 
   // Fetch chat history from Redis if the page refreshes
   useEffect(() => {
@@ -38,6 +46,35 @@ export default function Chat() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Restore focus after the chat API finishes and the input is re-enabled.
+  useEffect(() => {
+    if (!loading && !chatEnded) {
+      inputRef.current?.focus();
+    }
+  }, [loading, chatEnded]);
+
+  // const handleSend = async () => {
+  //   if (!input.trim() || loading) return; // Prevent sending empty messages or sending while loading
+
+  //   const userMessage = input.trim();
+  //   setInput("");
+
+  //   // Optimistically add user message to display
+  //   setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+  //   setLoading(true);
+
+  //   const data = await sendChatMessage(sessionId, userMessage);
+
+  //   if (data.success) {
+  //     setMessages((prev) => [
+  //       ...prev,
+  //       { role: "assistant", content: data.message },
+  //     ]);
+  //   }
+
+  //   setLoading(false);
+  // };
+
   const handleSend = async () => {
     if (!input.trim() || loading) return; // Prevent sending empty messages or sending while loading
 
@@ -48,16 +85,21 @@ export default function Chat() {
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setLoading(true);
 
-    const data = await sendChatMessage(sessionId, userMessage);
+    try {
+      const data = await sendChatMessage(sessionId, userMessage);
 
-    if (data.success) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.message },
-      ]);
+      if (data.success) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: data.message },
+        ]);
+        if (data.chat_ended) {
+          setChatEnded(true);
+        }
+      }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleKeyDown = (e) => {
@@ -67,22 +109,33 @@ export default function Chat() {
     }
   };
 
+  const handleSubmit = async () => {
+    if (loading) return;
+
+    setLoading(true);
+    try {
+      await submitChat(sessionId);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const hasMessages = messages.length > 0;
 
   console.log("Has messages:", hasMessages);
   console.log("Initializing:", initializing);
 
   return (
-    <div className="px-4 md:px-8 lg:px-16">
-      <div className="max-w-8xl mx-auto flex flex-col">
+    <div className="p-4 md:px-8 lg:px-16">
+      <div className="max-w-8xl mx-auto flex flex-col w-full flex-1 min-h-0">
         {/* Header */}
-        <div className="flex items-start gap-2 mb-4">
+        <div className="flex items-start gap-2 mb-4 shrink-0">
           <Image src={logoBlack} alt="Logo" width={75} />
           <h1 className="text-black text-4xl">Chat</h1>
         </div>
 
         {/* White box fills remaining space */}
-        <div className="bg-white rounded-[2.25rem] p-4 sm:p-10 flex-1 flex flex-col border border-gray-200 min-h-[80vh] ">
+        <div className="bg-white rounded-[2.25rem] p-4 sm:p-10 flex-1 flex flex-col border border-gray-200 min-h-[80vh] max-h-[80vh]">
           <div className="border-2 border-[#0575E63D] rounded-[2.25rem] flex-1 flex flex-col relative overflow-hidden">
             {!hasMessages && !initializing && (
               <div className="flex-1 flex flex-col items-center justify-center relative">
@@ -123,7 +176,7 @@ export default function Chat() {
 
             {/* Message list — shown once chat starts */}
             {hasMessages && (
-              <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 flex flex-col gap-4">
+              <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 sm:px-8 py-6 flex flex-col gap-4">
                 {messages.map((msg, i) => (
                   <div
                     key={i}
@@ -154,25 +207,36 @@ export default function Chat() {
             )}
 
             {/* Input bar at bottom */}
-            <div className="absolute bottom-6 left-4 sm:left-6 right-4 sm:right-6">
-              <div className="flex gap-2 bg-[#0575E614] rounded-full px-2 sm:px-3 py-1 sm:py-2">
-                <input
-                  className="flex-1 bg-transparent outline-none text-xs xs:text-sm placeholder:bg-gradient-to-r placeholder:from-[#032B4A] placeholder:to-[#0575E6] placeholder:bg-clip-text placeholder:text-transparent text-black"
-                  placeholder="Type your message here..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  disabled={loading}
-                />
+            <div className="px-4 sm:px-6 pb-6 pt-2 shrink-0">
+              {chatEnded ? (
                 <button
-                  onClick={handleSend}
-                  disabled={loading || !input.trim()}
+                  onClick={handleSubmit}
+                  disabled={loading}
                   className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white rounded-full p-2 sm:px-6 sm:py-2 text-sm flex gap-2 cursor-pointer hover:opacity-90 transition-opacity duration-500 ease-in-out"
                 >
-                  <span className="hidden sm:block">Send</span>
-                  <SendHorizontal size={15} />
+                  Submit
                 </button>
-              </div>
+              ) : (
+                <div className="flex gap-2 bg-[#0575E614] rounded-full px-2 sm:px-3 py-1 sm:py-2">
+                  <input
+                    ref={inputRef}
+                    className="flex-1 bg-transparent outline-none text-xs xs:text-sm placeholder:bg-gradient-to-r placeholder:from-[#032B4A] placeholder:to-[#0575E6] placeholder:bg-clip-text placeholder:text-transparent text-black"
+                    placeholder="Type your message here..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={loading}
+                  />
+                  <button
+                    onClick={handleSend}
+                    disabled={loading || !input.trim()}
+                    className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white rounded-full p-2 sm:px-6 sm:py-2 text-sm flex gap-2 cursor-pointer hover:opacity-90 transition-opacity duration-500 ease-in-out"
+                  >
+                    <span className="hidden sm:block">Send</span>
+                    <SendHorizontal size={15} />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

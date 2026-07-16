@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.extensions import db
 from app.models.patient_details import PatientProfile
 from app.models.session import IntakeSession
+from app.utils.session_helpers import _parse_date
 
 patient_profiles_bp = Blueprint("patient_profiles", __name__)
 
@@ -20,12 +21,6 @@ PATIENT_PROFILE_FIELDS = {
     "emergency_contact_name",
     "emergency_contact_number",
 }
-
-
-def _parse_date(value):
-    if not value or isinstance(value, date):
-        return value
-    return date.fromisoformat(value[:10])
 
 
 def _patient_profile_to_dict(profile):

@@ -10,12 +10,13 @@ SCREENS = [
     "referral_details",
     "review_submit",
     "all_set",
+    "chat"
 ]
 
 SCREEN_ACCESS = {
     "choose_access_method":    ["guest", "new", "followup_lt12", "followup_gt12"],
     "choose_appointment_type": ["new", "followup_lt12", "followup_gt12"],
-    "privacy_consent":         ["guest", "new", "followup_lt12", "followup_gt12"],
+    "privacy_consent":         ["guest", "new"],
     # "account_setup":           ["new"],
     "upload_personal_details": ["guest", "new", "followup_gt12"],
     "personal_details":        ["guest", "new", "followup_lt12", "followup_gt12"],
@@ -24,6 +25,7 @@ SCREEN_ACCESS = {
     "referral_details":        ["guest", "new", "followup_lt12", "followup_gt12"],
     "review_submit":           ["guest", "new", "followup_lt12", "followup_gt12"],
     "all_set":                 ["guest", "new", "followup_lt12", "followup_gt12"],
+    "chat":                    ["guest", "new", "followup_lt12", "followup_gt12"],
 }
 
 
