@@ -5,12 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import useIntakeStore from "@/lib/intakeStore";
 import { createSession } from "@/lib/api/session";
-import { useRouter } from "next/navigation";
 import Title from "@/components/Title";
 import InfoCard from "@/components/InfoCard";
+import AuthForm from "@/components/patients/AuthForm";
+import { X } from "lucide-react";
 
 export default function MainPage({ onNext }) {
-  const router = useRouter();
   const { initSession, patientType, clearFormData, sessionId } =
     useIntakeStore();
 
@@ -18,20 +18,34 @@ export default function MainPage({ onNext }) {
     patientType === "guest" ? "guest" : patientType === "new" ? "create" : null,
   );
   const [loading, setLoading] = useState(false);
+  const [authMode, setAuthMode] = useState(null);
 
   const handleLogin = () => {
-    router.push("/login");
+    setAuthMode("login");
+  };
+
+  const handleCreateAccount = () => {
+    setSelectedMethod("create");
+    setAuthMode("register");
+  };
+
+   const handleClose = () => {
+    setAuthMode(null);
+  }
+
+  const handleAuthSuccess = async (userId) => {
+    const data = await createSession("followup_lt12", userId, "doc-123", "apt-456"); // TODO: Check the users creation date and then determine if they are a new or returning patient. If we put new everytime, backend will throw an error.  
+
+    if (data.success) {
+      initSession(data.session_id, data.patient_type, data.screens);
+      setAuthMode(null);
+      onNext();
+    }
   };
 
   const handleSelect = async (method) => {
     setSelectedMethod(method);
     setLoading(true);
-
-    if (method === "create") {
-      router.push("/register");
-      setLoading(false);
-      return;
-    }
 
     const newPatientType = method === "guest" ? "guest" : "new";
     // const newPatientType = "guest";
@@ -63,7 +77,7 @@ export default function MainPage({ onNext }) {
   };
 
   return (
-    <div className="px-4 md:px-8 lg:px-16">
+    <div className="px-4 md:px-8 lg:px-16 font-poppins">
       <div className="max-w-8xl mx-auto">
         {/* Page Title */}
         {/* <div className="mb-4">
@@ -93,7 +107,7 @@ export default function MainPage({ onNext }) {
                   ? "border-blue-500 bg-blue-50"
                   : "border-gray-200 hover:border-blue-300"
               }`}
-              onClick={() => !loading && handleSelect("create")}
+              onClick={() => !loading && handleCreateAccount()}
             >
               <CardContent className="p-8 text-center h-full flex flex-col justify-center">
                 <div className="mb-6">
@@ -107,10 +121,10 @@ export default function MainPage({ onNext }) {
                     />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                <h3 className="text-xl font-semibold text-slate mb-3">
                   Create Account
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-slate leading-relaxed opacity-70">
                   Save your information, track appointments, and access your
                   medical records anytime.
                 </p>
@@ -138,10 +152,10 @@ export default function MainPage({ onNext }) {
                     />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                <h3 className="text-xl font-semibold text-slate mb-3">
                   Continue as Guest
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-slate opacity-70 leading-relaxed">
                   Quick entry for this appointment only. Session expires after
                   completion.
                 </p>
@@ -153,6 +167,34 @@ export default function MainPage({ onNext }) {
         {/* Footer Links */}
         {/* <Footer/> */}
       </div>
+
+      {authMode && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-0"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setAuthMode(null);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auth-dialog-title"
+            className="relative w-full max-w-3xl"
+          >
+            <h2 id="auth-dialog-title" className="sr-only">
+              {authMode === "register" ? "Create account" : "Patient login"}
+            </h2>
+            <AuthForm
+              isRegister={authMode === "register"}
+              isModal
+              onClose={handleClose}
+              onSuccess={handleAuthSuccess}
+              onRegisterClick={() => setAuthMode("register")}
+              onLoginClick={() => setAuthMode("login")}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

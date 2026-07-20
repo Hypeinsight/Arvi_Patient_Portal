@@ -206,7 +206,7 @@ export default function AccountSetup({ onNext, onBack, progress }) {
       <div className="pb-8 px-4 xs:px-0">
         <div className="max-w-8xl mx-auto ">
           {/* Progress Steps */}
-          <ProgressSteps currentStep={3} completedSteps={[1, 2]} />
+          <ProgressSteps />
 
           {/* Main White Container */}
           <div className="relative mt-7 min-h-[700px] bg-white rounded-4xl">

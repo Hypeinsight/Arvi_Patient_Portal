@@ -98,7 +98,7 @@ export default function UploadMedicalDetails({ onNext, onBack }) {
       <div className="pb-8">
         <div className="max-w-8xl mx-auto ">
           {/* Progress Steps */}
-          <ProgressSteps currentStep={5} completedSteps={[1, 2, 3, 4]} />
+          <ProgressSteps />
 
           {/* Main White Container */}
           <div className="relative mt-4 bg-white rounded-4xl">

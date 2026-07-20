@@ -9,7 +9,7 @@ export default function LoginForm() {
   const { initSession, goNext } = useIntakeStore();
 
   const handleLoginSuccess = async (userId) => {
-    const data = await createSession("new", userId, "doc-123", "apt-456");
+    const data = await createSession("followup_lt12", userId, "doc-123", "apt-456"); // TODO: Check the users creation date and then determine if they are a new or returning patient. If we put new everytime, backend will throw an error.  
     if (data.success) {
       initSession(data.session_id, data.patient_type, data.screens);
       goNext();
@@ -17,5 +17,5 @@ export default function LoginForm() {
     }
   };
 
-  return <AuthForm onSuccess={handleLoginSuccess} />;
+  return <AuthForm onSuccess={handleLoginSuccess}/>;
 }

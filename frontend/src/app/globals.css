@@ -17,6 +17,10 @@
   --breakpoint-xs: 480px;
 
   --container-8xl: 120rem;
+
+  /* custom colors */
+  --color-slate: #031822;
+  --color-light-gray: #031822B2;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,6 +38,13 @@
   /* Hide scrollbar for IE, Edge, and Firefox */
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+@utility text-gradient-brand {
+  background-image: linear-gradient(to bottom, #0575E6, #032B4A);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
 body {

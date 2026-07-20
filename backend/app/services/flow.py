@@ -3,14 +3,13 @@ SCREENS = [
     "choose_appointment_type",
     "privacy_consent",
     # "account_setup",
-    "upload_personal_details",
+    # "upload_personal_details",
     "personal_details",
-    "upload_medical_details",
+    # "upload_medical_details",
     "medical_details",
     "referral_details",
     "review_submit",
-    "all_set",
-    "chat"
+    "chat",
 ]
 
 SCREEN_ACCESS = {
@@ -18,13 +17,12 @@ SCREEN_ACCESS = {
     "choose_appointment_type": ["new", "followup_lt12", "followup_gt12"],
     "privacy_consent":         ["guest", "new"],
     # "account_setup":           ["new"],
-    "upload_personal_details": ["guest", "new", "followup_gt12"],
+    # "upload_personal_details": ["guest", "new", "followup_gt12"],
     "personal_details":        ["guest", "new", "followup_lt12", "followup_gt12"],
-    "upload_medical_details":  ["guest", "new", "followup_lt12", "followup_gt12"],
+    # "upload_medical_details":  ["guest", "new", "followup_lt12", "followup_gt12"],
     "medical_details":         ["guest", "new", "followup_lt12", "followup_gt12"],
     "referral_details":        ["guest", "new", "followup_lt12", "followup_gt12"],
     "review_submit":           ["guest", "new", "followup_lt12", "followup_gt12"],
-    "all_set":                 ["guest", "new", "followup_lt12", "followup_gt12"],
     "chat":                    ["guest", "new", "followup_lt12", "followup_gt12"],
 }
 

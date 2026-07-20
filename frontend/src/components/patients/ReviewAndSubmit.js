@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProgressSteps from "@/components/ProgressSteps";
-import { Check, Info } from "lucide-react";
+import { Check } from "lucide-react";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import useIntakeStore from "@/lib/intakeStore";
@@ -52,7 +52,7 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
       {/* Main Content */}
       <div className="pb-8">
         <div className="max-w-8xl mx-auto">
-          <ProgressSteps currentStep={7} completedSteps={[1, 2, 3, 4, 5, 6]} />
+          <ProgressSteps />
 
           {/* Main White Container */}
           <div className="relative mt-4 bg-white rounded-4xl">
@@ -76,11 +76,11 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
                 <h3 className="text-lg md:text-xl font-medium text-gray-900 mb-4">
                   Summary
                 </h3>
-                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div className="grid md:grid-cols-2 gap-4 mb-6 font-poppins">
                   <Card className="bg-blue-50 rounded-[1.125rem] h-20">
                     <CardContent className="p-4">
-                      <p className="text-sm text-gray-500 mb-1">Name:</p>
-                      <p className="text-sm md:text-base text-gray-900 font-medium">
+                      <p className="text-base md:text-lg font-medium text-slate mb-1">Name:</p>
+                      <p className="text-sm md:text-base text-slate font-medium capitalize">
                         {name}
                       </p>
                     </CardContent>
@@ -88,10 +88,10 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
 
                   <Card className="bg-blue-50 rounded-[1.125rem] h-20">
                     <CardContent className="p-4">
-                      <p className="text-sm text-gray-500 mb-1">
+                      <p className="text-base md:text-lg font-medium text-slate mb-1">
                         Appointment Type:
                       </p>
-                      <p className="text-sm md:text-base text-gray-900 font-medium">
+                      <p className="text-sm md:text-base text-slate font-medium capitalize">
                         {appointmentType}
                       </p>
                     </CardContent>
@@ -99,10 +99,10 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
 
                   <Card className="bg-blue-50 rounded-[1.125rem] h-20">
                     <CardContent className="p-4">
-                      <p className="text-sm text-gray-500 mb-1">
+                      <p className="text-base md:text-lg font-medium text-slate mb-1">
                         Access Method:
                       </p>
-                      <p className="text-sm md:text-base text-gray-900 font-medium">
+                      <p className="text-sm md:text-base text-slate font-medium capitalize">
                         {accessMethod}
                       </p>
                     </CardContent>
@@ -110,8 +110,8 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
 
                   <Card className="bg-blue-50 rounded-[1.125rem] h-20">
                     <CardContent className="p-4">
-                      <p className="text-sm text-gray-500 mb-1">Referral:</p>
-                      <p className="text-sm md:text-base text-gray-900 font-medium">
+                      <p className="text-base md:text-lg font-medium text-slate mb-1">Referral:</p>
+                      <p className="text-sm md:text-base text-slate font-medium capitalize">
                         {referral}
                       </p>
                     </CardContent>
@@ -130,7 +130,7 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
               <NavigationButtons
                 onBack={handlePrevious}
                 onNext={handleNext}
-                nextText="Submit"
+                nextText="Chat"
               />
             </div>
           </div>

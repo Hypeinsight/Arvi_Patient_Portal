@@ -20,5 +20,11 @@ export default function RegisterForm() {
     }
   };
 
-  return <AuthForm isRegister onSuccess={handleRegisterSuccess} />;
+  return (
+    <AuthForm
+      isRegister
+      onSuccess={handleRegisterSuccess}
+      onLoginClick={() => router.push("/login")}
+    />
+  );
 }

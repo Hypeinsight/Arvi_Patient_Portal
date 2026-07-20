@@ -55,7 +55,7 @@ export default function ReferralDetails({ onNext, onBack }) {
       <div className="pb-8">
         <div className="max-w-8xl mx-auto">
 
-          <ProgressSteps currentStep={6} completedSteps={[1, 2, 3, 4, 5]} />
+          <ProgressSteps />
 
           {/* Main White Container */}
           <div className="relative mt-4 bg-white rounded-4xl">

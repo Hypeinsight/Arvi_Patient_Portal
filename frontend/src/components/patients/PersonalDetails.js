@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
-import { Calendar } from "lucide-react";
+import { Calendar, ArrowUpToLine  } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import { AU } from "country-flag-icons/react/3x2";
 import ProgressIndicator from "@/components/ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import InfoCard from "../InfoCard";
 import Title from "../Title";
+import FileUploader from "@/components/FileUploader";
 import {
   Select,
   SelectTrigger,
@@ -21,6 +22,7 @@ import {
   createPatientProfile,
   updatePatientProfile,
 } from "@/lib/api/patient_profiles";
+import { ocrPersonalId } from "@/lib/api";
 
 const EMPTY_FORM = {
   firstName: "",
@@ -60,6 +62,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     ocrPersonalText,
     uploadedPersonalFile,
     sessionId,
+    setPersonalOcrResult,
   } = useIntakeStore();
 
   console.log("store data.personal:", storeData.personal);
@@ -97,6 +100,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   });
 
   const [errors, setErrors] = useState({});
+
+  const [showUploader, setShowUploader] = useState(false);
 
   useEffect(() => {
     // SCENARIO 1: Explicit File Removal or Viewing an empty manual form
@@ -327,7 +332,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
       <div className="pb-8">
         <div className="max-w-8xl mx-auto ">
           {/* Progress Steps */}
-          <ProgressSteps currentStep={4} completedSteps={[1, 2, 3]} />
+          <ProgressSteps />
 
           {/* Main White Container */}
           <div className="relative mt-4 bg-white rounded-4xl">
@@ -342,13 +347,17 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                   title={
                     ocrPersonalText
                       ? "Scanned Documents Overview"
-                      : "Enter Your Details"
+                      : "You can either fill out the form manually or upload a document."
                   }
                   description={
                     ocrPersonalText
                       ? "Below is a list of all the details we've received. Double-check the files and update or remove any if needed."
-                      : "No document was uploaded. Please fill in your personal details below."
+                      : "If you upload a document, the system will automatically extract the details and fill the form for you."
                   }
+                  buttonText={uploadedPersonalFile ? "Replace" : "Upload"}
+                  buttonIcon={ArrowUpToLine}
+                  buttonIconClassName="bg-white text-[#032B4A] hover:bg-blue-50 rounded-sm p-0.5"
+                  onClick={() => setShowUploader(true)}
                 />
 
                 {/* Form Fields */}
@@ -559,6 +568,34 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
           </div>
         </div>
       </div>
+
+      {showUploader && (
+        <FileUploader
+          isOpen={showUploader}
+          initialFile={uploadedPersonalFile}
+          subTitle="Upload any relevant personal documents."
+          uploadText="Identity Document"
+          uploadSubtext="Passport, National ID, or Driver's License"
+          onCancel={() => setShowUploader(false)}
+          onImport={async (file) => {
+            const data = await ocrPersonalId(sessionId, file);
+
+            if (!data.success) {
+              throw new Error(
+                data.message || "Could not extract details from this document.",
+              );
+            }
+
+            const extractedText = data.layout_text ?? data.text;
+            if (!extractedText) {
+              throw new Error("No personal details were found in this document.");
+            }
+
+            setPersonalOcrResult(file, extractedText);
+            setShowUploader(false);
+          }}
+        />
+      )}
     </div>
   );
 }

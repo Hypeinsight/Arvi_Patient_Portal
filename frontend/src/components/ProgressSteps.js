@@ -1,387 +1,108 @@
-"use client"
+"use client";
 
-export default function ProgressSteps({ currentStep, completedSteps = [] }) {
-  // Helper function to determine if step is completed
-  const isCompleted = (stepNumber) => completedSteps.includes(stepNumber)
-  
+import useIntakeStore from "@/lib/intakeStore";
+
+const SCREEN_LABELS = {
+  choose_appointment_type: "Appointment Type",
+  privacy_consent: "Privacy & Consent",
+  account_setup: "Account Setup",
+  upload_personal_details: "Upload Personal Details",
+  personal_details: "Personal Details",
+  upload_medical_details: "Upload Medical Details",
+  medical_details: "Medical Details",
+  referral_details: "Referral Details",
+  review_submit: "Review & Submit",
+};
+
+const NON_PROGRESS_SCREENS = new Set([
+  "choose_access_method",
+  "register",
+  "chat",
+  "all_set",
+]);
+
+const formatScreenLabel = (screen) =>
+  SCREEN_LABELS[screen] ??
+  screen
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+export default function ProgressSteps() {
+  const { screens, currentIndex } = useIntakeStore();
+  const currentScreen = screens[currentIndex];
+  const currentScreenIndex = screens.indexOf(currentScreen);
+  const progressScreens = screens.filter(
+    (screen) => !NON_PROGRESS_SCREENS.has(screen),
+  );
+
+  if (!progressScreens.length) return null;
+
   return (
-    <div className="flex items-center bg-blue-100/70 rounded-full px-2 py-0 shadow-sm relative z-0">
+    <div className="flex items-center bg-blue-100/70 rounded-full px-0 py-0 shadow-sm relative z-0">
       <div className="w-full overflow-auto no-scrollbar">
         <div className="flex items-center justify-between gap-2">
-          
-          {/* Step 1 - Appointment Type */}
-          <div className="flex items-center">
-            <div 
-                className={`
-                flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200
-                ${currentStep === 1 || isCompleted(1)
-                    ? 'bg-transparent border hover:border-blue-300' 
-                    : 'bg-transparent'
-                }
-                `}
-                style={currentStep === 1 || isCompleted(1) ? {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                } : {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                }}
-            >
-                <div
-                className={`
-                    w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2
-                    ${currentStep === 1 || isCompleted(1) ? 'text-white' : 'border'}
-                `}
-                style={
-                    currentStep === 1 || isCompleted(1)
-                    ? { 
-                        background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                        }
-                    : { 
-                        background: 'transparent',
-                        borderColor: '#0575E6',
-                        borderWidth: '2px',
-                        color: '#0575E6',
-                        }
-                }
-                >
-                {isCompleted(1) ? '✓' : 1}
-                </div>
-                <span 
-                className="whitespace-nowrap"
-                style={{
-                    background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                }}
-                >
-                Appointment Type
-                </span>
-            </div>
-            <div className="w-8 h-px mx-2"></div>
-        </div>
+          {progressScreens.map((screen, index) => {
+            const stepNumber = index + 1;
+            const screenIndex = screens.indexOf(screen);
+            const isCurrent = screen === currentScreen;
+            const isCompleted = screenIndex < currentScreenIndex;
+            const isActive = isCurrent || isCompleted;
 
-          {/* Step 2 - Privacy & Consent */}
-          <div className="flex items-center">
-            <div 
-                className={`
-                flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200
-                ${currentStep === 2 || isCompleted(2)
-                    ? 'bg-transparent border hover:border-blue-300' 
-                    : 'bg-transparent'
-                }
-                `}
-                style={currentStep === 2 || isCompleted(2) ? {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                } : {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                }}
-            >
+            return (
+              <div className="flex items-center" key={screen}>
                 <div
-                className={`
-                    w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2
-                    ${currentStep === 2 || isCompleted(2) ? 'text-white' : 'border'}
-                `}
-                style={
-                    currentStep === 2 || isCompleted(2)
-                    ? { 
-                        background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                        }
-                    : { 
-                        background: 'transparent',
-                        borderColor: '#0575E6',
-                        borderWidth: '2px',
-                        color: '#0575E6',
-                        }
-                }
+                  className={`flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "bg-transparent border hover:border-blue-300"
+                      : "bg-transparent"
+                  }`}
+                  style={{
+                    background: "transparent",
+                    borderColor: "#0575E6",
+                  }}
                 >
-                {isCompleted(2) ? '✓' : 2}
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2 ${
+                      isActive ? "text-white" : "border"
+                    }`}
+                    style={
+                      isActive
+                        ? {
+                            background:
+                              "linear-gradient(135deg, #0575E6, #021B79)",
+                          }
+                        : {
+                            background: "transparent",
+                            borderColor: "#0575E6",
+                            borderWidth: "2px",
+                            color: "#0575E6",
+                          }
+                    }
+                  >
+                    {isCompleted ? "✓" : stepNumber}
+                  </div>
+                  <span
+                    className="whitespace-nowrap"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #0575E6, #021B79)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    {formatScreenLabel(screen)}
+                  </span>
                 </div>
-                <span 
-                className="whitespace-nowrap"
-                style={{
-                    background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                }}
-                >
-                Privacy & Consent
-                </span>
-            </div>
-            <div className="w-8 h-px mx-2"></div>
-        </div>
-
-        {/* Step 3 - Account Setup */}
-          <div className="flex items-center">
-            <div 
-                className={`
-                flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200
-                ${currentStep === 3 || isCompleted(3)
-                    ? 'bg-transparent border hover:border-blue-300' 
-                    : 'bg-transparent'
-                }
-                `}
-                style={currentStep === 3 || isCompleted(3) ? {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                } : {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                }}
-            >
-                <div
-                className={`
-                    w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2
-                    ${currentStep === 3 || isCompleted(3) ? 'text-white' : 'border'}
-                `}
-                style={
-                    currentStep === 3 || isCompleted(3)
-                    ? { 
-                        background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                        }
-                    : { 
-                        background: 'transparent',
-                        borderColor: '#0575E6',
-                        borderWidth: '2px',
-                        color: '#0575E6',
-                        }
-                }
-                >
-                {isCompleted(3) ? '✓' : 3}
-                </div>
-                <span 
-                className="whitespace-nowrap"
-                style={{
-                    background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                }}
-                >
-                Account Setup
-                </span>
-            </div>
-            <div className="w-8 h-px mx-2"></div>
-        </div>
-
-          {/* Step 4 - Personal Details */}
-          <div className="flex items-center">
-            <div 
-                className={`
-                flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200
-                ${currentStep === 4 || isCompleted(4)
-                    ? 'bg-transparent border hover:border-blue-300' 
-                    : 'bg-transparent'
-                }
-                `}
-                style={currentStep === 4 || isCompleted(4) ? {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                } : {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                }}
-            >
-                <div
-                className={`
-                    w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2
-                    ${currentStep === 4 || isCompleted(4) ? 'text-white' : 'border'}
-                `}
-                style={
-                    currentStep === 4 || isCompleted(4)
-                    ? { 
-                        background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                        }
-                    : { 
-                        background: 'transparent',
-                        borderColor: '#0575E6',
-                        borderWidth: '2px',
-                        color: '#0575E6',
-                        }
-                }
-                >
-                {isCompleted(4) ? '✓' : 4}
-                </div>
-                <span 
-                className="whitespace-nowrap"
-                style={{
-                    background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                }}
-                >
-                Personal Details
-                </span>
-            </div>
-            <div className="w-8 h-px mx-2"></div>
-        </div>
-
-          {/* Step 5 - Medical Details */}
-          <div className="flex items-center">
-            <div 
-                className={`
-                flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200
-                ${currentStep === 5 || isCompleted(5)
-                    ? 'bg-transparent border hover:border-blue-300' 
-                    : 'bg-transparent'
-                }
-                `}
-                style={currentStep === 5 || isCompleted(5) ? {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                } : {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                }}
-            >
-                <div
-                className={`
-                    w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2
-                    ${currentStep === 5 || isCompleted(5) ? 'text-white' : 'border'}
-                `}
-                style={
-                    currentStep === 5 || isCompleted(5)
-                    ? { 
-                        background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                        }
-                    : { 
-                        background: 'transparent',
-                        borderColor: '#0575E6',
-                        borderWidth: '2px',
-                        color: '#0575E6',
-                        }
-                }
-                >
-                {isCompleted(5) ? '✓' : 5}
-                </div>
-                <span 
-                className="whitespace-nowrap"
-                style={{
-                    background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                }}
-                >
-                Medical Details
-                </span>
-            </div>
-            <div className="w-8 h-px mx-2"></div>
-        </div>
-
-          {/* Step 6 - Referral Details */}
-          <div className="flex items-center">
-            <div 
-                className={`
-                flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200
-                ${currentStep === 6 || isCompleted(6)
-                    ? 'bg-transparent border hover:border-blue-300' 
-                    : 'bg-transparent'
-                }
-                `}
-                style={currentStep === 6 || isCompleted(6) ? {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                } : {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                }}
-            >
-                <div
-                className={`
-                    w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2
-                    ${currentStep === 6 || isCompleted(6) ? 'text-white' : 'border'}
-                `}
-                style={
-                    currentStep === 6 || isCompleted(6)
-                    ? { 
-                        background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                        }
-                    : { 
-                        background: 'transparent',
-                        borderColor: '#0575E6',
-                        borderWidth: '2px',
-                        color: '#0575E6',
-                        }
-                }
-                >
-                {isCompleted(6) ? '✓' : 6}
-                </div>
-                <span 
-                className="whitespace-nowrap"
-                style={{
-                    background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                }}
-                >
-                Referral Details
-                </span>
-            </div>
-            <div className="w-8 h-px mx-2"></div>
-        </div>
-
-          {/* Step 7 - Review & Submit */}
-          <div className="flex items-center">
-            <div 
-                className={`
-                flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200
-                ${currentStep === 7 || isCompleted(7)
-                    ? 'bg-transparent border hover:border-blue-300' 
-                    : 'bg-transparent'
-                }
-                `}
-                style={currentStep === 7 || isCompleted(7) ? {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                } : {
-                background: 'transparent',
-                borderColor: '#0575E6',
-                }}
-            >
-                <div
-                className={`
-                    w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2
-                    ${currentStep === 7 || isCompleted(7) ? 'text-white' : 'border'}
-                `}
-                style={
-                    currentStep === 7 || isCompleted(7)
-                    ? { 
-                        background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                        }
-                    : { 
-                        background: 'transparent',
-                        borderColor: '#0575E6',
-                        borderWidth: '2px',
-                        color: '#0575E6',
-                        }
-                }
-                >
-                {isCompleted(7) ? '✓' : 7}
-                </div>
-                <span 
-                className="whitespace-nowrap"
-                style={{
-                    background: 'linear-gradient(135deg, #0575E6, #021B79)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                }}
-                >
-                Review & Submit
-                </span>
-            </div>
-            <div className="w-8 h-px mx-2"></div>
-        </div>
-
+                {index < progressScreens.length - 1 && (
+                  <div className="w-8 h-px mx-2" />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
-  )
+  );
 }

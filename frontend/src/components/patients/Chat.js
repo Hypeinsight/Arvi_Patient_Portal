@@ -2,24 +2,26 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import logoBlack from "../../../public/logoBlack.png";
-import logo from "../../../public/logo.png";
 import bgImg from "../../../public/bgImage1.png";
-import { SendHorizontal } from "lucide-react";
+import { SendHorizontal, SkipForward, Check } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import {
   fetchChatHistory,
   sendChatMessage,
   submit as submitChat,
 } from "@/lib/api/chat";
+import InfoCard from "@/components/InfoCard";
+import AllSet from "@/components/patients/AllSet";
 
 export default function Chat() {
   const { sessionId } = useIntakeStore();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [initializing, setInitializing] = useState(true);
-  const [chatEnded, setChatEnded] = useState(false);
+  const [chatEnded, setChatEnded] = useState(true);
+  const [showAllSet, setShowAllSet] = useState(true);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -53,27 +55,18 @@ export default function Chat() {
     }
   }, [loading, chatEnded]);
 
-  // const handleSend = async () => {
-  //   if (!input.trim() || loading) return; // Prevent sending empty messages or sending while loading
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
 
-  //   const userMessage = input.trim();
-  //   setInput("");
+    el.style.height = "auto";
 
-  //   // Optimistically add user message to display
-  //   setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
-  //   setLoading(true);
+    const lineHeight = parseFloat(getComputedStyle(el).lineHeight);
+    const maxHeight = lineHeight * 3; // cap at 3 rows
 
-  //   const data = await sendChatMessage(sessionId, userMessage);
-
-  //   if (data.success) {
-  //     setMessages((prev) => [
-  //       ...prev,
-  //       { role: "assistant", content: data.message },
-  //     ]);
-  //   }
-
-  //   setLoading(false);
-  // };
+    el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`;
+    el.style.overflowY = el.scrollHeight > maxHeight ? "auto" : "hidden";
+  }, [input]);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return; // Prevent sending empty messages or sending while loading
@@ -110,28 +103,48 @@ export default function Chat() {
   };
 
   const handleSubmit = async () => {
-    if (loading) return;
+    setShowAllSet(true);
+    // if (loading || submitting) return;
 
-    setLoading(true);
-    try {
-      await submitChat(sessionId);
-    } finally {
-      setLoading(false);
-    }
+    // setSubmitting(true);
+    // try {
+    //   const data = await submitChat(sessionId);
+    //   if (data.success) {
+    //     setShowAllSet(true);
+    //   }
+    // } finally {
+    //   setSubmitting(false);
+    // }
   };
 
   const hasMessages = messages.length > 0;
 
-  console.log("Has messages:", hasMessages);
-  console.log("Initializing:", initializing);
-
   return (
-    <div className="p-4 md:px-8 lg:px-16">
+    <div className="p-4 md:px-8 lg:px-16 font-poppins">
       <div className="max-w-8xl mx-auto flex flex-col w-full flex-1 min-h-0">
         {/* Header */}
-        <div className="flex items-start gap-2 mb-4 shrink-0">
-          <Image src={logoBlack} alt="Logo" width={75} />
-          <h1 className="text-black text-4xl">Chat</h1>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-start gap-2 shrink-0">
+            <h1 className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] bg-clip-text text-transparent font-semibold text-lg xs:text-xl sm:text-2xl lg:text-4xl">
+              Welcome ARVI Chat
+            </h1>
+          </div>
+          {!chatEnded && (
+            <button
+              onClick={handleSubmit}
+              disabled={loading || submitting}
+              className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] bg-clip-text text-transparent border border-[#0575E6] rounded-lg xs:rounded-xl py-1 px-2 xs:p-2 sm:px-4 sm:py-2 text-sm flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity duration-500 ease-in-out"
+            >
+              <span className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] bg-transparent bg-clip-text">
+                Skip
+              </span>
+              <SkipForward
+                size={15}
+                className="text-[#032B4A]"
+                fill="#032B4A"
+              />
+            </button>
+          )}
         </div>
 
         {/* White box fills remaining space */}
@@ -149,16 +162,8 @@ export default function Chat() {
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center gap-2 px-2 pb-6">
                   <div className="flex gap-2 items-start">
-                    <p className="text-xl xs:text-2xl sm:text-4xl bg-gradient-to-r from-[#691A6A] to-[#043762] bg-clip-text text-transparent font-semibold">
-                      Welcome
-                    </p>
-                    <Image
-                      src={logo}
-                      alt="logo"
-                      className="w-14 xs:w-16 sm:w-20"
-                    />
-                    <p className="text-xl xs:text-2xl sm:text-4xl bg-gradient-to-r from-[#691A6A] to-[#043762] bg-clip-text text-transparent font-semibold">
-                      Chat
+                    <p className="text-lg xs:text-xl sm:text-2xl lg:text-4xl text-center bg-gradient-to-r from-[#691A6A] to-[#043762] bg-clip-text text-transparent font-semibold">
+                      Hey, How Can We Help Today?
                     </p>
                   </div>
                   <div className="text-xs xs:text-sm sm:text-base">
@@ -209,35 +214,43 @@ export default function Chat() {
             {/* Input bar at bottom */}
             <div className="px-4 sm:px-6 pb-6 pt-2 shrink-0">
               {chatEnded ? (
-                <button
+                <InfoCard
+                  title="You're Almost Done"
+                  description="Thank you for completing your intake. Tap Send All Details to securely share your information with your healthcare team."
+                  className="mb-0"
+                  icon={Check}
+                  buttonIconClassName="text-white"
+                  buttonText="Send your details"
+                  buttonIcon={SendHorizontal}
+                  buttonClassName="flex-row-reverse !px-5"
+                  buttonDisabled={loading || submitting}
                   onClick={handleSubmit}
-                  disabled={loading}
-                  className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white rounded-full p-2 sm:px-6 sm:py-2 text-sm flex gap-2 cursor-pointer hover:opacity-90 transition-opacity duration-500 ease-in-out"
-                >
-                  Submit
-                </button>
+                />
               ) : (
-                <div className="flex gap-2 bg-[#0575E614] rounded-full px-2 sm:px-3 py-1 sm:py-2">
-                  <input
+                <div className="relative flex items-end gap-2 bg-[#0575E614] rounded-lg px-2 sm:px-3 py-2.5 sm:py-[18px] max-w-[940px] mx-auto">
+                  <textarea
                     ref={inputRef}
-                    className="flex-1 bg-transparent outline-none text-xs xs:text-sm placeholder:bg-gradient-to-r placeholder:from-[#032B4A] placeholder:to-[#0575E6] placeholder:bg-clip-text placeholder:text-transparent text-black"
+                    rows={1}
+                    className="flex-1 bg-transparent no-scrollbar leading-5 pr-10 sm:pr-28 outline-none resize-none text-xs xs:text-sm placeholder:bg-gradient-to-r placeholder:from-[#032B4A] placeholder:to-[#0575E6] placeholder:bg-clip-text placeholder:text-transparent text-black"
                     placeholder="Type your message here..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    disabled={loading}
+                    disabled={loading || submitting}
                   />
                   <button
                     onClick={handleSend}
-                    disabled={loading || !input.trim()}
-                    className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white rounded-full p-2 sm:px-6 sm:py-2 text-sm flex gap-2 cursor-pointer hover:opacity-90 transition-opacity duration-500 ease-in-out"
+                    disabled={loading || submitting || !input.trim()}
+                    className="absolute right-2 sm:right-3 bottom-1 sm:bottom-2 bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white rounded-lg sm:rounded-xl p-2 sm:px-6 sm:py-2 text-sm flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity duration-500 ease-in-out"
                   >
-                    <span className="hidden sm:block">Send</span>
+                    <span className="hidden sm:block leading-6">Send</span>
                     <SendHorizontal size={15} />
                   </button>
                 </div>
               )}
             </div>
+
+            {showAllSet && <AllSet onClose={() => setShowAllSet(false)} />}
           </div>
         </div>
       </div>

@@ -8,14 +8,10 @@ import MainPage from "@/components/patients/MainPage";
 import RegisterForm from "@/components/patients/RegisterForm";
 import AppointmentType from "@/components/patients/AppointmentType";
 import PrivacyConsent from "@/components/patients/PrivacyConsent";
-import AccountSetup from "@/components/patients/AccountSetup";
-import UploadPersonalDetails from "@/components/patients/UploadPersonalDetails";
 import PersonalDetails from "@/components/patients/PersonalDetails";
-import UploadMedicalDetails from "@/components/patients/UploadMedicalDetails";
 import MedicalDetails from "@/components/patients/MedicalDetails";
 import ReferralDetails from "@/components/patients/ReferralDetails";
 import ReviewAndSubmit from "@/components/patients/ReviewAndSubmit";
-import AllSet from "@/components/patients/AllSet";
 import Chat from "@/components/patients/Chat";
 import { useRouter } from "next/navigation";
 
@@ -25,13 +21,12 @@ const SCREEN_MAP = {
   choose_appointment_type: AppointmentType,
   privacy_consent: PrivacyConsent,
   // account_setup: AccountSetup,
-  upload_personal_details: UploadPersonalDetails,
+  // upload_personal_details: UploadPersonalDetails,
   personal_details: PersonalDetails,
-  upload_medical_details: UploadMedicalDetails,
+  // upload_medical_details: UploadMedicalDetails,
   medical_details: MedicalDetails,
   referral_details: ReferralDetails,
   review_submit: ReviewAndSubmit,
-  all_set: AllSet,
   chat: Chat,
 };
 

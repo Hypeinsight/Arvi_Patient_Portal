@@ -1,8 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import TopNav from "@/components/top-nav";
-import PatientsPage from "./patients/page";
-import Footer from "@/components/Footer";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +33,8 @@ export default function RootLayout({ children }) {
         }}>
         <TopNav />
         <main className="flex-1 flex flex-col justify-center">{children}</main>
-        <Footer/>
+        <Toaster position="top-right" richColors closeButton />
+        {/* <Footer/> */}
       </body>
     </html>
   );

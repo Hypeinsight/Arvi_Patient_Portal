@@ -99,7 +99,7 @@ export default function UploadPersonalDetails({ onNext, onBack }) {
         <div className="max-w-8xl mx-auto ">
 
           {/* Progress Steps */}
-          <ProgressSteps currentStep={4} completedSteps={[1, 2, 3]} />
+          <ProgressSteps />
 
           {/* Main White Container */}
           <div className="relative mt-4 bg-white rounded-4xl">

@@ -1,23 +1,31 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import ProgressSteps from "@/components/ProgressSteps"
-import { User, Users, ArrowLeft, ArrowRight, Info } from "lucide-react"
-import ProgressIndicator from "../ProgressIndicator"
-import useIntakeStore from "@/lib/intakeStore"
-import { createAppointmentDetails, updateAppointmentDetails } from "@/lib/api/appointment_details"
+import { useState } from "react";
+import ProgressSteps from "@/components/ProgressSteps";
+import ProgressIndicator from "../ProgressIndicator";
+import useIntakeStore from "@/lib/intakeStore";
+import {
+  createAppointmentDetails,
+  updateAppointmentDetails,
+} from "@/lib/api/appointment_details";
+import Title from "../Title";
+import InfoCard from "../InfoCard";
+import Image from "next/image";
+import { toast } from "sonner";
 
-export default function AppointmentType({onNext}) {
-  const { patientType, formData, clearFormData, sessionId } = useIntakeStore()
-  const [loading, setLoading] = useState(false)
+export default function AppointmentType({ onNext }) {
+  const { patientType, formData, clearFormData, sessionId } = useIntakeStore();
+  const [loading, setLoading] = useState(false);
 
   const appointmentTypes = [
     {
       id: "new",
       patientType: "new",
       title: "New Patient",
-      subtitle: "First time visiting our clinic",
-      icon: User
+      description: "First time visiting our clinic",
+      icon: "/user1.png",
+      width: 70,
+      height: 70,
     },
     {
       id: "follow-up-12-plus",
@@ -25,8 +33,9 @@ export default function AppointmentType({onNext}) {
       title: "Follow-up",
       subtitle: "(More than 12 months)",
       description: "For Patients Returning After 12+ Months",
-      icon: Users,
-      hasLeftArrow: true
+      icon: "/user3.png",
+      width: 100,
+      height: 100,
     },
     {
       id: "follow-up-12-less",
@@ -34,182 +43,118 @@ export default function AppointmentType({onNext}) {
       title: "Follow-up",
       subtitle: "(Less than 12 months)",
       description: "For Patients Returning Within 12 Months",
-      icon: Users,
-      hasRightArrow: true
-    }
-  ]
+      icon: "/user4.png",
+      width: 100,
+      height: 100,
+    },
+  ];
 
   const [selectedType, setSelectedType] = useState(
     appointmentTypes.find(
-      type => type.patientType === formData.appointment?.type
-    )?.id ?? null
-  )
+      (type) => type.patientType === formData.appointment?.type,
+    )?.id ?? null,
+  );
 
- const handleSelect = async (type) => {
-  setSelectedType(type.id)
+  const handleSelect = async (type) => {  
+    const currentAppointmentType = formData.appointment?.type ?? patientType;
+    
+    const payload = {
+      appointment_type: type.patientType,
+    };
 
-  const currentAppointmentType = formData.appointment?.type ?? patientType
-  if (type.patientType !== currentAppointmentType) {
-    clearFormData()
-  }
-
-  const payload = {
-    appointment_type: type.patientType
-  }
-
-   const data = formData.appointment
-            ? await updateAppointmentDetails(sessionId, payload)
-            : await createAppointmentDetails(sessionId, payload);
-
-    if (data.success) {
-      onNext(payload, "appointment")
+    const data = formData.appointment
+    ? await updateAppointmentDetails(sessionId, payload)
+    : await createAppointmentDetails(sessionId, payload);
+    
+    if (!data.success) {
+      toast.error(data.message || "Error selecting type");
+      return;
     }
-
-}
+    
+    setSelectedType(type.id);
+    
+    if (type.patientType !== currentAppointmentType) {
+      clearFormData();
+    }
+    onNext(payload, "appointment");
+  };
 
   return (
-    <div className="min-h-screen xs:px-4 md:px-8 lg:px-16">
+    <div className="px-4 md:px-8 lg:px-16">
       {/* Main Content */}
-      <div className="pb-8 px-4 xs:px-0">
+      <div className="pb-8">
         <div className="max-w-8xl mx-auto">
-          {/* Page Title */}
-          <div className="mb-4">
-            <h1 className="text-2xl sm:text-[40px] font-medium text-gray-900">Patient Intake Form</h1>
-          </div>
-
           {/* Progress Steps */}
-          <ProgressSteps currentStep={1} />
+          <ProgressSteps />
 
           {/* Main White Container */}
-          <div className="relative mt-7 min-h-[700px]  bg-white rounded-4xl md:bg-transparent">
-            {/* Custom SVG Background */}
-            <svg 
-  className="absolute inset-0 w-full h-full hidden md:block" 
-  viewBox="0 0 1320 600" 
-  preserveAspectRatio="none"
-  style={{ filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1))' }}
->
-  <path
-    fillRule="evenodd"
-    clipRule="evenodd"
-    d="M1292 80C1307.464 80 1320 92.536 1320 108V568C1320 583.464 1307.464 596 1292 596H36C16.1178 596 0 579.882 0 560V540V528V36C0 16.1178 16.1178 0 36 0H670.123C680.863 0 688.794 5.1585 693.994 11.5561L761.498 68.556C766.429 75.469 775.812 80 785.998 80H1292Z"
-    fill="white"
-  />
-</svg>
-            
+          <div className="relative mt-4 bg-white rounded-4xl">
             {/* Content Container */}
             <div className="relative z-10 p-4 md:p-8">
-            {/* Progress Indicator - Positioned in top right */}
-            <ProgressIndicator/>
+              <Title
+                title="Choose Your Appointment Type"
+                className="md:!text-2xl"
+              />
 
-            <div className="mt-16 md:mt-0 mb-8">
-                <h2 className="text-base sm:text-[1.25rem] lg:text-3xl xl:text-[2rem] font-medium text-gray-800 mb-8 font-poppins">
-                  Choose Your Appointment Type
-                </h2>
-              </div>
+              {/* Progress Indicator - Positioned in top right */}
+              <ProgressIndicator />
 
-            {/* Choose your appointment Type Section */}
-            <div className="mt-8 md:mt-16 mb-16">
+              {/* Choose your appointment Type Section */}
+              <div className="mt-8 mb-16">
+                {/* Discount Information */}
+                <InfoCard
+                  title="Important Discount Information"
+                  description="Patients with a valid referral, Medicare number, and uploaded referral letter are eligible for our referral discount.
+                        Patients without a referral will be charged standard consultation fees."
+                />
 
-              {/* Discount Information */}
-              <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-start gap-3">
-                     <Info
-                        className="w-5 md:w-8 text-blue-600 stroke-white"
-                        fill="currentColor"
-                      />
-                    <div>
-                      <h3 className="text-md md:text-lg font-semibold text-gray-900 mb-1">
-                        Important Discount Information
-                      </h3>
-                      <p className="text-gray-600 text-xs md:text-sm">
-                        Patients with a valid referral, Medicare number, and uploaded referral letter are eligible for our referral discount.
-                        Patients without a referral will be charged standard consultation fees.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-  {appointmentTypes.map((type) => {
-    const Icon = type.icon
-    return (
-      <div
-        key={type.id}
-        className={`
-          relative cursor-pointer transition-all duration-200 hover:shadow-lg 
-          border-2 rounded-lg bg-white p-3 text-center h-40 md:h-88 flex flex-col justify-center
-          ${selectedType === type.id 
-            ? 'border-blue-600 shadow-lg' 
-            : 'border-gray-200 hover:border-gray-300'
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                  {appointmentTypes.map((type) => {
+                    const Icon = type.icon;
+                    return (
+                      <div
+                        key={type.id}
+                        className={`
+          relative cursor-pointer transition-all duration-200 hover:shadow-lg
+          border-2 rounded-2xl bg-white p-3 text-center h-40 md:h-88 flex flex-col justify-center items-center
+          ${
+            selectedType === type.id
+              ? "border-blue-600 shadow-lg"
+              : "border-[#0575E63D] hover:border-gray-300"
           }
         `}
-        onClick={() => !loading && handleSelect(type)}
-      >
-        {/* Left Arrow */}
-        {type.hasLeftArrow && (
-          <ArrowLeft className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-600" />
-        )}
+                        onClick={() => !loading && handleSelect(type)}
+                      >
+                        {/* Icon */}
+                        <Image
+                          src={type.icon}
+                          width={type.width}
+                          height={type.height}
+                          alt="icon"
+                          className=""
+                        />
 
-        {/* Icon */}
-        <div className="mb-2 flex justify-center">
-          <div className="relative">
-            <div 
-              className="w-7 h-7 rounded-full flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, #0575E6, #021B79)'
-              }}
-            >
-              <Icon className="w-3.5 h-3.5 text-white" />
+                        {/* Content */}
+                        <h3 className="font-poppins text-sm md:text-[1.25rem] 2xl:text-[1.625rem] font-medium text-slate mb-1">
+                          {type.title}
+                        </h3>
+                        <p className="font-poppins text-xs md:text-[1rem] 2xl:text-[1.5rem] text-slate mb-1 leading-tight">
+                          {type.subtitle}
+                        </p>
+                        {type.description && (
+                          <p className="font-poppins text-xs md:text-[1rem] text-slate opacity-70 leading-tight">
+                            {type.description}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
-            {type.id !== "new-patient" && (
-              <div 
-                className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full"
-                style={{
-                  background: 'linear-gradient(135deg, #0575E6, #021B79)'
-                }}
-              ></div>
-            )}
-          </div>
-        </div>
-
-        {/* Content */}
-        <h3 className="text-sm font-medium text-gray-900 mb-1">
-          {type.title}
-        </h3>
-        <p className="text-xs text-gray-600 mb-1 leading-tight">
-          {type.subtitle}
-        </p>
-        {type.description && (
-          <p className="text-xs text-gray-500 leading-tight">
-            {type.description}
-          </p>
-        )}
-
-        {/* Right Arrow */}
-        {type.hasRightArrow && (
-          <ArrowRight className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-600" />
-        )}
-      </div>
-    )
-  })}
-</div>
-            </div>
-
-            {/* Footer Links */}
-            <div className="flex gap-4 text-sm text-gray-600 mt-12">
-              <button className="hover:text-gray-900 transition-colors underline">
-                Privacy Policy
-              </button>
-              <span>|</span>
-              <button className="hover:text-gray-900 transition-colors underline">
-                Terms of Use
-              </button>
-            </div>
-          </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

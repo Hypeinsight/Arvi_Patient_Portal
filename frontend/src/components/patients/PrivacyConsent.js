@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
-import { ChevronLeft, ChevronRight, BatteryMedium } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
@@ -57,7 +56,7 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
   const isNextDisabled = !acceptedTerms || !acceptedPrivacy;
 
   return (
-    <div className="px-4 md:px-8 lg:px-16">
+    <div className="px-4 md:px-8 lg:px-16 font-poppins">
       {/* Main Content */}
       <div className="pb-8">
         <div className="max-w-8xl mx-auto">
@@ -69,7 +68,7 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
           </div> */}
 
           {/* Progress Steps */}
-          <ProgressSteps currentStep={2} completedSteps={[1]} />
+          <ProgressSteps />
 
           {/* Main White Container */}
           <div className="relative bg-white rounded-4xl mt-4">

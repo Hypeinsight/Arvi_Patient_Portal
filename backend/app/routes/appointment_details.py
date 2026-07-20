@@ -27,6 +27,14 @@ def _appointment_type_from_body(body):
     return body.get("appointment_type") or body.get("type")
 
 
+def _appointment_type_error(session, appointment_type):
+    if appointment_type not in VALID_APPOINTMENT_TYPES:
+        return "Invalid appointment type"
+    if session.patient_type == "new" and appointment_type != "new":
+        return "You don't have an account"
+    return None
+
+
 @appointment_details_bp.post("/sessions/<uuid:session_id>/appointment-details")
 def create_appointment_details(session_id):
     session = db.session.get(IntakeSession, session_id)
@@ -40,8 +48,10 @@ def create_appointment_details(session_id):
     body = request.get_json(silent=True) or {}
     appointment_type = body.get("appointment_type")
 
-    if appointment_type not in VALID_APPOINTMENT_TYPES:
-        return jsonify({"success": False, "message": "Invalid appointment type"}), 400
+    print(f"Received appointment_type: {appointment_type} for session_id: {session_id}")
+
+    if error := _appointment_type_error(session, appointment_type):
+        return jsonify({"success": False, "message": error}), 400
 
     appointment = AppointmentDetails(
         session_id=session.id,
@@ -88,6 +98,8 @@ def update_appointment_details(session_id):
     body = request.get_json(silent=True) or {}
     appointment_type = _appointment_type_from_body(body)
     if appointment_type is not None:
+        if error := _appointment_type_error(session, appointment_type):
+            return jsonify({"success": False, "message": error}), 400
         session.appointment_details.appointment_type = appointment_type
 
     try:

@@ -8,6 +8,9 @@ import useIntakeStore from "@/lib/intakeStore";
 import { extractMedicalDetails } from "@/lib/utils";
 import Title from "../Title";
 import InfoCard from "@/components/InfoCard";
+import FileUploader from "@/components/FileUploader";
+import { ArrowUpToLine } from "lucide-react";
+import { ocrPersonalId } from "@/lib/api";
 import {
   createMedicalDetails,
   updateMedicalDetails,
@@ -43,6 +46,7 @@ export default function MedicalDetails({ onNext, onBack }) {
     ocrMedicalText,
     uploadedMedicalFile,
     sessionId,
+    setMedicalOcrResult,
   } = useIntakeStore();
 
   const [formData, setFormData] = useState(() => {
@@ -68,6 +72,7 @@ export default function MedicalDetails({ onNext, onBack }) {
   });
 
   const [errors, setErrors] = useState({});
+  const [showUploader, setShowUploader] = useState(false);
 
   useEffect(() => {
     // SCENARIO 1: Explicit File Removal or Viewing an empty manual form
@@ -204,7 +209,7 @@ export default function MedicalDetails({ onNext, onBack }) {
       <div className="pb-8">
         <div className="max-w-8xl mx-auto">
           {/* Progress Steps */}
-          <ProgressSteps currentStep={5} completedSteps={[1, 2, 3, 4]} />
+          <ProgressSteps />
 
           {/* Main White Container */}
           <div className="relative mt-4 bg-white rounded-4xl">
@@ -219,10 +224,20 @@ export default function MedicalDetails({ onNext, onBack }) {
               <div className="mt-8 mb-16">
                 {/* Information */}
                 <InfoCard
-                  title="Scanned Documents Overview"
-                  description="Below is a list of all the details we’ve received.
-                        Double-check the files and update or remove any if
-                        needed."
+                  title={
+                    ocrMedicalText
+                      ? "Scanned Documents Overview"
+                      : "You can either fill out the form manually or upload a document."
+                  }
+                  description={
+                    ocrMedicalText
+                      ? "Below is a list of all the details we've received. Double-check the files and update or remove any if needed."
+                      : "If you upload a document, the system will automatically extract the details and fill the form for you."
+                  }
+                  buttonText={uploadedMedicalFile ? "Replace" : "Upload"}
+                  buttonIcon={ArrowUpToLine}
+                  buttonIconClassName="bg-white text-[#032B4A] hover:bg-blue-50 rounded-sm p-0.5"
+                  onClick={() => setShowUploader(true)}
                 />
 
                 <form className="space-y-6">
@@ -325,6 +340,35 @@ export default function MedicalDetails({ onNext, onBack }) {
           </div>
         </div>
       </div>
+
+      {showUploader && (
+        <FileUploader
+          isOpen={showUploader}
+          initialFile={uploadedMedicalFile}
+          title="Import Medical Details"
+          subTitle="Upload any relevant medical documents."
+          uploadText="Medical Report"
+          uploadSubtext="Lab results, diagnosis reports, discharge summaries, or prescriptions"
+          onCancel={() => setShowUploader(false)}
+          onImport={async (file) => {
+            const data = await ocrPersonalId(sessionId, file);
+
+            if (!data.success) {
+              throw new Error(
+                data.message || "Could not extract details from this document.",
+              );
+            }
+
+            const extractedText = data.text ?? data.layout_text;
+            if (!extractedText) {
+              throw new Error("No medical details were found in this document.");
+            }
+
+            setMedicalOcrResult(file, extractedText);
+            setShowUploader(false);
+          }}
+        />
+      )}
     </div>
   );
 }
