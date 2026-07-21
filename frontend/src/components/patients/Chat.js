@@ -20,8 +20,8 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [initializing, setInitializing] = useState(true);
-  const [chatEnded, setChatEnded] = useState(true);
-  const [showAllSet, setShowAllSet] = useState(true);
+  const [chatEnded, setChatEnded] = useState(false);
+  const [showAllSet, setShowAllSet] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -103,18 +103,18 @@ export default function Chat() {
   };
 
   const handleSubmit = async () => {
-    setShowAllSet(true);
-    // if (loading || submitting) return;
+    // setShowAllSet(true);
+    if (loading || submitting) return;
 
-    // setSubmitting(true);
-    // try {
-    //   const data = await submitChat(sessionId);
-    //   if (data.success) {
-    //     setShowAllSet(true);
-    //   }
-    // } finally {
-    //   setSubmitting(false);
-    // }
+    setSubmitting(true);
+    try {
+      const data = await submitChat(sessionId);
+      if (data.success) {
+        setShowAllSet(true);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const hasMessages = messages.length > 0;
@@ -250,7 +250,7 @@ export default function Chat() {
               )}
             </div>
 
-            {showAllSet && <AllSet onClose={() => setShowAllSet(false)} />}
+            {showAllSet && <AllSet />}
           </div>
         </div>
       </div>

@@ -26,6 +26,7 @@ export default function FileUploader({
   initialFile = null,
   onCancel,
   onImport,
+  onRemove,
 }) {
   const [selectedFile, setSelectedFile] = useState(initialFile);
   const [error, setError] = useState("");
@@ -103,6 +104,7 @@ export default function FileUploader({
     setSelectedFile(null);
     setError("");
     if (fileInputRef.current) fileInputRef.current.value = "";
+    onRemove?.();
   };
 
   if (!isOpen) return null;

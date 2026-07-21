@@ -41,6 +41,17 @@ const useIntakeStore = create((set, get) => ({
   initSession: (sessionId, patientType, screens) =>
     set({ sessionId, patientType, screens, currentIndex: 0 }),
 
+  updatePatientFlow: (patientType, screens) =>
+    set((state) => {
+      const currentScreen = state.screens[state.currentIndex];
+      const nextIndex = screens.indexOf(currentScreen);
+      return {
+        patientType,
+        screens,
+        currentIndex: nextIndex >= 0 ? nextIndex : 0,
+      };
+    }),
+
   goNext: () =>
     set((state) => ({
       currentIndex: Math.min(state.currentIndex + 1, state.screens.length - 1), // To prevent going beyond the last screen

@@ -63,6 +63,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     uploadedPersonalFile,
     sessionId,
     setPersonalOcrResult,
+    clearPersonalOcrResult,
   } = useIntakeStore();
 
   console.log("store data.personal:", storeData.personal);
@@ -106,25 +107,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   useEffect(() => {
     // SCENARIO 1: Explicit File Removal or Viewing an empty manual form
     if (!ocrPersonalText && !uploadedPersonalFile) {
-      const hasStoreData =
-        storeData.personal && Object.values(storeData.personal).some(Boolean);
-
-      if (hasStoreData) {
-        setFormData({
-          firstName: storeData.personal.first_name ?? "",
-          lastName: storeData.personal.last_name ?? "",
-          dateOfBirth: storeData.personal.date_of_birth ?? "",
-          gender: storeData.personal.gender ?? "Male",
-          phoneNumber: storeData.personal.phone ?? "",
-          emailAddress: storeData.personal.email ?? "",
-          homeAddress: storeData.personal.address ?? "",
-          emergencyContactName: storeData.personal.emergency_contact_name ?? "",
-          emergencyContactNumber:
-            storeData.personal.emergency_contact_number ?? "",
-        });
-      } else {
-        setFormData(EMPTY_FORM);
-      }
+      // The initial state already contains any stored personal data. When an
+      // uploaded file is removed, keep the remaining manually entered values.
       return;
     }
 
@@ -138,21 +122,22 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
         status,
       );
 
-      // Merge: OCR data takes priority, but preserve manual store fields if OCR missed them
-      setFormData({
-        firstName: ocrData.firstName || storeData.personal?.first_name || "",
-        lastName: ocrData.lastName || storeData.personal?.last_name || "",
-        dateOfBirth:
-          ocrData.dateOfBirth || storeData.personal?.date_of_birth || "",
-        gender: ocrData.gender || storeData.personal?.gender || "Male",
-        phoneNumber: ocrData.phoneNumber || storeData.personal?.phone || "",
-        emailAddress: ocrData.emailAddress || storeData.personal?.email || "",
-        homeAddress: ocrData.homeAddress || storeData.personal?.address || "",
-        // These fields typically don't exist on standard ID docs, so preserve manual entry safely
-        emergencyContactName: storeData.personal?.emergency_contact_name || "",
+      // New OCR values take priority. If the document does not contain a
+      // field, retain the value currently in the form (including manual input).
+      setFormData((currentFormData) => ({
+        firstName: ocrData.firstName || currentFormData.firstName,
+        lastName: ocrData.lastName || currentFormData.lastName,
+        dateOfBirth: ocrData.dateOfBirth || currentFormData.dateOfBirth,
+        gender: ocrData.gender || currentFormData.gender,
+        phoneNumber: ocrData.phoneNumber || currentFormData.phoneNumber,
+        emailAddress: ocrData.emailAddress || currentFormData.emailAddress,
+        homeAddress: ocrData.homeAddress || currentFormData.homeAddress,
+        emergencyContactName:
+          ocrData.emergencyContactName || currentFormData.emergencyContactName,
         emergencyContactNumber:
-          storeData.personal?.emergency_contact_number || "",
-      });
+          ocrData.emergencyContactNumber ||
+          currentFormData.emergencyContactNumber,
+      }));
       return;
     }
 
@@ -191,6 +176,21 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
       [field]: value,
     }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const handleRemovePersonalFile = () => {
+    const { data: ocrData } = extractPersonalDetails(ocrPersonalText);
+
+    setFormData((currentFormData) =>
+      Object.fromEntries(
+        Object.entries(currentFormData).map(([field, value]) => [
+          field,
+          ocrData[field] && value === ocrData[field] ? EMPTY_FORM[field] : value,
+        ]),
+      ),
+    );
+    clearPersonalOcrResult();
+    setErrors({});
   };
 
   const validatePhone = (value) => {
@@ -577,6 +577,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
           uploadText="Identity Document"
           uploadSubtext="Passport, National ID, or Driver's License"
           onCancel={() => setShowUploader(false)}
+          onRemove={handleRemovePersonalFile}
           onImport={async (file) => {
             const data = await ocrPersonalId(sessionId, file);
 

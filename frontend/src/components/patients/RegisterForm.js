@@ -12,7 +12,12 @@ export default function RegisterForm() {
 
   const handleRegisterSuccess = async (userId) => {
     // localStorage.setItem("user_token", token);
-    const data = await createSession("new", userId, "doc-123", "apt-456");
+    const data = await createSession(
+      "pending",
+      userId,
+      "doc-123",
+      "apt-456",
+    );
     if (data.success) {
       initSession(data.session_id, data.patient_type, data.screens);
       goNext();

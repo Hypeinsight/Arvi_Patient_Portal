@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, {useState} from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProgressSteps from "@/components/ProgressSteps";
 import { Check } from "lucide-react";
@@ -13,6 +13,7 @@ import { createSummary } from "@/lib/api/summary";
 
 export default function ReviewAndSubmit({ onNext, onBack }) {
   const { formData, patientType, sessionId } = useIntakeStore();
+  const [loading, setLoading] = useState(false);
   console.log("ReviewAndSubmit formData:", formData);
 
   const handlePrevious = () => {
@@ -22,7 +23,9 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
 
   const handleNext = async () => {
     console.log("Navigate to next step");
+    setLoading(true);
     const data = await createSummary(sessionId);
+    setLoading(false);
     if (data.success) {
       onNext();
     }
@@ -131,6 +134,7 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
                 onBack={handlePrevious}
                 onNext={handleNext}
                 nextText="Chat"
+                loading={loading}
               />
             </div>
           </div>

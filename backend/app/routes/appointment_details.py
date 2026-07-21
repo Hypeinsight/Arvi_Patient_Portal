@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.extensions import db
 from app.models.appointment import AppointmentDetails
 from app.models.session import IntakeSession
+from app.services.flow import get_screen_order
 
 appointment_details_bp = Blueprint("appointment_details", __name__)
 
@@ -30,8 +31,10 @@ def _appointment_type_from_body(body):
 def _appointment_type_error(session, appointment_type):
     if appointment_type not in VALID_APPOINTMENT_TYPES:
         return "Invalid appointment type"
-    if session.patient_type == "new" and appointment_type != "new":
+    if session.is_new_account and appointment_type != "new":
         return "You don't have an account"
+    if not session.is_new_account and appointment_type == "new":
+        return "You already have an account"
     return None
 
 
@@ -59,6 +62,7 @@ def create_appointment_details(session_id):
     )
 
     try:
+        session.patient_type = appointment_type
         db.session.add(appointment)
         db.session.commit()
     except SQLAlchemyError as exc:
@@ -68,6 +72,8 @@ def create_appointment_details(session_id):
     return jsonify({
         "success": True,
         "appointment_details": _appointment_to_dict(appointment),
+        "patient_type": session.patient_type,
+        "screens": get_screen_order(session.patient_type),
     }), 201
 
 
@@ -101,6 +107,7 @@ def update_appointment_details(session_id):
         if error := _appointment_type_error(session, appointment_type):
             return jsonify({"success": False, "message": error}), 400
         session.appointment_details.appointment_type = appointment_type
+        session.patient_type = appointment_type
 
     try:
         db.session.commit()
@@ -111,4 +118,6 @@ def update_appointment_details(session_id):
     return jsonify({
         "success": True,
         "appointment_details": _appointment_to_dict(session.appointment_details),
+        "patient_type": session.patient_type,
+        "screens": get_screen_order(session.patient_type),
     }), 200

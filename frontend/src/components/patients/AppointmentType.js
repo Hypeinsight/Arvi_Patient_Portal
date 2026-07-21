@@ -14,7 +14,13 @@ import Image from "next/image";
 import { toast } from "sonner";
 
 export default function AppointmentType({ onNext }) {
-  const { patientType, formData, clearFormData, sessionId } = useIntakeStore();
+  const {
+    patientType,
+    formData,
+    clearFormData,
+    sessionId,
+    updatePatientFlow,
+  } = useIntakeStore();
   const [loading, setLoading] = useState(false);
 
   const appointmentTypes = [
@@ -51,12 +57,17 @@ export default function AppointmentType({ onNext }) {
 
   const [selectedType, setSelectedType] = useState(
     appointmentTypes.find(
-      (type) => type.patientType === formData.appointment?.type,
+      (type) =>
+        type.patientType ===
+        (formData.appointment?.appointment_type ?? formData.appointment?.type),
     )?.id ?? null,
   );
 
   const handleSelect = async (type) => {  
-    const currentAppointmentType = formData.appointment?.type ?? patientType;
+    const currentAppointmentType =
+      formData.appointment?.appointment_type ??
+      formData.appointment?.type ??
+      patientType;
     
     const payload = {
       appointment_type: type.patientType,
@@ -70,6 +81,8 @@ export default function AppointmentType({ onNext }) {
       toast.error(data.message || "Error selecting type");
       return;
     }
+
+    updatePatientFlow(data.patient_type, data.screens);
     
     setSelectedType(type.id);
     

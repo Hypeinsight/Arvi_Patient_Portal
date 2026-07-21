@@ -10,7 +10,7 @@ from app.services.summariser import build_doctor_summary, summarise_chat_transcr
 
 
 MIN_TURNS = 3
-MAX_TURNS = 8
+MAX_TURNS = 10
 URGENT_BUFFER = 2
 
 

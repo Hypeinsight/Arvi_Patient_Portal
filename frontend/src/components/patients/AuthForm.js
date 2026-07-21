@@ -19,12 +19,10 @@ export default function AuthForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
     if (isRegister && password !== confirmPassword) {
       toast.error("Passwords do not match");
@@ -43,7 +41,7 @@ export default function AuthForm({
       localStorage.setItem("user_token", res.access_token);
       onSuccess?.(res.user.id);
     } else {
-      setError(res.message || "Invalid email or password");
+      toast.error(res.message || "An error occurred. Please try again.");
     }
 
     setLoading(false);
@@ -142,10 +140,6 @@ export default function AuthForm({
               </div>
             )}
           </div>
-
-          {error && (
-            <p className="text-red-500 text-sm mb-3 text-center">{error}</p>
-          )}
 
           {!isRegister && (
             <div className="text-right w-full ">

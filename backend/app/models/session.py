@@ -10,7 +10,7 @@ class IntakeSession(db.Model):
     __tablename__ = "intake_sessions"
     __table_args__ = (
         CheckConstraint(
-            "patient_type IN ('new', 'guest', 'followup_lt12', 'followup_gt12')",
+            "patient_type IN ('pending', 'new', 'guest', 'followup_lt12', 'followup_gt12')",
             name="ck_intake_sessions_patient_type",
         ),
         CheckConstraint(
@@ -31,6 +31,12 @@ class IntakeSession(db.Model):
         nullable=False,
     )
     patient_type = db.Column(db.String(50), nullable=False)
+    is_new_account = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False,
+        server_default=db.false(),
+    )
     status = db.Column(
         db.String(50),
         nullable=False,
@@ -103,6 +109,7 @@ class IntakeSession(db.Model):
             "id": str(self.id),
             "user_id": str(self.user_id),
             "patient_type": self.patient_type,
+            "is_new_account": self.is_new_account,
             "status": self.status,
             "last_activity_at": self.last_activity_at.isoformat(),
             "created_at": self.created_at.isoformat(),

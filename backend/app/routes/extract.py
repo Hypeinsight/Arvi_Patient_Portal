@@ -1,6 +1,6 @@
 import pytesseract
-from pytesseract import Output, TesseractError
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+from pytesseract import Output, TesseractError
 from flask import Blueprint, request, jsonify
 from app.extensions import db
 from app.models.session import IntakeSession
