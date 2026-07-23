@@ -317,9 +317,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
       emergency_contact_number: formData.emergencyContactNumber,
     };
 
-    const data = storeData.personal
-      ? await updatePatientProfile(sessionId, payload)
-      : await createPatientProfile(sessionId, payload);
+    const data = await createPatientProfile(sessionId, payload);
 
     if (data.success) {
       onNext(payload, "personal");

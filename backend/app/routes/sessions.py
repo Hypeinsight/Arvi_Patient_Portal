@@ -126,7 +126,7 @@ def update_session(session_id):
     }), 200
 
 
-@sessions_bp.get("/sessions/<uuid:session_id>/prefill") # TODO: This should be updated to get all the details, not just the personal details. This is a temporary solution to prefill the personal details for returning patients.
+@sessions_bp.get("/sessions/<uuid:session_id>/prefill")
 def prefill_session(session_id):
     current_session = db.session.get(IntakeSession, session_id)
     if not current_session:
@@ -144,6 +144,8 @@ def prefill_session(session_id):
     )
 
     personal = previous_session.patient_profile if previous_session else None
+    medical = previous_session.medical_details if previous_session else None
+    referral = previous_session.referral_details if previous_session else None
 
     return jsonify({
         "success": True,
@@ -163,5 +165,15 @@ def prefill_session(session_id):
                 "emergency_contact_name": personal.emergency_contact_name,
                 "emergency_contact_number": personal.emergency_contact_number,
             } if personal else None,
+            "medical": {
+                "allergies": medical.allergies,
+                "conditions": medical.conditions,
+                "medications": medical.medications,
+                "previous_surgeries": medical.previous_surgeries,
+                "family_history": medical.family_history,
+            } if medical else None,
+            "referral": {
+                "has_referral": referral.has_referral,
+            } if referral else None,
         },
     })

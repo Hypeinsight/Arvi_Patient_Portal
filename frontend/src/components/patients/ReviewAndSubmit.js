@@ -33,13 +33,23 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
 
   const name = formData.personal
     ? `${formData.personal.first_name ?? ""} ${formData.personal.last_name ?? ""}`.trim()
-    : "—";
+    : "_";
+
+  const dob = formData.personal?.date_of_birth
+    ? new Date(formData.personal.date_of_birth).toLocaleDateString()
+    : "_";
+
+  const email = formData.personal?.email ?? "_";
+
+  const phone = formData.personal?.phone ?? "_";
+
+  const address = formData.personal?.address ?? "_";
 
   const appointmentType = formData.appointment?.type
     ? formData.appointment.type
         .replace(/_/g, " ")
         .replace(/\b\w/g, (c) => c.toUpperCase())
-    : "—";
+    : "_";
 
   const accessMethod = patientType === "guest" ? "Guest" : "Account User";
 
@@ -48,7 +58,18 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
       ? "Referral Discount Applied"
       : formData.referral?.has_referral === false
         ? "Standard Fees Apply"
-        : "—";
+        : "_";
+
+  const summary = [
+    { label: "Name", value: name },
+    { label: "Date of Birth", value: dob },
+    { label: "Email", value: email },
+    { label: "Phone", value: phone },
+    { label: "Address", value: address },
+    { label: "Appointment Type", value: appointmentType },
+    { label: "Access Method", value: accessMethod },
+    { label: "Referral", value: referral },
+  ];
 
   return (
     <div className="px-4 md:px-8 lg:px-16">
@@ -79,46 +100,24 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
                 <h3 className="text-lg md:text-xl font-medium text-gray-900 mb-4">
                   Summary
                 </h3>
-                <div className="grid md:grid-cols-2 gap-4 mb-6 font-poppins">
-                  <Card className="bg-blue-50 rounded-[1.125rem] h-20">
-                    <CardContent className="p-4">
-                      <p className="text-base md:text-lg font-medium text-slate mb-1">Name:</p>
-                      <p className="text-sm md:text-base text-slate font-medium capitalize">
-                        {name}
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-blue-50 rounded-[1.125rem] h-20">
-                    <CardContent className="p-4">
-                      <p className="text-base md:text-lg font-medium text-slate mb-1">
-                        Appointment Type:
-                      </p>
-                      <p className="text-sm md:text-base text-slate font-medium capitalize">
-                        {appointmentType}
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-blue-50 rounded-[1.125rem] h-20">
-                    <CardContent className="p-4">
-                      <p className="text-base md:text-lg font-medium text-slate mb-1">
-                        Access Method:
-                      </p>
-                      <p className="text-sm md:text-base text-slate font-medium capitalize">
-                        {accessMethod}
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-blue-50 rounded-[1.125rem] h-20">
-                    <CardContent className="p-4">
-                      <p className="text-base md:text-lg font-medium text-slate mb-1">Referral:</p>
-                      <p className="text-sm md:text-base text-slate font-medium capitalize">
-                        {referral}
-                      </p>
-                    </CardContent>
-                  </Card>
+                <div className="grid md:grid-cols-2 gap-4 mb-6 font-poppins max-h-[30vh] overflow-y-auto scrollbar">
+                  {summary.map((item) => (
+                    <Card
+                      key={item.label}
+                      className="bg-blue-50 rounded-[1.125rem] h-auto"
+                    >
+                      <CardContent className="p-4 flex items-center gap-1">
+                        <p className="text-sm md:text-base font-medium text-slate">
+                          {item.label}:
+                        </p>
+                        <p
+                          className={`text-sm md:text-base text-light-gray font-medium ${item.label == "Email" ? "lowercase" : "capitalize"}`}
+                        >
+                          {item.value.length > 40 ? `${item.value.slice(0,5)}...` : item.value}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
 
                 {/* What happens next card */}

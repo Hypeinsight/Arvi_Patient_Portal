@@ -63,11 +63,7 @@ export default function AppointmentType({ onNext }) {
     )?.id ?? null,
   );
 
-  const handleSelect = async (type) => {  
-    const currentAppointmentType =
-      formData.appointment?.appointment_type ??
-      formData.appointment?.type ??
-      patientType;
+  const handleSelect = async (type) => { 
     
     const payload = {
       appointment_type: type.patientType,
@@ -86,9 +82,6 @@ export default function AppointmentType({ onNext }) {
     
     setSelectedType(type.id);
     
-    if (type.patientType !== currentAppointmentType) {
-      clearFormData();
-    }
     onNext(payload, "appointment");
   };
 

@@ -89,6 +89,17 @@ const useIntakeStore = create((set, get) => ({
 
   clearMedicalOcrResult: () =>
     set({ uploadedMedicalFile: null, ocrMedicalText: null }),
+
+  setPrefillData: (prefill) =>
+    set((state) => ({
+      formData: {
+        ...state.formData,
+        personal: prefill.personal ?? state.formData.personal,
+        medical: prefill.medical ?? state.formData.medical,
+        referral: prefill.referral ?? state.formData.referral,
+      },
+    })),
+
   clearFormData: () =>
     set({
       formData: {

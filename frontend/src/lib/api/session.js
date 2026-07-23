@@ -24,5 +24,14 @@ export async function createSession(
       appointment_id: appointmentId,
     }),
   });
+  const data = await res.json();
+  return data;
+}
+
+export async function prefillSession(sessionId) {
+  const res = await fetch(`${BASE_URL}/sessions/${sessionId}/prefill`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
   return res.json();
 }

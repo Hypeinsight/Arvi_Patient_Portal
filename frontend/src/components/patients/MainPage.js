@@ -8,10 +8,10 @@ import { createSession } from "@/lib/api/session";
 import Title from "@/components/Title";
 import InfoCard from "@/components/InfoCard";
 import AuthForm from "@/components/patients/AuthForm";
-import { X } from "lucide-react";
+import { prefillSession } from "@/lib/api/session";
 
 export default function MainPage({ onNext }) {
-  const { initSession, patientType, clearFormData, sessionId } =
+  const { initSession, patientType, clearFormData, sessionId, setPrefillData } =
     useIntakeStore();
 
   const [selectedMethod, setSelectedMethod] = useState(
@@ -29,21 +29,25 @@ export default function MainPage({ onNext }) {
     setAuthMode("register");
   };
 
-   const handleClose = () => {
+  const handleClose = () => {
     setAuthMode(null);
-  }
+  };
 
   const handleAuthSuccess = async (userId) => {
-    const data = await createSession(
-      "pending",
-      userId,
-      "doc-123",
-      "apt-456",
-    );
+    const data = await createSession("pending", userId, "doc-123", "apt-456");
 
     if (data.success) {
       initSession(data.session_id, data.patient_type, data.screens);
       setAuthMode(null);
+
+      if (authMode == "login") {
+        const prefillData = await prefillSession(data.session_id);
+        console.log("before prefill success");
+        if (prefillData.success && prefillData.prefill) {
+          setPrefillData(prefillData.prefill);
+        }
+      }
+
       onNext();
     }
   };

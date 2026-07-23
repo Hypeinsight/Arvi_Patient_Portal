@@ -34,26 +34,29 @@ def create_referral_details(session_id):
     if not session:
         return jsonify({"success": False, "message": "Session not found"}), 404
 
-    if session.referral_details:
-        return jsonify({"success": False, "message": "Referral details already exist"}), 409
-
     body = request.get_json(silent=True) or {}
-    referral = ReferralDetails(
-        session_id=session.id,
-        **_referral_details_data_from_body(body),
-    )
+    data = _referral_details_data_from_body(body)
 
     try:
-        db.session.add(referral)
+        if session.referral_details:
+            referral = session.referral_details
+            for field, value in data.items():
+                setattr(referral, field, value)
+            status_code = 200
+        else:
+            referral = ReferralDetails(session_id=session.id, **data)
+            db.session.add(referral)
+            status_code = 201
+
         db.session.commit()
-    except SQLAlchemyError as exc:
+    except (SQLAlchemyError, ValueError) as exc:
         db.session.rollback()
         return jsonify({"success": False, "message": str(exc)}), 400
 
     return jsonify({
         "success": True,
         "referral_details": _referral_details_to_dict(referral),
-    }), 201
+    }), status_code
 
 
 @referral_details_bp.get("/sessions/<uuid:session_id>/referral-details")

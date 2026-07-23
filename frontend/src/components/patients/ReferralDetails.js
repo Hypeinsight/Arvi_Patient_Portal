@@ -35,9 +35,7 @@ export default function ReferralDetails({ onNext, onBack }) {
       has_referral: selectedMethod === "yes"
     };
 
-    const data = storeData.referral
-          ? await updateReferralDetails(sessionId, payload)
-          : await createReferralDetails(sessionId, payload);
+    const data = await createReferralDetails(sessionId, payload);
 
     if (data.success) {
       onNext(payload, "referral");

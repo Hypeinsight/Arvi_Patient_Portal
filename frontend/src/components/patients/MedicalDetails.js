@@ -184,9 +184,7 @@ export default function MedicalDetails({ onNext, onBack }) {
       family_history: formData.familyMedicalHistory,
     };
 
-    const data = storeData.medical
-      ? await updateMedicalDetails(sessionId, payload)
-      : await createMedicalDetails(sessionId, payload);
+    const data = await createMedicalDetails(sessionId, payload);
 
     if (data.success) {
       onNext(payload, "medical");
