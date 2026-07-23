@@ -19,7 +19,7 @@ def _fmt_list(values: list) -> str:
     return ", ".join(str(v) for v in values if v)
 
 
-def build_chat_system_prompt(form_data: dict) -> str:
+def build_chat_system_prompt(form_data: dict, previous_summary: str | None = None, patient_type: str | None = None ) -> str:
     p = form_data.get("personal") or {}
     m = form_data.get("medical") or {}
 
@@ -32,6 +32,32 @@ def build_chat_system_prompt(form_data: dict) -> str:
     allergies    = _fmt_list(m.get("allergies", []))
     surgeries    = m.get("previous_surgeries") or "None reported"
     family_hx    = m.get("family_history") or "None reported"
+
+    # Build the follow-up context section, only included when relevant
+    follow_up_section = ""
+    if previous_summary:
+        if patient_type == "follow_up_recent":
+            framing = (
+                "This patient was seen recently (within the last 12 months). "
+                "Reference their previous visit naturally where relevant — e.g. "
+                "ask whether something mentioned last time has changed or resolved."
+            )
+        elif patient_type == "follow_up_overdue":
+            framing = (
+                "It has been over 12 months since this patient's last visit. "
+                "Reference their previous visit more broadly — things may have "
+                "changed significantly, so check in on past issues rather than "
+                "assuming continuity."
+            )
+        else:
+            framing = "This patient has a previous visit on record. Reference it where relevant."
+
+        follow_up_section = f"""
+            PREVIOUS VISIT SUMMARY:
+            {previous_summary}
+
+            {framing}
+            """
 
     return f"""You are a clinical intake assistant for a medical clinic.
             A patient has completed a pre-appointment intake form. Your role is to have a brief, 
@@ -48,6 +74,7 @@ def build_chat_system_prompt(form_data: dict) -> str:
             - Allergies:        {allergies}
             - Previous surgeries: {surgeries}
             - Family history:   {family_hx}
+            {follow_up_section}
 
             INSTRUCTIONS:
             - Ask one question at a time — do not overwhelm the patient
@@ -91,4 +118,4 @@ def build_chat_system_prompt(form_data: dict) -> str:
             Do not include any text outside this JSON object. Do not use markdown code fences.
 
             Begin by greeting the patient warmly and asking your first most important clarifying question 
-            based on the medical history above."""
+            based on the medical history above{" and their previous visit" if previous_summary else ""}."""

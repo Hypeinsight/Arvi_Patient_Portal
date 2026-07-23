@@ -28,7 +28,8 @@ export default function NavigationButtons({
           <button
             type="button"
             onClick={onBack}
-            className="font-poppins w-full xs:w-[125px] xl:w-[145px] 2xl:w-[180px] px-2 sm:px-4 h-full text-blue-600 bg-white rounded-lg xs:rounded-xl cursor-pointer hover:bg-blue-50 flex items-center justify-center gap-2 transition-all duration-200 text-xs sm:text-sm font-medium"
+            disabled={loading}
+            className={`font-poppins w-full xs:w-[125px] xl:w-[145px] 2xl:w-[180px] px-2 sm:px-4 h-full text-blue-600 bg-white rounded-lg xs:rounded-xl hover:bg-blue-50 flex items-center justify-center gap-2 transition-all duration-200 text-xs sm:text-sm font-medium ${loading ? "cursor-not-allowed" : "cursor-pointer"}`}
           >
             <Play className="w-4 h-4 -scale-x-100" fill="#032b4a" />
             {backText}
@@ -38,7 +39,7 @@ export default function NavigationButtons({
         <Button
           type="button"
           onClick={onNext}
-          disabled={isNextDisabled}
+          disabled={isNextDisabled || loading}
           className={`font-poppins hover:opacity-90 disabled:opacity-50 disabled:from-gray-400 disabled:to-gray-500 w-full xs:w-[125px] xl:w-[145px] 2xl:w-[180px] px-2 sm:px-4 h-9 xs:h-11 rounded-lg xs:rounded-xl flex items-center justify-center gap-2 text-white text-xs sm:text-sm font-medium transition-all duration-200 bg-gradient-to-tr from-[#032B4A] to-[#0575E6] ${isNextDisabled || loading ? "cursor-not-allowed" : "cursor-pointer"}`}
         >
           {loading ? (

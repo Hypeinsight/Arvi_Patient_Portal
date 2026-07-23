@@ -143,6 +143,7 @@ export default function ReferralDetails({ onNext, onBack }) {
               <NavigationButtons
                 onBack={handlePrevious}
                 onNext={handleNext}
+                isNextDisabled={!selectedMethod}
               />
             </div>
           </div>

@@ -104,9 +104,17 @@ def prepare_summary(session_id):
 
     form_data = session_form_data(session)
 
+    previous_summary = (
+        Summary.query
+        .filter(Summary.user_id == session.user_id, Summary.session_id != session.id)
+        .order_by(Summary.created_at.desc())
+        .first()
+    )
+
     summary_text = build_doctor_summary(
         session=session,
         form_data=form_data,
+        previous_summary=previous_summary.summary_text if previous_summary else None,
     )
 
     try:
@@ -121,7 +129,11 @@ def prepare_summary(session_id):
             ))
         db.session.commit()
 
-        system_prompt = build_chat_system_prompt(form_data)
+        system_prompt = build_chat_system_prompt(
+            form_data, 
+            previous_summary=previous_summary.summary_text if previous_summary else None, 
+            patient_type=session.patient_type
+        )
         init_chat_cache(str(session_id), system_prompt)
     except SQLAlchemyError as exc:
         db.session.rollback()

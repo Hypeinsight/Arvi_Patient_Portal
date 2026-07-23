@@ -194,7 +194,7 @@ export default function MedicalDetails({ onNext, onBack }) {
   };
 
   const textareaClass = (field) =>
-    `w-full px-4 py-3 font-poppins text-sm border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 placeholder-gray-300 ${
+    `w-full px-4 py-3 font-poppins no-scrollbar text-sm border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 placeholder-gray-300 ${
       errors[field] ? "border-red-500" : "border-gray-300"
     }`;
 

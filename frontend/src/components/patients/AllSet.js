@@ -6,7 +6,7 @@ import Image from "next/image";
 import useIntakeStore from "@/lib/intakeStore";
 import { useRouter } from "next/navigation";
 
-export default function AllSet() {
+export default function AllSet({ onClose }) {
   const {reset} = useIntakeStore();
   const router = useRouter();
 
@@ -74,8 +74,8 @@ export default function AllSet() {
 
         <button
           type="button"
-          onClick={handleClose}
-          // onClick={onClose}
+          // onClick={handleClose}
+          onClick={onClose}
           aria-label="Close uploader"
           className="absolute right-4 md:right-6 top-4 md:top-6 rounded-sm xs:rounded-lg bg-[#ff0000] p-0.25 xs:p-1 cursor-pointer text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
         >

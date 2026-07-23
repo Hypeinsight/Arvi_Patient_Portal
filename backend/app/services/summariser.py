@@ -61,6 +61,7 @@ def build_doctor_summary(
     session,
     form_data: dict,
     chat_notes: str | None = None,
+    previous_summary: str | None = None,
 ) -> str:
     lines = []
 
@@ -79,6 +80,16 @@ def build_doctor_summary(
         f"Appointment Type: {a.get('appointment_type') or 'Not specified'}",
         "",
     ]
+
+     # Follow-up notice, only shown when there's a previous visit
+    if previous_summary:
+        lines += [
+            _divider(),
+            "FOLLOW-UP VISIT — PREVIOUS SUMMARY ON FILE",
+            _divider(),
+            previous_summary,
+            "",
+        ]
 
     # Patient details
     dob = p.get("date_of_birth")

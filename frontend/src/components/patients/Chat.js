@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import bgImg from "../../../public/bgImage1.png";
-import { SendHorizontal, SkipForward, Check } from "lucide-react";
+import { SendHorizontal, SkipForward, Check, Loader2 } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import {
   fetchChatHistory,
@@ -102,6 +102,12 @@ export default function Chat() {
     }
   };
 
+  // TODO: Remove this after the test
+  const handleClose = () => {
+    setShowAllSet(false);
+    setChatEnded(false);
+  };
+
   const handleSubmit = async () => {
     // setShowAllSet(true);
     if (loading || submitting) return;
@@ -109,6 +115,7 @@ export default function Chat() {
     setSubmitting(true);
     try {
       const data = await submitChat(sessionId);
+
       if (data.success) {
         setShowAllSet(true);
       }
@@ -133,22 +140,28 @@ export default function Chat() {
             <button
               onClick={handleSubmit}
               disabled={loading || submitting}
-              className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] bg-clip-text text-transparent border border-[#0575E6] rounded-lg xs:rounded-xl py-1 px-2 xs:p-2 sm:px-4 sm:py-2 text-sm flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity duration-500 ease-in-out"
+              className="h-[30px] xs:h-[38px] w-[80px] xl:w-[100px] justify-center bg-gradient-to-tr from-[#032B4A] to-[#0575E6] bg-clip-text text-transparent border border-[#0575E6] rounded-lg xs:rounded-xl py-1 px-2 xs:p-2 sm:px-4 sm:py-2 text-sm flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity duration-500 ease-in-out"
             >
-              <span className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] bg-transparent bg-clip-text">
-                Skip
-              </span>
-              <SkipForward
-                size={15}
-                className="text-[#032B4A]"
-                fill="#032B4A"
-              />
+              {submitting ? (
+                <Loader2 className="w-4 h-4 animate-spin text-[#032B4A]" />
+              ) : (
+                <>
+                  <span className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] bg-transparent bg-clip-text">
+                    Skip
+                  </span>
+                  <SkipForward
+                    size={15}
+                    className="text-[#032B4A]"
+                    fill="#032B4A"
+                  />
+                </>
+              )}
             </button>
           )}
         </div>
 
         {/* White box fills remaining space */}
-        <div className="bg-white rounded-[2.25rem] p-4 sm:p-10 flex-1 flex flex-col border border-gray-200 min-h-[80vh] max-h-[80vh]">
+        <div className="bg-white rounded-[2.25rem] p-4 sm:p-10 flex-1 flex flex-col border border-gray-200 min-h-[85vh] max-h-[85vh]">
           <div className="border-2 border-[#0575E63D] rounded-[2.25rem] flex-1 flex flex-col relative overflow-hidden">
             {!hasMessages && !initializing && (
               <div className="flex-1 flex flex-col items-center justify-center relative">
@@ -181,7 +194,7 @@ export default function Chat() {
 
             {/* Message list — shown once chat starts */}
             {hasMessages && (
-              <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 sm:px-8 py-6 flex flex-col gap-4">
+              <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 sm:px-8 py-6 flex flex-col gap-4 ">
                 {messages.map((msg, i) => (
                   <div
                     key={i}
@@ -225,6 +238,7 @@ export default function Chat() {
                   buttonClassName="flex-row-reverse !px-5"
                   buttonDisabled={loading || submitting}
                   onClick={handleSubmit}
+                  loading={submitting}
                 />
               ) : (
                 <div className="relative flex items-end gap-2 bg-[#0575E614] rounded-lg px-2 sm:px-3 py-2.5 sm:py-[18px] max-w-[940px] mx-auto">
@@ -250,7 +264,8 @@ export default function Chat() {
               )}
             </div>
 
-            {showAllSet && <AllSet />}
+            {/* TODO: Remove onClose after the test */}
+            {showAllSet && <AllSet onClose={handleClose} />}
           </div>
         </div>
       </div>
