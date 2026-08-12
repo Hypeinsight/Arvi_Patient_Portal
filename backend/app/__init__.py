@@ -27,6 +27,8 @@ def create_app():
 
     # Register blueprints
     from app.routes.appointment_details import appointment_details_bp
+    from app.routes.clinic_details import clinic_details_bp
+    from app.routes.clinics import clinics_bp
     from app.routes.consent_records import consent_records_bp
     from app.routes.medical_details import medical_details_bp
     from app.routes.patient_profiles import patient_profiles_bp
@@ -37,6 +39,8 @@ def create_app():
     from app.routes.chat import chat_bp
 
     app.register_blueprint(appointment_details_bp, url_prefix="/api")
+    app.register_blueprint(clinic_details_bp, url_prefix="/api")
+    app.register_blueprint(clinics_bp, url_prefix="/api")
     app.register_blueprint(consent_records_bp, url_prefix="/api")
     app.register_blueprint(medical_details_bp, url_prefix="/api")
     app.register_blueprint(patient_profiles_bp, url_prefix="/api")

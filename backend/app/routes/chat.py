@@ -1,5 +1,7 @@
 import json
+from datetime import datetime, timezone
 
+import requests
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from app.extensions import db
@@ -9,6 +11,7 @@ from app.services.azure_openai import call_chat_model
 from app.models.chat_messages import ChatMessage
 from app.utils.session_helpers import _chat_message_to_dict
 from app.models.summaries import Summary
+from app.services.doctor_api import send_to_doctor
 from app.services.prompt_builder import build_chat_system_prompt
 from app.services.session_data import session_form_data
 from app.services.summariser import build_doctor_summary
@@ -165,6 +168,57 @@ def flush_chat_messages(session_id):
     except SQLAlchemyError as exc:
         return jsonify({"success": False, "message": str(exc)}), 400
 
+    if not summary_text:
+        return jsonify({"success": False, "message": "Summary not ready yet. Please try again."}), 400
+
+    # Already delivered to ARVI in a previous call to this endpoint — don't resend.
+    if session.summary and session.summary.sent_at:
+        return jsonify({
+            "success": True,
+            "source": source,
+            "persisted_count": len(chat_messages),
+            "chat_messages": chat_messages,
+            "summary": summary_text,
+        }), 200
+
+    clinic = session.clinic_details
+    patient = session.patient_profile
+    if not clinic or not patient:
+        return jsonify({"success": False, "message": "Clinic and personal details are required before submitting."}), 400
+
+    try:
+        send_to_doctor(
+            org_id=clinic.clinic_org_id,
+            doctor_id=clinic.doctor_id,
+            first_name=patient.first_name,
+            last_name=patient.last_name,
+            date_of_birth=patient.date_of_birth.isoformat() if patient.date_of_birth else None,
+            gender=patient.gender,
+            phone=patient.phone,
+            email=patient.email,
+            summary=summary_text,
+        )
+    except requests.RequestException:
+        # Messages/summary are already persisted above, so a retry of this
+        # endpoint won't lose the transcript — it'll just retry delivery.
+        return jsonify({
+            "success": False,
+            "message": "Could not deliver your intake to the clinic. Please try submitting again.",
+            "source": source,
+            "persisted_count": len(chat_messages),
+        }), 502
+
+    try:
+        if not session.summary:
+            session.summary = Summary(session_id=session.id, user_id=session.user_id, summary_text=summary_text)
+        session.summary.sent_at = datetime.now(timezone.utc)
+        session.status = "submitted"
+        session.submitted_at = datetime.now(timezone.utc)
+        db.session.commit()
+    except SQLAlchemyError as exc:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(exc)}), 500
+
     return jsonify({
         "success": True,
         "source": source,
@@ -172,50 +226,3 @@ def flush_chat_messages(session_id):
         "chat_messages": chat_messages,
         "summary": summary_text,
     }), 201 if source == "database" and cached_messages else 200
-
-    # Delete cached messages if the messages are persisted
-    # if existing_messages:
-    #     delete_cached_messages(session_id)
-    #     return jsonify({
-    #         "success": True,
-    #         "source": "database",
-    #         "persisted_count": len(existing_messages),
-    #         "chat_messages": [_chat_message_to_dict(message) for message in existing_messages],
-    #     }), 200
-
-    # cached_messages = get_cached_messages(session_id)
-    # if not cached_messages:
-    #     return jsonify({
-    #         "success": True,
-    #         "source": "redis",
-    #         "persisted_count": 0,
-    #         "chat_messages": [],
-    #     }), 200
-
-    # chat_messages = [
-    #     ChatMessage(
-    #         session_id=session.id,
-    #         role=message["role"],
-    #         content=message["content"],
-    #         created_at=_parse_datetime(message.get("created_at")),
-    #     )
-    #     for message in cached_messages
-    #     if message.get("role") in VALID_ROLES and message.get("content")
-    # ]
-
-    # # Bulk save if there are messages in chat
-    # try:
-    #     db.session.bulk_save_objects(chat_messages)
-    #     db.session.commit()
-    #     delete_cached_messages(session_id)
-    # except SQLAlchemyError as exc:
-    #     db.session.rollback()
-    #     refresh_cached_messages(session_id, cached_messages)
-    #     return jsonify({"success": False, "message": str(exc)}), 400
-
-    # return jsonify({
-    #     "success": True,
-    #     "source": "database",
-    #     "persisted_count": len(chat_messages),
-    #     "chat_messages": cached_messages,
-    # }), 201

@@ -1,5 +1,6 @@
 from .appointment import AppointmentDetails
 from .chat_messages import ChatMessage
+from .clinic_details import ClinicDetails
 from .consent import ConsentRecord
 from .medical_details import MedicalDetails
 from .patient_details import PatientProfile

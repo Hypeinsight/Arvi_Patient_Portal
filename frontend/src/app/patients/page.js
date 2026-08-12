@@ -9,6 +9,7 @@ import RegisterForm from "@/components/patients/RegisterForm";
 import AppointmentType from "@/components/patients/AppointmentType";
 import PrivacyConsent from "@/components/patients/PrivacyConsent";
 import PersonalDetails from "@/components/patients/PersonalDetails";
+import ClinicDetails from "@/components/patients/ClinicDetails";
 import MedicalDetails from "@/components/patients/MedicalDetails";
 import ReferralDetails from "@/components/patients/ReferralDetails";
 import ReviewAndSubmit from "@/components/patients/ReviewAndSubmit";
@@ -23,6 +24,7 @@ const SCREEN_MAP = {
   // account_setup: AccountSetup,
   // upload_personal_details: UploadPersonalDetails,
   personal_details: PersonalDetails,
+  clinic_details: ClinicDetails,
   // upload_medical_details: UploadMedicalDetails,
   medical_details: MedicalDetails,
   referral_details: ReferralDetails,

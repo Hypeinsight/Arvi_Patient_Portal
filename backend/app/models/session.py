@@ -76,6 +76,12 @@ class IntakeSession(db.Model):
         cascade="all, delete-orphan",
         uselist=False,
     )
+    clinic_details = db.relationship(
+        "ClinicDetails",
+        backref="session",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
     medical_details = db.relationship(
         "MedicalDetails",
         backref="session",

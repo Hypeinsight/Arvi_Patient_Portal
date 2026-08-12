@@ -8,6 +8,7 @@ const SCREEN_LABELS = {
   account_setup: "Account Setup",
   upload_personal_details: "Upload Personal Details",
   personal_details: "Personal Details",
+  clinic_details: "Clinic Details",
   upload_medical_details: "Upload Medical Details",
   medical_details: "Medical Details",
   referral_details: "Referral Details",

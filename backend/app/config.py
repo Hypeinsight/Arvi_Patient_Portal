@@ -9,8 +9,9 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_CONTENT_LENGTH             = 20 * 1024 * 1024   # 20 MB
     STORAGE_BUCKET                 = os.getenv("STORAGE_BUCKET")
-    DOCTOR_API_URL                 = os.getenv("DOCTOR_API_URL")
-    DOCTOR_API_KEY                 = os.getenv("DOCTOR_API_KEY")
+    # Shared ARVI platform endpoint — backs clinic/doctor search and the intake submission API
+    ARVI_API_URL                   = os.getenv("ARVI_API_URL", "http://localhost:5000")
+    ARVI_API_KEY                   = os.getenv("ARVI_API_KEY")
     JWT_SECRET_KEY                 = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret")
     REDIS_URL                      = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 

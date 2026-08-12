@@ -3,6 +3,7 @@ from datetime import date, datetime, timezone
 from app.extensions import db
 from app.models.appointment import AppointmentDetails
 from app.models.chat_messages import ChatMessage
+from app.models.clinic_details import ClinicDetails
 from app.models.consent import ConsentRecord
 from app.models.medical_details import MedicalDetails
 from app.models.patient_details import PatientProfile
@@ -80,6 +81,19 @@ def update_session_sections(session, payload):
             },
         )
 
+    if clinic := payload.get("clinic"):
+        _upsert_one(
+            session,
+            "clinic_details",
+            ClinicDetails,
+            {
+                "clinic_org_id": clinic.get("clinic_org_id"),
+                "clinic_name": clinic.get("clinic_name"),
+                "doctor_id": clinic.get("doctor_id"),
+                "doctor_name": clinic.get("doctor_name"),
+            },
+        )
+
     if medical := payload.get("medical"):
         _upsert_one(
             session,
@@ -133,6 +147,7 @@ def session_form_data(session):
         "appointment": _appointment_to_dict(session.appointment_details),
         "consent": _consent_to_dict(session.consent_record),
         "personal": _patient_to_dict(session.patient_profile),
+        "clinic": _clinic_to_dict(session.clinic_details),
         "medical": _medical_to_dict(session.medical_details),
         "referral": _referral_to_dict(session.referral_details),
     }
@@ -189,6 +204,20 @@ def _patient_to_dict(record):
         "address": record.address,
         "emergency_contact_name": record.emergency_contact_name,
         "emergency_contact_number": record.emergency_contact_number,
+        "created_at": _iso(record.created_at),
+        "updated_at": _iso(record.updated_at),
+    }
+
+
+def _clinic_to_dict(record):
+    if not record:
+        return None
+    return {
+        "id": str(record.id),
+        "clinic_org_id": record.clinic_org_id,
+        "clinic_name": record.clinic_name,
+        "doctor_id": record.doctor_id,
+        "doctor_name": record.doctor_name,
         "created_at": _iso(record.created_at),
         "updated_at": _iso(record.updated_at),
     }
