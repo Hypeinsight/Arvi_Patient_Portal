@@ -100,6 +100,14 @@ NEXT_PUBLIC_API_URL=http://127.0.0.1:5000/api
 
 ---
 
-### Known gap
+### Inspecting chat sessions in RedisInsight
 
-`backend/.env.example` is out of date — it still has the pre-Docker `DATABASE_URL` (port 5432, user `user`/`password`) and is missing `REDIS_URL` and the `AZURE_OPENAI_*` keys entirely. Following it literally will connect to nothing. Use the `.env` block in Step 3 above instead of the committed example.
+Chat state (system prompt, message history, turn count) is cached in Redis under `chat:<session_id>`, with a 2-hour TTL, so you can watch it live while testing the chat flow.
+
+1. With `docker compose up -d` running, open `http://localhost:5540`.
+2. Click **Add Redis Database**.
+3. Connect using the Docker service name, not the host-mapped port — RedisInsight reaches Redis over the internal Docker network:
+   - **Host:** `redis`
+   - **Port:** `6379`
+   - Leave username/password blank (no auth is configured locally).
+4. Once connected, use the key browser and filter by pattern `chat:*` to find the active session. Select a key to view its JSON value — `messages` is the running conversation, `turn_count` tracks how many turns have happened.
