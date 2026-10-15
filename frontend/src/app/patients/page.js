@@ -10,7 +10,6 @@ import AppointmentType from "@/components/patients/AppointmentType";
 import PrivacyConsent from "@/components/patients/PrivacyConsent";
 import PersonalDetails from "@/components/patients/PersonalDetails";
 import MedicalDetails from "@/components/patients/MedicalDetails";
-import ReferralDetails from "@/components/patients/ReferralDetails";
 import ReviewAndSubmit from "@/components/patients/ReviewAndSubmit";
 import Chat from "@/components/patients/Chat";
 import { useRouter } from "next/navigation";
@@ -25,7 +24,6 @@ const SCREEN_MAP = {
   personal_details: PersonalDetails,
   // upload_medical_details: UploadMedicalDetails,
   medical_details: MedicalDetails,
-  referral_details: ReferralDetails,
   review_submit: ReviewAndSubmit,
   chat: Chat,
 };

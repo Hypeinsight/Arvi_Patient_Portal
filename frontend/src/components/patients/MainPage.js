@@ -37,7 +37,7 @@ export default function MainPage({ onNext }) {
     const data = await createSession("pending", userId, "doc-123", "apt-456");
 
     if (data.success) {
-      initSession(data.session_id, data.patient_type, data.screens);
+      initSession(data.session_id, data.patient_type, data.screens, data.is_new_account);
       setAuthMode(null);
 
       if (authMode == "login") {
@@ -67,14 +67,14 @@ export default function MainPage({ onNext }) {
     // const data = await createSession(newPatientType, "doc-123", "apt-456");
 
     // if (data.success) {
-    //   initSession(data.session_id, data.patient_type, data.screens);
+    //   initSession(data.session_id, data.patient_type, data.screens, data.is_new_account);
     //   onNext(); // no data to save for this screen, just advance
     // }
 
     if (newPatientType !== patientType || !sessionId) {
       const data = await createSession(newPatientType, null, "doc-123", "apt-456");
       if (data.success) {
-        initSession(data.session_id, data.patient_type, data.screens);
+        initSession(data.session_id, data.patient_type, data.screens, data.is_new_account);
       } else {
         setLoading(false);
         return;

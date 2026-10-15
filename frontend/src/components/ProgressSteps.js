@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 
 const SCREEN_LABELS = {
@@ -10,7 +11,6 @@ const SCREEN_LABELS = {
   personal_details: "Personal Details",
   upload_medical_details: "Upload Medical Details",
   medical_details: "Medical Details",
-  referral_details: "Referral Details",
   review_submit: "Review & Submit",
 };
 
@@ -20,6 +20,8 @@ const NON_PROGRESS_SCREENS = new Set([
   "chat",
   "all_set",
 ]);
+
+const BRAND_GRADIENT = "linear-gradient(135deg, #0575E6, #021B79)";
 
 const formatScreenLabel = (screen) =>
   SCREEN_LABELS[screen] ??
@@ -39,70 +41,73 @@ export default function ProgressSteps() {
   if (!progressScreens.length) return null;
 
   return (
-    <div className="flex items-center bg-blue-100/70 rounded-full px-0 py-0 shadow-sm relative z-0">
-      <div className="w-full overflow-auto no-scrollbar">
-        <div className="flex items-center justify-between gap-2">
-          {progressScreens.map((screen, index) => {
-            const stepNumber = index + 1;
-            const screenIndex = screens.indexOf(screen);
-            const isCurrent = screen === currentScreen;
-            const isCompleted = screenIndex < currentScreenIndex;
-            const isActive = isCurrent || isCompleted;
+    <nav
+      aria-label="Intake progress"
+      className="bg-white/70 rounded-3xl px-2 sm:px-4 py-4 shadow-sm"
+    >
+      <ol className="flex items-start">
+        {progressScreens.map((screen, index) => {
+          const screenIndex = screens.indexOf(screen);
+          const isCurrent = screen === currentScreen;
+          const isCompleted = screenIndex < currentScreenIndex;
+          const isLast = index === progressScreens.length - 1;
 
-            return (
-              <div className="flex items-center" key={screen}>
+          return (
+            <li
+              key={screen}
+              className="relative flex-1 flex flex-col items-center"
+              aria-current={isCurrent ? "step" : undefined}
+            >
+              {/* Connector to the next step */}
+              {!isLast && (
                 <div
-                  className={`flex items-center px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? "bg-transparent border hover:border-blue-300"
-                      : "bg-transparent"
-                  }`}
-                  style={{
-                    background: "transparent",
-                    borderColor: "#0575E6",
-                  }}
+                  className="absolute top-4 left-1/2 w-full h-0.5 bg-blue-100"
+                  aria-hidden="true"
                 >
                   <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2 ${
-                      isActive ? "text-white" : "border"
-                    }`}
-                    style={
-                      isActive
-                        ? {
-                            background:
-                              "linear-gradient(135deg, #0575E6, #021B79)",
-                          }
-                        : {
-                            background: "transparent",
-                            borderColor: "#0575E6",
-                            borderWidth: "2px",
-                            color: "#0575E6",
-                          }
-                    }
-                  >
-                    {isCompleted ? "✓" : stepNumber}
-                  </div>
-                  <span
-                    className="whitespace-nowrap"
+                    className="h-full transition-all duration-300"
                     style={{
-                      background:
-                        "linear-gradient(135deg, #0575E6, #021B79)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
+                      width: isCompleted ? "100%" : "0%",
+                      background: BRAND_GRADIENT,
                     }}
-                  >
-                    {formatScreenLabel(screen)}
-                  </span>
+                  />
                 </div>
-                {index < progressScreens.length - 1 && (
-                  <div className="w-8 h-px mx-2" />
-                )}
+              )}
+
+              {/* Step marker */}
+              <div
+                className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
+                  isCurrent
+                    ? "text-white ring-4 ring-blue-100"
+                    : isCompleted
+                      ? "text-white"
+                      : "bg-white border-2 border-blue-200 text-blue-300"
+                }`}
+                style={
+                  isCurrent || isCompleted
+                    ? { background: BRAND_GRADIENT }
+                    : undefined
+                }
+              >
+                {isCompleted ? <Check className="w-4 h-4" strokeWidth={3} /> : index + 1}
               </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
+
+              {/* Step label */}
+              <span
+                className={`mt-2 px-1 text-center text-xs md:text-sm leading-tight font-poppins ${
+                  isCurrent
+                    ? "block font-semibold text-[#032B4A]"
+                    : isCompleted
+                      ? "hidden sm:block font-medium text-[#0575E6]"
+                      : "hidden sm:block text-gray-400"
+                }`}
+              >
+                {formatScreenLabel(screen)}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }

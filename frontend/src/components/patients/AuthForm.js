@@ -70,9 +70,9 @@ export default function AuthForm({
           <Image
             src="/main_logo.png"
             alt="ARVI Health Logo"
-            width={160}
-            height={90}
-            className="md:w-40 md:h-auto w-20 sm:w-28 h-auto object-contain"
+            width={112}
+            height={63}
+            className="w-16 sm:w-20 md:w-28 h-auto object-contain"
             priority
           />
         </div>

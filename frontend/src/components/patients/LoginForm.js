@@ -11,7 +11,7 @@ export default function LoginForm() {
   const handleLoginSuccess = async (userId) => {
     const data = await createSession("pending", userId, "doc-123", "apt-456");
     if (data.success) {
-      initSession(data.session_id, data.patient_type, data.screens);
+      initSession(data.session_id, data.patient_type, data.screens, data.is_new_account);
       goNext();
       router.push("/patients");
     }

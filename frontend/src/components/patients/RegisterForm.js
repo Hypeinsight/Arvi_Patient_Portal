@@ -19,7 +19,7 @@ export default function RegisterForm() {
       "apt-456",
     );
     if (data.success) {
-      initSession(data.session_id, data.patient_type, data.screens);
+      initSession(data.session_id, data.patient_type, data.screens, data.is_new_account);
       goNext();
       router.push("/patients");
     }

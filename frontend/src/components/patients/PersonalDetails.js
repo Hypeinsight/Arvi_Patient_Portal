@@ -22,7 +22,9 @@ import {
   createPatientProfile,
   updatePatientProfile,
 } from "@/lib/api/patient_profiles";
+import { createReferralDetails } from "@/lib/api/referral_details";
 import { ocrPersonalId } from "@/lib/api";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const EMPTY_FORM = {
   firstName: "",
@@ -64,6 +66,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     sessionId,
     setPersonalOcrResult,
     clearPersonalOcrResult,
+    saveStepData,
   } = useIntakeStore();
 
   console.log("store data.personal:", storeData.personal);
@@ -101,6 +104,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   });
 
   const [errors, setErrors] = useState({});
+
+  const [hasReferral, setHasReferral] = useState(
+    storeData.referral?.has_referral ?? false,
+  );
 
   const [showUploader, setShowUploader] = useState(false);
 
@@ -318,10 +325,14 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     };
 
     const data = await createPatientProfile(sessionId, payload);
+    if (!data.success) return;
 
-    if (data.success) {
-      onNext(payload, "personal");
-    }
+    const referralPayload = { has_referral: hasReferral };
+    const referralData = await createReferralDetails(sessionId, referralPayload);
+    if (!referralData.success) return;
+
+    saveStepData("referral", referralPayload);
+    onNext(payload, "personal");
   };
 
   return (
@@ -556,6 +567,33 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       </div>
                       <ErrorMsg field="emergencyContactNumber" />
                     </div>
+                  </div>
+
+                  {/* Fifth Row: Referral */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
+                      Referral
+                    </label>
+                    <label
+                      htmlFor="hasReferral"
+                      className={`${fieldClass("hasReferral")} flex items-start gap-3 py-3 cursor-pointer`}
+                    >
+                      <Checkbox
+                        id="hasReferral"
+                        checked={hasReferral}
+                        onCheckedChange={(checked) => setHasReferral(!!checked)}
+                        className="w-4 h-4 mt-0.5 rounded-sm cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-[#0575E6] data-[state=checked]:border-[#0575E6]"
+                      />
+                      <span>
+                        I have a referral
+                        <span className="block text-gray-500 mt-1">
+                          Patients with a valid referral, Medicare number, and
+                          uploaded referral letter are eligible for our referral
+                          discount. Patients without a referral will be charged
+                          standard consultation fees.
+                        </span>
+                      </span>
+                    </label>
                   </div>
                 </form>
               </div>

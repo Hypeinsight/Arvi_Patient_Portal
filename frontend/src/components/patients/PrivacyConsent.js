@@ -12,14 +12,9 @@ import { createConsent, updateConsent } from "@/lib/api/consent";
 export default function PrivacyConsent({ onNext, onBack, progress }) {
   const { formData: storeData, sessionId } = useIntakeStore();
 
-  const [acceptedTerms, setAcceptedTerms] = useState(
-    storeData.consent?.accepted_terms ?? false,
-  );
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(
-    storeData.consent?.accepted_privacy ?? false,
-  );
-  const [consentMarketing, setConsentMarketing] = useState(
-    storeData.consent?.consent_marketing ?? false,
+  const [accepted, setAccepted] = useState(
+    (storeData.consent?.accepted_terms && storeData.consent?.accepted_privacy) ??
+      false,
   );
 
   const handlePrevious = () => {
@@ -32,9 +27,9 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
     if (isNextDisabled) return;
 
     const payload = {
-      accepted_terms: acceptedTerms,
-      accepted_privacy: acceptedPrivacy,
-      consent_marketing: consentMarketing,
+      accepted_terms: accepted,
+      accepted_privacy: accepted,
+      consent_marketing: false,
       timestamp: new Date().toISOString(),
     };
 
@@ -53,7 +48,7 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
     }
   };
 
-  const isNextDisabled = !acceptedTerms || !acceptedPrivacy;
+  const isNextDisabled = !accepted;
 
   return (
     <div className="px-4 md:px-8 lg:px-16 font-poppins">
@@ -98,67 +93,24 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
 
               {/* Privacy & Consent Section */}
               <div className="mt-8 mb-16">
-                {/* Consent Checkboxes */}
-                <div className="space-y-6 max-w-8xl">
-                  {/* Terms of Use Checkbox */}
+                {/* Consent Checkbox */}
+                <div className="max-w-8xl">
                   <div className="flex items-start gap-4 p-3 md:p-4 bg-blue-50 rounded-2xl">
                     <div className="relative mt-0.5">
                       <Checkbox
-                        id="terms"
-                        checked={acceptedTerms}
-                        onCheckedChange={(checked) =>
-                          setAcceptedTerms(!!checked)
-                        }
+                        id="consent"
+                        checked={accepted}
+                        onCheckedChange={(checked) => setAccepted(!!checked)}
                         className="w-4 md:w-5 h-4 md:h-5 rounded-sm md:rounded-md cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-[#0575E6] data-[state=checked]:border-[#0575E6]"
                       />
                     </div>
                     <label
-                      htmlFor="terms"
+                      htmlFor="consent"
                       className="text-sm md:text-base text-gray-900 cursor-pointer leading-relaxed"
                     >
-                      I accept the Terms of Use
-                    </label>
-                  </div>
-
-                  {/* Privacy Policy Checkbox */}
-                  <div className="flex items-start gap-4 p-3 md:p-4 bg-blue-50 rounded-2xl">
-                    <div className="relative mt-0.5">
-                      <Checkbox
-                        id="privacy"
-                        checked={acceptedPrivacy}
-                        onCheckedChange={(checked) =>
-                          setAcceptedPrivacy(!!checked)
-                        }
-                        className="w-4 md:w-5 h-4 md:h-5 rounded-sm md:rounded-md cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-[#0575E6] data-[state=checked]:border-[#0575E6]"
-                      />
-                    </div>
-                    <label
-                      htmlFor="privacy"
-                      className="text-sm md:text-base text-gray-900 cursor-pointer leading-relaxed"
-                    >
-                      I acknowledge that I have read and understand the Privacy
-                      Policy (Australian Privacy Principles compliant)
-                    </label>
-                  </div>
-
-                  {/* Marketing Consent Checkbox */}
-                  <div className="flex items-start gap-4 p-3 md:p-4 bg-blue-50 rounded-2xl">
-                    <div className="relative mt-0.5">
-                      <Checkbox
-                        id="marketing"
-                        checked={consentMarketing}
-                        onCheckedChange={(checked) =>
-                          setConsentMarketing(!!checked)
-                        }
-                        className="w-4 md:w-5 h-4 md:h-5 rounded-sm md:rounded-md cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-[#0575E6] data-[state=checked]:border-[#0575E6]"
-                      />
-                    </div>
-                    <label
-                      htmlFor="marketing"
-                      className="text-sm md:text-base text-gray-900 cursor-pointer leading-relaxed"
-                    >
-                      I consent to receiving appointment reminders, health tips,
-                      and promotional materials via email and SMS (optional)
+                      I accept the Terms of Use and acknowledge that I have read
+                      and understand the Privacy Policy (Australian Privacy
+                      Principles compliant)
                     </label>
                   </div>
                 </div>
@@ -168,7 +120,7 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
               <NavigationButtons
                 onBack={handlePrevious}
                 onNext={handleNext}
-                isNextDisabled={!acceptedTerms || !acceptedPrivacy}
+                isNextDisabled={isNextDisabled}
               />
             </div>
           </div>

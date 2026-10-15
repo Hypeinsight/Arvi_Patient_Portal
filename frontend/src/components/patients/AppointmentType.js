@@ -20,6 +20,7 @@ export default function AppointmentType({ onNext }) {
     clearFormData,
     sessionId,
     updatePatientFlow,
+    isNewAccount,
   } = useIntakeStore();
   const [loading, setLoading] = useState(false);
 
@@ -54,6 +55,12 @@ export default function AppointmentType({ onNext }) {
       height: 100,
     },
   ];
+
+  // The backend only accepts "new" for accounts without a completed intake,
+  // and only follow-ups for accounts that have one.
+  const availableTypes = appointmentTypes.filter((type) =>
+    isNewAccount ? type.patientType === "new" : type.patientType !== "new",
+  );
 
   const [selectedType, setSelectedType] = useState(
     appointmentTypes.find(
@@ -114,8 +121,14 @@ export default function AppointmentType({ onNext }) {
                         Patients without a referral will be charged standard consultation fees."
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                  {appointmentTypes.map((type) => {
+                <div
+                  className={`grid grid-cols-1 gap-4 md:gap-6 ${
+                    availableTypes.length > 2
+                      ? "md:grid-cols-3"
+                      : "md:grid-cols-2"
+                  }`}
+                >
+                  {availableTypes.map((type) => {
                     const Icon = type.icon;
                     return (
                       <div

@@ -4,6 +4,7 @@ const useIntakeStore = create((set, get) => ({
   // Session
   sessionId: null,
   patientType: null,
+  isNewAccount: false,          // true until the account has completed an intake
   screens: [],
   currentIndex: 0,
 
@@ -38,8 +39,8 @@ const useIntakeStore = create((set, get) => ({
   },
 
   // Actions
-  initSession: (sessionId, patientType, screens) =>
-    set({ sessionId, patientType, screens, currentIndex: 0 }),
+  initSession: (sessionId, patientType, screens, isNewAccount = false) =>
+    set({ sessionId, patientType, screens, isNewAccount, currentIndex: 0 }),
 
   updatePatientFlow: (patientType, screens) =>
     set((state) => {
@@ -117,6 +118,7 @@ const useIntakeStore = create((set, get) => ({
     set({
       sessionId: null,
       patientType: null,
+      isNewAccount: false,
       screens: [],
       currentIndex: 0,
       formData: {

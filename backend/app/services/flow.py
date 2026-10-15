@@ -7,7 +7,6 @@ SCREENS = [
     "personal_details",
     # "upload_medical_details",
     "medical_details",
-    "referral_details",
     "review_submit",
     "chat",
 ]
@@ -21,7 +20,6 @@ SCREEN_ACCESS = {
     "personal_details":        ["guest", "new", "followup_lt12", "followup_gt12"],
     # "upload_medical_details":  ["guest", "new", "followup_lt12", "followup_gt12"],
     "medical_details":         ["guest", "new", "followup_lt12", "followup_gt12"],
-    "referral_details":        ["guest", "new", "followup_lt12", "followup_gt12"],
     "review_submit":           ["guest", "new", "followup_lt12", "followup_gt12"],
     "chat":                    ["guest", "new", "followup_lt12", "followup_gt12"],
 }
