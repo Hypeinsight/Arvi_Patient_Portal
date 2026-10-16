@@ -60,13 +60,20 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
         ? "Standard Fees Apply"
         : "_";
 
+  // Guests aren't asked for contact details or an appointment type
+  const isGuest = patientType === "guest";
+
   const summary = [
     { label: "Name", value: name },
     { label: "Date of Birth", value: dob },
-    { label: "Email", value: email },
-    { label: "Phone", value: phone },
-    { label: "Address", value: address },
-    { label: "Appointment Type", value: appointmentType },
+    ...(isGuest
+      ? []
+      : [
+          { label: "Email", value: email },
+          { label: "Phone", value: phone },
+          { label: "Address", value: address },
+          { label: "Appointment Type", value: appointmentType },
+        ]),
     { label: "Access Method", value: accessMethod },
     { label: "Referral", value: referral },
   ];

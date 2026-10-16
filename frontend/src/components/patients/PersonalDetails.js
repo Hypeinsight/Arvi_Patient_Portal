@@ -48,6 +48,9 @@ const REQUIRED_FIELDS = [
   "homeAddress",
 ];
 
+// Guests only book this one appointment, so we ask for the minimum.
+const GUEST_REQUIRED_FIELDS = ["firstName", "lastName", "dateOfBirth"];
+
 const FIELD_LABELS = {
   firstName: "First Name",
   lastName: "Last Name",
@@ -67,7 +70,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     setPersonalOcrResult,
     clearPersonalOcrResult,
     saveStepData,
+    patientType,
   } = useIntakeStore();
+
+  const isGuest = patientType === "guest";
 
   console.log("store data.personal:", storeData.personal);
 
@@ -256,16 +262,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     const newErrors = {};
 
     // Required fields
-    for (const field of REQUIRED_FIELDS) {
+    for (const field of isGuest ? GUEST_REQUIRED_FIELDS : REQUIRED_FIELDS) {
       if (!formData[field]?.toString().trim()) {
         newErrors[field] = `${FIELD_LABELS[field]} is required.`;
       }
-    }
-
-    // Email format (if filled)
-    if (formData.emailAddress && !validateEmail(formData.emailAddress)) {
-      newErrors.emailAddress =
-        "Enter a valid email address (e.g. name@example.com).";
     }
 
     // Date of birth
@@ -274,19 +274,29 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
       if (!valid) newErrors.dateOfBirth = message;
     }
 
-    // Phone
-    if (formData.phoneNumber && !validatePhone(formData.phoneNumber)) {
-      newErrors.phoneNumber =
-        "Enter a valid Australian number (e.g. 0412 345 678).";
-    }
+    // Contact fields are hidden for guests (OCR may still fill them), so
+    // only validate them for account holders
+    if (!isGuest) {
+      // Email format (if filled)
+      if (formData.emailAddress && !validateEmail(formData.emailAddress)) {
+        newErrors.emailAddress =
+          "Enter a valid email address (e.g. name@example.com).";
+      }
 
-    // Emergency contact number (optional, but validated if provided)
-    if (
-      formData.emergencyContactNumber &&
-      !validatePhone(formData.emergencyContactNumber)
-    ) {
-      newErrors.emergencyContactNumber =
-        "Enter a valid Australian number (e.g. 0412 345 678).";
+      // Phone
+      if (formData.phoneNumber && !validatePhone(formData.phoneNumber)) {
+        newErrors.phoneNumber =
+          "Enter a valid Australian number (e.g. 0412 345 678).";
+      }
+
+      // Emergency contact number (optional, but validated if provided)
+      if (
+        formData.emergencyContactNumber &&
+        !validatePhone(formData.emergencyContactNumber)
+      ) {
+        newErrors.emergencyContactNumber =
+          "Enter a valid Australian number (e.g. 0412 345 678).";
+      }
     }
 
     setErrors(newErrors);
@@ -316,12 +326,14 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
       first_name: formData.firstName,
       last_name: formData.lastName,
       date_of_birth: formData.dateOfBirth,
-      gender: formData.gender,
-      phone: formData.phoneNumber,
-      email: formData.emailAddress,
-      address: formData.homeAddress,
-      emergency_contact_name: formData.emergencyContactName,
-      emergency_contact_number: formData.emergencyContactNumber,
+      ...(!isGuest && {
+        gender: formData.gender,
+        phone: formData.phoneNumber,
+        email: formData.emailAddress,
+        address: formData.homeAddress,
+        emergency_contact_name: formData.emergencyContactName,
+        emergency_contact_number: formData.emergencyContactNumber,
+      }),
     };
 
     const data = await createPatientProfile(sessionId, payload);
@@ -429,6 +441,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                     </div>
                   </div>
 
+                  {!isGuest && (
+                  <>
                   {/* Second Row: Gender, Phone Number, Email */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
@@ -568,6 +582,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <ErrorMsg field="emergencyContactNumber" />
                     </div>
                   </div>
+                  </>
+                  )}
 
                   {/* Fifth Row: Referral */}
                   <div>
