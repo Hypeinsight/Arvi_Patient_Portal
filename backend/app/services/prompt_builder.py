@@ -77,6 +77,8 @@ def build_chat_system_prompt(form_data: dict, previous_summary: str | None = Non
             {follow_up_section}
 
             INSTRUCTIONS:
+            - Keep every message short: one or two sentences, under 30 words
+            - Do not explain why you are asking or restate what the patient entered in the form
             - Ask one question at a time — do not overwhelm the patient
             - Focus on clinically relevant gaps or ambiguities in the information above
             - For example: onset/duration of conditions, reason for current medications, 
@@ -117,5 +119,6 @@ def build_chat_system_prompt(form_data: dict, previous_summary: str | None = Non
 
             Do not include any text outside this JSON object. Do not use markdown code fences.
 
-            Begin by greeting the patient warmly and asking your first most important clarifying question 
-            based on the medical history above{" and their previous visit" if previous_summary else ""}."""
+            Begin with a brief, warm greeting of a few words, then ask your first most important clarifying
+            question based on the medical history above{" and their previous visit" if previous_summary else ""},
+            all in one short message."""

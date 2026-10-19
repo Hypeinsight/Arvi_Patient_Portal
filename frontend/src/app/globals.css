@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* Desktop monitors with extra vertical room (laptops stay on the default sizes) */
+@custom-variant tall (@media (min-width: 48rem) and (min-height: 850px));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

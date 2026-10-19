@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import useIntakeStore from "@/lib/intakeStore";
 
@@ -46,6 +46,65 @@ export default function PatientsPage() {
   // return <UploadPersonalDetails onNext={() => {}} onBack={() => {}} progress={{ percent: 100 }} />;
   const currentScreen = screens[currentIndex];
   const isPublic = PUBLIC_SCREENS.has(currentScreen);
+
+  // The whole form lives on one URL, so record each screen as a browser
+  // history entry to make the browser's Back/Forward buttons move between steps.
+  const changedByBrowser = useRef(false);
+
+  useEffect(() => {
+    if (!currentScreen) return;
+    if (changedByBrowser.current) {
+      changedByBrowser.current = false;
+      return;
+    }
+
+    // Keep Next.js's own history state, only add our step to it
+    const state = window.history.state ?? {};
+    if (state.intakeStep === currentScreen) return;
+
+    if (!state.intakeStep && currentIndex > 0) {
+      // First step entered: let Back return to the start of the form
+      window.history.replaceState({ ...state, intakeStep: screens[0] }, "");
+    }
+    window.history.pushState(
+      { ...window.history.state, intakeStep: currentScreen },
+      "",
+    );
+  }, [currentScreen, currentIndex, screens]);
+
+  useEffect(() => {
+    const handlePopState = (event) => {
+      const step = event.state?.intakeStep;
+      const { screens, currentIndex, setCurrentIndex, reset } =
+        useIntakeStore.getState();
+      if (!step || !screens.length) return;
+
+      // Back from the chat ends the intake and returns to the start page
+      if (screens[currentIndex] === "chat") {
+        const leave = window.confirm(
+          "Leave the chat? Your chat answers won't be sent to your doctor.",
+        );
+        if (leave) {
+          reset();
+          router.replace("/");
+        } else {
+          window.history.pushState(
+            { ...window.history.state, intakeStep: "chat" },
+            "",
+          );
+        }
+        return;
+      }
+
+      const index = screens.indexOf(step);
+      if (index === -1 || index === currentIndex) return;
+      changedByBrowser.current = true;
+      setCurrentIndex(index);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [router]);
 
   useEffect(() => {
     if (!screens.length) return;

@@ -4,7 +4,6 @@ import React, {useState} from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProgressSteps from "@/components/ProgressSteps";
 import { Check } from "lucide-react";
-import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import useIntakeStore from "@/lib/intakeStore";
 import Title from "../Title";
@@ -91,8 +90,6 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
             <div className="relative z-10 p-4 md:p-8">
               <Title title="Review & Submit" />
 
-              {/* Progress Indicator - Positioned in top right */}
-              <ProgressIndicator />
 
               {/* Review & Submit Section */}
               <div className="mt-8 mb-16">

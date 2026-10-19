@@ -3,7 +3,6 @@
 import { useState } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
 import useIntakeStore from "@/lib/intakeStore";
-import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import Title from "../Title";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -88,8 +87,6 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
             <div className="relative z-10 p-4 md:p-8">
               <Title title="Privacy & Consent" />
 
-              {/* Progress Indicator - Positioned in top right */}
-              <ProgressIndicator />
 
               {/* Privacy & Consent Section */}
               <div className="mt-8 mb-16">
@@ -101,7 +98,7 @@ export default function PrivacyConsent({ onNext, onBack, progress }) {
                         id="consent"
                         checked={accepted}
                         onCheckedChange={(checked) => setAccepted(!!checked)}
-                        className="w-4 md:w-5 h-4 md:h-5 rounded-sm md:rounded-md cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-[#0575E6] data-[state=checked]:border-[#0575E6]"
+                        className="w-4 md:w-5 h-4 md:h-5 rounded-sm md:rounded-md cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-white data-[state=checked]:border-[#0575E6] data-[state=checked]:text-[#0575E6]"
                       />
                     </div>
                     <label

@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
@@ -162,7 +163,14 @@ def flush_chat_messages(session_id):
 
     try:
         source, chat_messages, summary_text = persist_chat_messages(session, existing_messages, cached_messages)
+
+        # Sending the chat (or skipping it) completes the intake
+        if session.status != "submitted":
+            session.status = "submitted"
+            session.submitted_at = datetime.now(timezone.utc)
+            db.session.commit()
     except SQLAlchemyError as exc:
+        db.session.rollback()
         return jsonify({"success": False, "message": str(exc)}), 400
 
     return jsonify({

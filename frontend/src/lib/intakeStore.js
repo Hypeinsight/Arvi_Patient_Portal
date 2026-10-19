@@ -58,6 +58,18 @@ const useIntakeStore = create((set, get) => ({
       currentIndex: Math.min(state.currentIndex + 1, state.screens.length - 1), // To prevent going beyond the last screen
     })),
 
+  // Show any screen in the flow (used by the browser's Back/Forward buttons)
+  setCurrentIndex: (index) =>
+    set((state) =>
+      index >= 0 && index < state.screens.length ? { currentIndex: index } : {},
+    ),
+
+  // Jump back to an earlier screen (e.g. from the progress flowline)
+  goTo: (index) =>
+    set((state) =>
+      index >= 0 && index < state.currentIndex ? { currentIndex: index } : {},
+    ),
+
   goBack: () =>
     set((state) => ({
       currentIndex: Math.max(state.currentIndex - 1, 0), // To prevent going before the first screen

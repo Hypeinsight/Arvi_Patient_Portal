@@ -5,7 +5,6 @@ import ProgressSteps from "@/components/ProgressSteps";
 import { Calendar, ArrowUpToLine  } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import { AU } from "country-flag-icons/react/3x2";
-import ProgressIndicator from "@/components/ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import InfoCard from "../InfoCard";
 import Title from "../Title";
@@ -360,7 +359,6 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
             {/* Content Container */}
             <div className="relative z-10 p-4 md:p-8">
               <Title title="Personal Details" />
-              <ProgressIndicator />
 
               {/* Personal Details Section */}
               <div className="mt-8 mb-16">
@@ -598,7 +596,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                         id="hasReferral"
                         checked={hasReferral}
                         onCheckedChange={(checked) => setHasReferral(!!checked)}
-                        className="w-4 h-4 mt-0.5 rounded-sm cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-[#0575E6] data-[state=checked]:border-[#0575E6]"
+                        className="w-4 h-4 mt-0.5 rounded-sm cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-white data-[state=checked]:border-[#0575E6] data-[state=checked]:text-[#0575E6]"
                       />
                       <span>
                         I have a referral

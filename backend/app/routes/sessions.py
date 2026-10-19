@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
+from app.models.patient_details import PatientProfile
 from app.models.session import IntakeSession
 from app.models.summaries import Summary
 from app.models.user import User
@@ -132,20 +133,28 @@ def prefill_session(session_id):
     if not current_session:
         return jsonify({"success": False, "message": "Session not found"}), 404
 
+    # Latest earlier intake that got as far as personal details, preferring
+    # completed ones, so details carry over even if the chat was never sent
     previous_session = (
         IntakeSession.query
+        .join(PatientProfile)
         .filter(
             IntakeSession.user_id == current_session.user_id,
             IntakeSession.id != current_session.id,
-            IntakeSession.status == "submitted",
         )
-        .order_by(IntakeSession.submitted_at.desc())
+        .order_by(
+            (IntakeSession.status == "submitted").desc(),
+            IntakeSession.created_at.desc(),
+        )
         .first()
     )
 
     personal = previous_session.patient_profile if previous_session else None
     medical = previous_session.medical_details if previous_session else None
     referral = previous_session.referral_details if previous_session else None
+
+    # First intake for this account: at least fill in the sign-up email
+    account_email = current_session.user.email if current_session.user else None
 
     return jsonify({
         "success": True,
@@ -160,11 +169,13 @@ def prefill_session(session_id):
                 ),
                 "gender": personal.gender,
                 "phone": personal.phone,
-                "email": personal.email,
+                "email": personal.email or account_email,
                 "address": personal.address,
                 "emergency_contact_name": personal.emergency_contact_name,
                 "emergency_contact_number": personal.emergency_contact_number,
-            } if personal else None,
+            } if personal else (
+                {"email": account_email} if account_email else None
+            ),
             "medical": {
                 "allergies": medical.allergies,
                 "conditions": medical.conditions,

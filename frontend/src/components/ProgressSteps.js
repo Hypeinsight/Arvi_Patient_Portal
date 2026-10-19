@@ -31,7 +31,7 @@ const formatScreenLabel = (screen) =>
     .join(" ");
 
 export default function ProgressSteps() {
-  const { screens, currentIndex } = useIntakeStore();
+  const { screens, currentIndex, goTo } = useIntakeStore();
   const currentScreen = screens[currentIndex];
   const currentScreenIndex = screens.indexOf(currentScreen);
   const progressScreens = screens.filter(
@@ -74,36 +74,51 @@ export default function ProgressSteps() {
                 </div>
               )}
 
-              {/* Step marker */}
-              <div
-                className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
-                  isCurrent
-                    ? "text-white ring-4 ring-blue-100"
-                    : isCompleted
-                      ? "text-white"
-                      : "bg-white border-2 border-blue-200 text-blue-300"
-                }`}
-                style={
-                  isCurrent || isCompleted
-                    ? { background: BRAND_GRADIENT }
+              {/* Completed steps are links back to that screen */}
+              <button
+                type="button"
+                onClick={() => goTo(screenIndex)}
+                disabled={!isCompleted}
+                aria-label={
+                  isCompleted
+                    ? `Go back to ${formatScreenLabel(screen)}`
                     : undefined
                 }
-              >
-                {isCompleted ? <Check className="w-4 h-4" strokeWidth={3} /> : index + 1}
-              </div>
-
-              {/* Step label */}
-              <span
-                className={`mt-2 px-1 text-center text-xs md:text-sm leading-tight font-poppins ${
-                  isCurrent
-                    ? "block font-semibold text-[#032B4A]"
-                    : isCompleted
-                      ? "hidden sm:block font-medium text-[#0575E6]"
-                      : "hidden sm:block text-gray-400"
+                className={`group relative z-10 flex flex-col items-center ${
+                  isCompleted ? "cursor-pointer" : "cursor-default"
                 }`}
               >
-                {formatScreenLabel(screen)}
-              </span>
+                {/* Step marker */}
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
+                    isCurrent
+                      ? "text-white ring-4 ring-blue-100"
+                      : isCompleted
+                        ? "text-white group-hover:ring-4 group-hover:ring-blue-100"
+                        : "bg-white border-2 border-blue-200 text-blue-300"
+                  }`}
+                  style={
+                    isCurrent || isCompleted
+                      ? { background: BRAND_GRADIENT }
+                      : undefined
+                  }
+                >
+                  {isCompleted ? <Check className="w-4 h-4" strokeWidth={3} /> : index + 1}
+                </div>
+
+                {/* Step label */}
+                <span
+                  className={`mt-2 px-1 text-center text-xs md:text-sm leading-tight font-poppins ${
+                    isCurrent
+                      ? "block font-semibold text-[#032B4A]"
+                      : isCompleted
+                        ? "hidden sm:block font-medium text-[#0575E6] group-hover:underline"
+                        : "hidden sm:block text-gray-400"
+                  }`}
+                >
+                  {formatScreenLabel(screen)}
+                </span>
+              </button>
             </li>
           );
         })}

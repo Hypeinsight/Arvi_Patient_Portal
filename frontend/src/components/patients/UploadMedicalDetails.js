@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import ProgressSteps from "@/components/ProgressSteps";
 import { File } from "lucide-react";
-import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import useIntakeStore from "@/lib/intakeStore";
 import { ocrPersonalId } from "@/lib/api";
@@ -106,8 +105,6 @@ export default function UploadMedicalDetails({ onNext, onBack }) {
             <div className="relative z-10 p-4 md:p-8">
               <Title title="Upload Your Medical Details" className="md:!text-2xl" />
 
-              {/* Progress Indicator - Positioned in top right */}
-              <ProgressIndicator />
 
               {/* Upload Your Medical Details Section */}
               <div className="mt-8 mb-16">

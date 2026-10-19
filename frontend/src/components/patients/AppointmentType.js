@@ -2,18 +2,18 @@
 
 import { useState } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
-import ProgressIndicator from "../ProgressIndicator";
 import useIntakeStore from "@/lib/intakeStore";
 import {
   createAppointmentDetails,
   updateAppointmentDetails,
 } from "@/lib/api/appointment_details";
 import Title from "../Title";
+import NavigationButtons from "@/components/NavigationButtons";
 import InfoCard from "../InfoCard";
 import Image from "next/image";
 import { toast } from "sonner";
 
-export default function AppointmentType({ onNext }) {
+export default function AppointmentType({ onNext, onBack }) {
   const {
     patientType,
     formData,
@@ -109,8 +109,6 @@ export default function AppointmentType({ onNext }) {
                 className="md:!text-2xl"
               />
 
-              {/* Progress Indicator - Positioned in top right */}
-              <ProgressIndicator />
 
               {/* Choose your appointment Type Section */}
               <div className="mt-8 mb-16">
@@ -170,6 +168,13 @@ export default function AppointmentType({ onNext }) {
                   })}
                 </div>
               </div>
+
+              {/* Next continues with an already-saved choice after going back */}
+              <NavigationButtons
+                onBack={onBack}
+                onNext={() => onNext()}
+                isNextDisabled={!formData.appointment}
+              />
             </div>
           </div>
         </div>

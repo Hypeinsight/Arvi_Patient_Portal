@@ -6,7 +6,6 @@ import ProgressSteps from "@/components/ProgressSteps";
 import useIntakeStore from "@/lib/intakeStore";
 import { ocrPersonalId } from "@/lib/api";
 import { File, SkipForward } from "lucide-react";
-import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import InfoCard from "@/components/InfoCard";
 import Title from "@/components/Title";
@@ -107,8 +106,6 @@ export default function UploadPersonalDetails({ onNext, onBack }) {
             <div className="relative z-10 p-4 md:p-8">
               <Title title="Upload Your Personal Details" className="md:!text-2xl"/>
 
-              {/* Progress Indicator - Positioned in top right */}
-              <ProgressIndicator />
 
               {/* Upload Your Personal Details Section */}
               <div className="mt-8 mb-16">

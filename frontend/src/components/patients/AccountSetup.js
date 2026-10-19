@@ -5,7 +5,6 @@ import ProgressSteps from "@/components/ProgressSteps";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import { BatteryMedium, Info } from "lucide-react";
-import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import InfoCard from "../InfoCard";
 import { AU } from "country-flag-icons/react/3x2";
@@ -227,8 +226,6 @@ export default function AccountSetup({ onNext, onBack, progress }) {
             {/* Content Container */}
             <div className="relative z-10 p-4 md:p-8">
               <Title title="Account Setup" />
-              {/* Progress Indicator - Positioned in top right */}
-              <ProgressIndicator />
 
               {/* Account Setup Section */}
               <div className="mt-8 mb-16">

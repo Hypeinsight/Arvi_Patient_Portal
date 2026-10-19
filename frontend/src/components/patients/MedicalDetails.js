@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
-import ProgressIndicator from "../ProgressIndicator";
 import NavigationButtons from "@/components/NavigationButtons";
 import useIntakeStore from "@/lib/intakeStore";
 import { extractMedicalDetails } from "@/lib/utils";
@@ -215,8 +214,6 @@ export default function MedicalDetails({ onNext, onBack }) {
             <div className="relative z-10 p-4 md:p-8">
               <Title title="Medical Details" />
 
-              {/* Progress Indicator - Positioned in top right */}
-              <ProgressIndicator />
 
               {/* Medical Details Section */}
               <div className="mt-8 mb-16">

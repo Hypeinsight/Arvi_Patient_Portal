@@ -63,7 +63,7 @@ export default function TopNav() {
   return (
     <>
       <header
-        className={`relative z-20 max-w-8xl mx-auto w-full transition-colors duration-300 min-h-[60px] justify-center mb-1 md:mb-2`}
+        className={`relative z-20 max-w-8xl mx-auto w-full transition-colors duration-300 min-h-[60px] justify-center`}
       >
         <div className="grid grid-cols-[auto_1fr_auto] items-center h-14 md:h-16 px-4 md:px-8 lg:px-16 relative">
           {/* Logo Section */}
