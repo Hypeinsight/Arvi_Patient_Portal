@@ -5,7 +5,6 @@ import useIntakeStore from "@/lib/intakeStore";
 
 const SCREEN_LABELS = {
   choose_appointment_type: "Appointment Type",
-  privacy_consent: "Privacy & Consent",
   account_setup: "Account Setup",
   upload_personal_details: "Upload Personal Details",
   personal_details: "Personal Details",

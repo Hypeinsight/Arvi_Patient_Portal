@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
+from app.models.appointment import AppointmentDetails
 from app.models.patient_details import PatientProfile
 from app.models.session import IntakeSession
 from app.models.summaries import Summary
@@ -71,12 +72,19 @@ def create_session():
             )
             is_new_account = not has_prior_intake
 
+            # A new account can only book as a new patient, so skip the
+            # appointment type screen and assign it straight away
+            if is_new_account:
+                patient_type = "new"
+
         session = IntakeSession(
             user_id=user.id,
             patient_type=patient_type,
             is_new_account=is_new_account,
         )
         db.session.add(session)
+        if patient_type == "new":
+            session.appointment_details = AppointmentDetails(appointment_type="new")
         db.session.commit()
     except SQLAlchemyError as exc:
         db.session.rollback()

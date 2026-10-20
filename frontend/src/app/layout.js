@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "ARVI Patient Portal",
+  title: "Arvi Patient Portal",
   description: "Patient Portal built with Next.js",
   icons: {
     icon: "/main_logo.png",

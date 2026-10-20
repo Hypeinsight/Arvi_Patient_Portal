@@ -1,8 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* Desktop monitors with extra vertical room (laptops stay on the default sizes) */
-@custom-variant tall (@media (min-width: 48rem) and (min-height: 850px));
+/* Desktop monitors with extra vertical room (laptops stay on the default sizes).
+   A 1080p monitor gives ~945px of browser height, a typical laptop ~875px. */
+@custom-variant tall (@media (min-width: 48rem) and (min-height: 920px));
+
+/* Short windows such as laptops, where popups need to be more compact */
+@custom-variant short (@media (max-height: 800px));
 
 :root {
   --background: #ffffff;

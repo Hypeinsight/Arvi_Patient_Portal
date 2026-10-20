@@ -15,8 +15,14 @@ import AuthForm from "@/components/patients/AuthForm";
 import { prefillSession } from "@/lib/api/session";
 
 export default function MainPage({ onNext }) {
-  const { initSession, patientType, clearFormData, sessionId, setPrefillData } =
-    useIntakeStore();
+  const {
+    initSession,
+    patientType,
+    clearFormData,
+    sessionId,
+    setPrefillData,
+    saveStepData,
+  } = useIntakeStore();
 
   const [selectedMethod, setSelectedMethod] = useState(
     patientType === "guest" ? "guest" : patientType === "new" ? "create" : null,
@@ -44,6 +50,12 @@ export default function MainPage({ onNext }) {
     if (data.success) {
       initSession(data.session_id, data.patient_type, data.screens, data.is_new_account);
       setAuthMode(null);
+
+      // New accounts are booked as new patients by the backend, with no
+      // appointment type screen; keep the store in step for the review
+      if (data.patient_type === "new") {
+        saveStepData("appointment", { appointment_type: "new" });
+      }
 
       // Fill the form from the account's last intake (or its sign-up email)
       const prefillData = await prefillSession(data.session_id);
@@ -192,7 +204,7 @@ export default function MainPage({ onNext }) {
 
       {authMode && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-0"
+          className="fixed inset-0 z-50 flex justify-center overflow-y-auto bg-[#032B4A]/40 backdrop-blur-sm px-4 py-6"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setAuthMode(null);
           }}
@@ -201,7 +213,7 @@ export default function MainPage({ onNext }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="auth-dialog-title"
-            className="relative w-full max-w-3xl"
+            className="relative w-full max-w-3xl my-auto"
           >
             <h2 id="auth-dialog-title" className="sr-only">
               {authMode === "register" ? "Create account" : "Patient login"}

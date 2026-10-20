@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import ProgressSteps from "@/components/ProgressSteps";
-import { Calendar, ArrowUpToLine  } from "lucide-react";
+import { ArrowUpToLine } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 import { AU } from "country-flag-icons/react/3x2";
 import NavigationButtons from "@/components/NavigationButtons";
@@ -22,8 +22,17 @@ import {
   updatePatientProfile,
 } from "@/lib/api/patient_profiles";
 import { createReferralDetails } from "@/lib/api/referral_details";
+import { createConsent, updateConsent } from "@/lib/api/consent";
 import { ocrPersonalId } from "@/lib/api";
 import { Checkbox } from "@/components/ui/checkbox";
+import DatePicker from "@/components/ui/date-picker";
+
+// Date of birth must be in the past, so yesterday is the latest pickable day
+const yesterdayISO = () => {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+};
 
 const EMPTY_FORM = {
   firstName: "",
@@ -48,7 +57,14 @@ const REQUIRED_FIELDS = [
 ];
 
 // Guests only book this one appointment, so we ask for the minimum.
-const GUEST_REQUIRED_FIELDS = ["firstName", "lastName", "dateOfBirth"];
+const GUEST_REQUIRED_FIELDS = [
+  "firstName",
+  "lastName",
+  "dateOfBirth",
+  "gender",
+  "phoneNumber",
+  "emailAddress",
+];
 
 const FIELD_LABELS = {
   firstName: "First Name",
@@ -112,6 +128,13 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
 
   const [hasReferral, setHasReferral] = useState(
     storeData.referral?.has_referral ?? false,
+  );
+
+  // Guests and new patients accept the terms here; follow-up patients
+  // already did on their first visit
+  const needsConsent = patientType === "guest" || patientType === "new";
+  const [acceptedConsent, setAcceptedConsent] = useState(
+    !!(storeData.consent?.accepted_terms && storeData.consent?.accepted_privacy),
   );
 
   const [showUploader, setShowUploader] = useState(false);
@@ -273,21 +296,21 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
       if (!valid) newErrors.dateOfBirth = message;
     }
 
-    // Contact fields are hidden for guests (OCR may still fill them), so
-    // only validate them for account holders
+    // Email format (if filled)
+    if (formData.emailAddress && !validateEmail(formData.emailAddress)) {
+      newErrors.emailAddress =
+        "Enter a valid email address (e.g. name@example.com).";
+    }
+
+    // Phone
+    if (formData.phoneNumber && !validatePhone(formData.phoneNumber)) {
+      newErrors.phoneNumber =
+        "Enter a valid Australian number (e.g. 0412 345 678).";
+    }
+
+    // Emergency contact is hidden for guests (OCR may still fill it), so
+    // only validate it for account holders
     if (!isGuest) {
-      // Email format (if filled)
-      if (formData.emailAddress && !validateEmail(formData.emailAddress)) {
-        newErrors.emailAddress =
-          "Enter a valid email address (e.g. name@example.com).";
-      }
-
-      // Phone
-      if (formData.phoneNumber && !validatePhone(formData.phoneNumber)) {
-        newErrors.phoneNumber =
-          "Enter a valid Australian number (e.g. 0412 345 678).";
-      }
-
       // Emergency contact number (optional, but validated if provided)
       if (
         formData.emergencyContactNumber &&
@@ -296,6 +319,11 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
         newErrors.emergencyContactNumber =
           "Enter a valid Australian number (e.g. 0412 345 678).";
       }
+    }
+
+    if (needsConsent && !acceptedConsent) {
+      newErrors.consent =
+        "Please accept the Terms of Use and Privacy Policy to continue.";
     }
 
     setErrors(newErrors);
@@ -325,10 +353,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
       first_name: formData.firstName,
       last_name: formData.lastName,
       date_of_birth: formData.dateOfBirth,
+      gender: formData.gender,
+      phone: formData.phoneNumber,
+      email: formData.emailAddress,
       ...(!isGuest && {
-        gender: formData.gender,
-        phone: formData.phoneNumber,
-        email: formData.emailAddress,
         address: formData.homeAddress,
         emergency_contact_name: formData.emergencyContactName,
         emergency_contact_number: formData.emergencyContactNumber,
@@ -343,6 +371,21 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     if (!referralData.success) return;
 
     saveStepData("referral", referralPayload);
+
+    if (needsConsent) {
+      const consentPayload = {
+        accepted_terms: acceptedConsent,
+        accepted_privacy: acceptedConsent,
+        consent_marketing: false,
+        timestamp: new Date().toISOString(),
+      };
+      const consentData = storeData.consent
+        ? await updateConsent(sessionId, consentPayload)
+        : await createConsent(sessionId, consentPayload);
+      if (!consentData.success) return;
+      saveStepData("consent", consentPayload);
+    }
+
     onNext(payload, "personal");
   };
 
@@ -417,30 +460,19 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Date of Birth*
                       </label>
-                      <div className="relative">
-                        <input
-                          type="date"
-                          value={formData.dateOfBirth}
-                          onChange={(e) =>
-                            handleInputChange("dateOfBirth", e.target.value)
-                          }
-                          onBlur={(e) => handleDobBlur(e.target.value)}
-                          max={new Date().toISOString().split("T")[0]}
-                          className={`${fieldClass("dateOfBirth")} font-poppins ${
-                            !formData.dateOfBirth
-                              ? "text-gray-300 [&::-webkit-datetime-edit]:text-gray-300"
-                              : "text-gray-900 [&::-webkit-datetime-edit]:text-gray-900"
-                          } [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:h-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
-                          placeholder="DD/MM/YYYY"
-                        />
-                        <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                      </div>
+                      <DatePicker
+                        value={formData.dateOfBirth}
+                        onChange={(value) => {
+                          handleInputChange("dateOfBirth", value);
+                          handleDobBlur(value);
+                        }}
+                        max={yesterdayISO()}
+                        className={fieldClass("dateOfBirth")}
+                      />
                       <ErrorMsg field="dateOfBirth" />
                     </div>
                   </div>
 
-                  {!isGuest && (
-                  <>
                   {/* Second Row: Gender, Phone Number, Email */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
@@ -514,6 +546,9 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                     </div>
                   </div>
 
+                  {/* Home address and emergency contact: account holders only */}
+                  {!isGuest && (
+                  <>
                   {/* Third Row: Home Address */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
@@ -609,6 +644,36 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       </span>
                     </label>
                   </div>
+
+                  {/* Sixth Row: Privacy & Consent */}
+                  {needsConsent && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
+                        Privacy &amp; Consent*
+                      </label>
+                      <label
+                        htmlFor="acceptedConsent"
+                        className={`${fieldClass("consent")} flex items-start gap-3 py-3 cursor-pointer`}
+                      >
+                        <Checkbox
+                          id="acceptedConsent"
+                          checked={acceptedConsent}
+                          onCheckedChange={(checked) => {
+                            setAcceptedConsent(!!checked);
+                            if (errors.consent)
+                              setErrors((prev) => ({ ...prev, consent: "" }));
+                          }}
+                          className="w-4 h-4 mt-0.5 rounded-sm cursor-pointer border-2 border-blue-300 data-[state=checked]:bg-white data-[state=checked]:border-[#0575E6] data-[state=checked]:text-[#0575E6]"
+                        />
+                        <span>
+                          I accept the Terms of Use and acknowledge that I have
+                          read and understand the Privacy Policy (Australian
+                          Privacy Principles compliant)
+                        </span>
+                      </label>
+                      <ErrorMsg field="consent" />
+                    </div>
+                  )}
                 </form>
               </div>
 

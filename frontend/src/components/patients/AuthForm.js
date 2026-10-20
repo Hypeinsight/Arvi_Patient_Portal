@@ -4,7 +4,42 @@ import { useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { loginUser, registerUser } from "@/lib/api";
-import { Eye, EyeOff, X } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail, X } from "lucide-react";
+
+const inputClass =
+  "w-full h-12 short:h-10 pl-11 rounded-xl border bg-white text-sm text-[#032B4A] placeholder:text-[#4f7ca8]/60 outline-none transition-colors focus:border-[#0575E6] focus:ring-4 focus:ring-[#0575E6]/10";
+
+function PasswordField({ id, label, value, onChange, show, onToggle, error, autoComplete }) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-[#032B4A] mb-1.5">
+        {label}
+      </label>
+      <div className="relative">
+        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4f7ca8]" />
+        <input
+          id={id}
+          type={show ? "text" : "password"}
+          placeholder="••••••••"
+          value={value}
+          onChange={onChange}
+          autoComplete={autoComplete}
+          required
+          className={`${inputClass} pr-12 ${error ? "border-red-400" : "border-[#0575E63D]"}`}
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={show ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-[#4f7ca8] cursor-pointer hover:text-[#0575E6]"
+        >
+          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+      </div>
+      {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+}
 
 export default function AuthForm({
   onRegisterClick,
@@ -12,6 +47,7 @@ export default function AuthForm({
   onSuccess,
   isRegister = false,
   isOpen = false,
+  isModal = false,
   onClose,
 }) {
   const [email, setEmail] = useState("");
@@ -19,135 +55,133 @@ export default function AuthForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [mismatch, setMismatch] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isRegister && password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      setMismatch(true);
       return;
     }
 
     setLoading(true);
+    try {
+      const res = isRegister
+        ? await registerUser(email, password)
+        : await loginUser(email, password);
 
-    const res = isRegister
-      ? await registerUser(email, password)
-      : await loginUser(email, password);
-
-    console.log("AuthForm handleSubmit response:", res);
-
-    if (res.success) {
-      localStorage.setItem("user_token", res.access_token);
-      onSuccess?.(res.user.id);
-    } else {
-      toast.error(res.message || "An error occurred. Please try again.");
+      if (res.success) {
+        localStorage.setItem("user_token", res.access_token);
+        onSuccess?.(res.user.id);
+      } else {
+        toast.error(res.message || "An error occurred. Please try again.");
+      }
+    } catch {
+      toast.error("Couldn't reach the server. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <div
       className={
-        isOpen
+        isOpen || isModal
           ? "flex items-center justify-center"
           : "flex items-center justify-center min-h-[80vh] px-4"
       }
     >
-      <div className="bg-white realative rounded-xl xs:rounded-4xl px-4 py-6 xs:p-8 md:px-14 md:py-10 w-full max-w-xl shadow-sm flex flex-col items-center relative">
-        <button
-          type="button"
-          onClick={onClose}
-          // disabled={isImporting}
-          aria-label="Close uploader"
-          className="absolute right-3 top-3 xs:right-6 xs:top-6 rounded-lg bg-[#ff0000] p-0.25 xs:p-1 cursor-pointer text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <X className="h-3 xs:h-4 w-3 xs:w-4" />
-        </button>
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl px-6 py-8 sm:px-10 sm:py-10 short:py-6 short:sm:py-6 font-poppins">
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute right-4 top-4 p-1.5 rounded-lg text-[#4f7ca8] cursor-pointer hover:bg-[#0575E614] hover:text-[#032B4A] transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
 
-        <div className="mb-6 flex justify-center">
+        {/* Header */}
+        <div className="flex flex-col items-center text-center">
           <Image
             src="/main_logo.png"
-            alt="ARVI Health Logo"
-            width={112}
-            height={63}
-            className="w-16 sm:w-20 md:w-28 h-auto object-contain"
+            alt="Arvi Health Logo"
+            width={96}
+            height={54}
+            className="w-20 short:w-16 h-auto object-contain"
             priority
           />
+          <h1 className="mt-5 short:mt-3 text-xl sm:text-2xl font-semibold text-[#032B4A]">
+            {isRegister ? "Create your account" : "Welcome back"}
+          </h1>
+          <p className="mt-1 text-sm text-[#4f7ca8]">
+            {isRegister
+              ? "Save your details for faster check-ins next time."
+              : "Log in to continue your patient intake."}
+          </p>
         </div>
 
-        <h1 className="text-2xl md:text-3xl font-semibold text-slate tracking-tight mb-8 text-center">
-          Patient Intake Form
-        </h1>
-
-        <form className="w-full flex flex-col" onSubmit={handleSubmit}>
-          <div className="space-y-4 w-full mb-3">
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#edf4fe] text-slate placeholder-[#4f7ca8] rounded-xl px-6 py-2 sm:py-4 outline-none focus:ring-2 focus:ring-blue-400 font-medium transition-all"
-              required
-            />
+        {/* Form */}
+        <form className="mt-7 short:mt-5 space-y-4 short:space-y-3" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="auth-email" className="block text-sm font-medium text-[#032B4A] mb-1.5">
+              Email address
+            </label>
             <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4f7ca8]" />
               <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#edf4fe] text-slate placeholder-[#4f7ca8] rounded-xl py-2 sm:py-4 pl-6 pr-14 outline-none focus:ring-2 focus:ring-blue-400 font-medium transition-all"
+                id="auth-email"
+                type="email"
+                placeholder="name@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
                 required
+                className={`${inputClass} pr-4 border-[#0575E63D]`}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword((visible) => !visible)}
-                className="absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer text-[#4f7ca8] hover:text-[#005cb9]"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
             </div>
-            {isRegister && (
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[#edf4fe] text-slate placeholder-[#4f7ca8] rounded-xl py-2 sm:py-4 pl-6 pr-14 outline-none focus:ring-2 focus:ring-blue-400 font-medium transition-all"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowConfirmPassword((visible) => !visible)
-                  }
-                  className="absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer text-[#4f7ca8] hover:text-[#005cb9]"
-                  aria-label={
-                    showConfirmPassword
-                      ? "Hide confirmed password"
-                      : "Show confirmed password"
-                  }
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
-                </button>
-              </div>
-            )}
           </div>
 
+          <PasswordField
+            id="auth-password"
+            label="Password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setMismatch(false);
+            }}
+            show={showPassword}
+            onToggle={() => setShowPassword((visible) => !visible)}
+            autoComplete={isRegister ? "new-password" : "current-password"}
+          />
+
+          {isRegister && (
+            <PasswordField
+              id="auth-confirm-password"
+              label="Confirm password"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setMismatch(false);
+              }}
+              show={showConfirmPassword}
+              onToggle={() => setShowConfirmPassword((visible) => !visible)}
+              error={mismatch ? "Passwords do not match." : ""}
+              autoComplete="new-password"
+            />
+          )}
+
           {!isRegister && (
-            <div className="text-right w-full ">
+            <div className="flex justify-end -mt-1">
               <button
                 type="button"
-                className="text-gradient-brand font-medium text-sm hover:underline cursor-pointer"
+                className="text-xs font-medium text-[#0575E6] cursor-pointer hover:underline"
               >
-                Forgot Password
+                Forgot password?
               </button>
             </div>
           )}
@@ -155,42 +189,32 @@ export default function AuthForm({
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-6 bg-gradient-to-tr cursor-pointer from-[#032B4A] to-[#0575E6] text-white font-medium text-base md:text-lg py-2 sm:py-4 rounded-xl shadow-md hover:opacity-95 transition-opacity duration-200 mb-6 disabled:opacity-50"
+            className="w-full h-12 short:h-11 mt-2 rounded-xl bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white text-sm sm:text-base font-medium shadow-md inline-flex items-center justify-center gap-2 cursor-pointer hover:opacity-95 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {loading
-              ? isRegister
-                ? "Creating account..."
-                : "Signing in..."
-              : isRegister
-                ? "Create account"
-                : "Sign in with email"}
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {isRegister ? "Creating account..." : "Signing in..."}
+              </>
+            ) : isRegister ? (
+              "Create account"
+            ) : (
+              "Log in"
+            )}
           </button>
         </form>
 
-        {!isRegister && (
-          <p className="text-slate font-medium text-xs xs:text-sm md:text-base text-center">
-            Don't have an account?{" "}
-            <button
-              type="button"
-              onClick={onRegisterClick}
-              className="text-gradient-brand font-semibold hover:underline cursor-pointer"
-            >
-              Register as new patient
-            </button>
-          </p>
-        )}
-        {isRegister && (
-          <p className="text-slate font-medium text-sm md:text-base text-center">
-            Already have an account?{" "}
-            <button
-              type="button"
-              onClick={onLoginClick}
-              className="text-[#005cb9] font-semibold hover:underline cursor-pointer"
-            >
-              Login
-            </button>
-          </p>
-        )}
+        {/* Switch between login and register */}
+        <p className="mt-6 short:mt-4 text-center text-sm text-[#4f7ca8]">
+          {isRegister ? "Already have an account? " : "New patient? "}
+          <button
+            type="button"
+            onClick={isRegister ? onLoginClick : onRegisterClick}
+            className="font-semibold text-[#0575E6] cursor-pointer hover:underline"
+          >
+            {isRegister ? "Log in" : "Create an account"}
+          </button>
+        </p>
       </div>
     </div>
   );

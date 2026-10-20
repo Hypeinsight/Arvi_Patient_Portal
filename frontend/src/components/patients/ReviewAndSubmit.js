@@ -1,27 +1,62 @@
 "use client";
 
-import React, {useState} from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useEffect, useState } from "react";
+import {
+  ArrowRight,
+  ClipboardCheck,
+  Info,
+  Loader2,
+  Pencil,
+  X,
+} from "lucide-react";
 import ProgressSteps from "@/components/ProgressSteps";
-import { Check } from "lucide-react";
-import NavigationButtons from "@/components/NavigationButtons";
 import useIntakeStore from "@/lib/intakeStore";
-import Title from "../Title";
-import InfoCard from "../InfoCard";
 import { createSummary } from "@/lib/api/summary";
 
-export default function ReviewAndSubmit({ onNext, onBack }) {
-  const { formData, patientType, sessionId } = useIntakeStore();
-  const [loading, setLoading] = useState(false);
-  console.log("ReviewAndSubmit formData:", formData);
+const APPOINTMENT_LABELS = {
+  new: "New Patient",
+  followup_lt12: "Follow-up (within 12 months)",
+  followup_gt12: "Follow-up (over 12 months)",
+};
 
-  const handlePrevious = () => {
-    console.log("Navigate to previous step");
-    onBack();
-  };
+// "YYYY-MM-DD" -> "DD/MM/YYYY", without going through Date (avoids timezone shifts)
+const formatDate = (value) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value || "");
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : null;
+};
+
+const formatList = (value) => {
+  if (Array.isArray(value)) return value.filter(Boolean).join(", ") || null;
+  return value || null;
+};
+
+export default function ReviewAndSubmit({ onNext, onBack }) {
+  const { formData, patientType, sessionId, screens, goTo } = useIntakeStore();
+  const [loading, setLoading] = useState(false);
+
+  const isGuest = patientType === "guest";
+  const personal = formData.personal ?? {};
+  const medical = formData.medical ?? {};
+
+  // Lock page scroll while the popup is open
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  // Escape works like Back
+  useEffect(() => {
+    const handleKey = (event) => {
+      if (event.key === "Escape" && !loading) onBack();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [loading, onBack]);
 
   const handleNext = async () => {
-    console.log("Navigate to next step");
     setLoading(true);
     const data = await createSummary(sessionId);
     setLoading(false);
@@ -30,116 +65,198 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
     }
   };
 
-  const name = formData.personal
-    ? `${formData.personal.first_name ?? ""} ${formData.personal.last_name ?? ""}`.trim()
-    : "_";
+  const editScreen = (screen) => {
+    const index = screens.indexOf(screen);
+    if (index >= 0) goTo(index);
+  };
 
-  const dob = formData.personal?.date_of_birth
-    ? new Date(formData.personal.date_of_birth).toLocaleDateString()
-    : "_";
+  const emergencyContact = [
+    personal.emergency_contact_name,
+    personal.emergency_contact_number,
+  ]
+    .filter(Boolean)
+    .join(" - ");
 
-  const email = formData.personal?.email ?? "_";
+  const appointmentType =
+    formData.appointment?.appointment_type ?? formData.appointment?.type;
 
-  const phone = formData.personal?.phone ?? "_";
-
-  const address = formData.personal?.address ?? "_";
-
-  const appointmentType = formData.appointment?.type
-    ? formData.appointment.type
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, (c) => c.toUpperCase())
-    : "_";
-
-  const accessMethod = patientType === "guest" ? "Guest" : "Account User";
-
-  const referral =
-    formData.referral?.has_referral === true
-      ? "Referral Discount Applied"
-      : formData.referral?.has_referral === false
-        ? "Standard Fees Apply"
-        : "_";
-
-  // Guests aren't asked for contact details or an appointment type
-  const isGuest = patientType === "guest";
-
-  const summary = [
-    { label: "Name", value: name },
-    { label: "Date of Birth", value: dob },
-    ...(isGuest
-      ? []
-      : [
-          { label: "Email", value: email },
-          { label: "Phone", value: phone },
-          { label: "Address", value: address },
-          { label: "Appointment Type", value: appointmentType },
-        ]),
-    { label: "Access Method", value: accessMethod },
-    { label: "Referral", value: referral },
+  const sections = [
+    {
+      title: "Personal details",
+      screen: "personal_details",
+      rows: [
+        {
+          label: "Name",
+          value: `${personal.first_name ?? ""} ${personal.last_name ?? ""}`.trim(),
+        },
+        { label: "Date of birth", value: formatDate(personal.date_of_birth) },
+        { label: "Gender", value: personal.gender },
+        { label: "Phone", value: personal.phone },
+        { label: "Email", value: personal.email, lowercase: true },
+        ...(isGuest
+          ? []
+          : [
+              { label: "Home address", value: personal.address },
+              { label: "Emergency contact", value: emergencyContact },
+            ]),
+      ],
+    },
+    {
+      title: "Medical details",
+      screen: "medical_details",
+      rows: [
+        { label: "Conditions", value: formatList(medical.conditions) },
+        { label: "Medications", value: formatList(medical.medications) },
+        { label: "Allergies", value: formatList(medical.allergies) },
+        { label: "Previous surgeries", value: medical.previous_surgeries },
+        { label: "Family history", value: medical.family_history },
+      ],
+    },
+    {
+      title: "Appointment",
+      screen: isGuest ? null : "choose_appointment_type",
+      rows: [
+        { label: "Access method", value: isGuest ? "Guest" : "Account user" },
+        ...(isGuest
+          ? []
+          : [
+              {
+                label: "Appointment type",
+                value: APPOINTMENT_LABELS[appointmentType] ?? appointmentType,
+              },
+            ]),
+        {
+          label: "Referral",
+          value:
+            formData.referral?.has_referral === true
+              ? "Yes - referral discount applies"
+              : formData.referral?.has_referral === false
+                ? "No - standard fees apply"
+                : null,
+        },
+      ],
+    },
   ];
 
   return (
     <div className="px-4 md:px-8 lg:px-16">
-      {/* Main Content */}
-      <div className="pb-8">
-        <div className="max-w-8xl mx-auto">
-          <ProgressSteps />
+      <div className="max-w-8xl mx-auto">
+        <ProgressSteps />
+      </div>
 
-          {/* Main White Container */}
-          <div className="relative mt-4 bg-white rounded-4xl">
-            {/* Content Container */}
-            <div className="relative z-10 p-4 md:p-8">
-              <Title title="Review & Submit" />
-
-
-              {/* Review & Submit Section */}
-              <div className="mt-8 mb-16">
-                {/* Form complete card */}
-                <InfoCard
-                  title="Form Complete!"
-                  description="Your intake form is 90% complete. Please review the information below and submit when ready."
-                  icon={Check}
-                />
-
-                {/* Summary Section */}
-                <h3 className="text-lg md:text-xl font-medium text-gray-900 mb-4">
-                  Summary
-                </h3>
-                <div className="grid md:grid-cols-2 gap-4 mb-6 font-poppins max-h-[30vh] overflow-y-auto scrollbar">
-                  {summary.map((item) => (
-                    <Card
-                      key={item.label}
-                      className="bg-blue-50 rounded-[1.125rem] h-auto"
-                    >
-                      <CardContent className="p-4 flex items-center gap-1">
-                        <p className="text-sm md:text-base font-medium text-slate">
-                          {item.label}:
-                        </p>
-                        <p
-                          className={`text-sm md:text-base text-light-gray font-medium ${item.label == "Email" ? "lowercase" : "capitalize"}`}
-                        >
-                          {item.value.length > 40 ? `${item.value.slice(0,5)}...` : item.value}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* What happens next card */}
-                <InfoCard
-                  title=" What happens next?"
-                  description="After submission, you'll receive a confirmation email
-                        with your appointment details. Our medical team will
-                        review your information before your consultation."
-                />
-              </div>
-
-              <NavigationButtons
-                onBack={handlePrevious}
-                onNext={handleNext}
-                nextText="Chat"
-                loading={loading}
-              />
+      {/* Review popup */}
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#032B4A]/40 backdrop-blur-sm p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="review-title"
+          className="w-full max-w-2xl max-h-[90dvh] flex flex-col bg-white rounded-3xl shadow-2xl font-poppins overflow-hidden"
+        >
+          {/* Header */}
+          <div className="flex items-start gap-4 px-6 pt-6 pb-4 border-b border-[#0575E61F]">
+            <span className="flex items-center justify-center w-11 h-11 shrink-0 rounded-2xl border border-[#0575E63D] text-[#0575E6]">
+              <ClipboardCheck className="w-6 h-6" strokeWidth={1.5} />
+            </span>
+            <div className="flex-1">
+              <h2
+                id="review-title"
+                className="text-lg sm:text-xl font-semibold text-[#032B4A]"
+              >
+                Review your details
+              </h2>
+              <p className="mt-0.5 text-sm text-[#4f7ca8]">
+                Check everything is correct before starting your pre-visit
+                chat.
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={onBack}
+              disabled={loading}
+              aria-label="Close and go back"
+              className="p-1.5 rounded-lg text-[#4f7ca8] cursor-pointer hover:bg-[#0575E614] hover:text-[#032B4A] disabled:cursor-not-allowed"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Summary */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            {sections.map((section) => (
+              <section
+                key={section.title}
+                className="rounded-2xl border border-[#0575E61F] bg-[#F5F9FF]"
+              >
+                <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                  <h3 className="text-sm font-semibold text-[#032B4A]">
+                    {section.title}
+                  </h3>
+                  {section.screen && (
+                    <button
+                      type="button"
+                      onClick={() => editScreen(section.screen)}
+                      disabled={loading}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-[#0575E6] cursor-pointer hover:underline disabled:cursor-not-allowed"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+                  )}
+                </div>
+                <dl className="divide-y divide-[#0575E614] px-4 pb-1">
+                  {section.rows.map((row) => (
+                    <div
+                      key={row.label}
+                      className="grid grid-cols-[8.5rem_1fr] sm:grid-cols-[10rem_1fr] gap-3 py-2 text-sm"
+                    >
+                      <dt className="text-[#4f7ca8]">{row.label}</dt>
+                      <dd
+                        className={`break-words ${
+                          row.value
+                            ? `text-[#032B4A] ${row.lowercase ? "lowercase" : ""}`
+                            : "text-[#4f7ca8]/60 italic"
+                        }`}
+                      >
+                        {row.value || "Not provided"}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            ))}
+
+            <p className="flex items-start gap-2 text-xs text-[#4f7ca8]">
+              <Info className="w-4 h-4 shrink-0 mt-px" />
+              Our medical team will review your information before your
+              consultation.
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 px-6 py-4 border-t border-[#0575E61F]">
+            <button
+              type="button"
+              onClick={onBack}
+              disabled={loading}
+              className="h-10 px-6 rounded-xl border border-[#0575E6] text-sm font-medium text-[#0575E6] bg-white cursor-pointer hover:bg-[#0575E614] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={loading}
+              className="h-10 px-6 rounded-xl bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-sm font-medium text-white inline-flex items-center justify-center gap-2 cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  Confirm &amp; start chat
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>

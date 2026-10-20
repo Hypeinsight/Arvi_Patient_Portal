@@ -70,26 +70,32 @@ export default function AppointmentType({ onNext, onBack }) {
     )?.id ?? null,
   );
 
-  const handleSelect = async (type) => { 
-    
+  // Clicking a card only selects it; Next saves the choice and moves on,
+  // like the other form steps
+  const handleNext = async () => {
+    const type = appointmentTypes.find((t) => t.id === selectedType);
+    if (!type) return;
+
     const payload = {
       appointment_type: type.patientType,
     };
 
-    const data = formData.appointment
-    ? await updateAppointmentDetails(sessionId, payload)
-    : await createAppointmentDetails(sessionId, payload);
-    
-    if (!data.success) {
-      toast.error(data.message || "Error selecting type");
-      return;
-    }
+    setLoading(true);
+    try {
+      const data = formData.appointment
+        ? await updateAppointmentDetails(sessionId, payload)
+        : await createAppointmentDetails(sessionId, payload);
 
-    updatePatientFlow(data.patient_type, data.screens);
-    
-    setSelectedType(type.id);
-    
-    onNext(payload, "appointment");
+      if (!data.success) {
+        toast.error(data.message || "Error selecting type");
+        return;
+      }
+
+      updatePatientFlow(data.patient_type, data.screens);
+      onNext(payload, "appointment");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -103,7 +109,7 @@ export default function AppointmentType({ onNext, onBack }) {
           {/* Main White Container */}
           <div className="relative mt-4 bg-white rounded-4xl">
             {/* Content Container */}
-            <div className="relative z-10 p-4 md:p-8">
+            <div className="relative z-10 p-4 md:p-6 tall:p-8">
               <Title
                 title="Choose Your Appointment Type"
                 className="md:!text-2xl"
@@ -111,7 +117,7 @@ export default function AppointmentType({ onNext, onBack }) {
 
 
               {/* Choose your appointment Type Section */}
-              <div className="mt-8 mb-16">
+              <div className="mt-5 mb-6 tall:mt-8 tall:mb-12">
                 {/* Discount Information */}
                 <InfoCard
                   title="Important Discount Information"
@@ -133,14 +139,14 @@ export default function AppointmentType({ onNext, onBack }) {
                         key={type.id}
                         className={`
           relative cursor-pointer transition-all duration-200 hover:shadow-lg
-          border-2 rounded-2xl bg-white p-3 text-center h-40 md:h-88 flex flex-col justify-center items-center
+          border-2 rounded-2xl bg-white p-3 text-center h-36 md:h-52 tall:h-88 flex flex-col justify-center items-center
           ${
             selectedType === type.id
               ? "border-blue-600 shadow-lg"
               : "border-[#0575E63D] hover:border-gray-300"
           }
         `}
-                        onClick={() => !loading && handleSelect(type)}
+                        onClick={() => !loading && setSelectedType(type.id)}
                       >
                         {/* Icon */}
                         <Image
@@ -148,14 +154,14 @@ export default function AppointmentType({ onNext, onBack }) {
                           width={type.width}
                           height={type.height}
                           alt="icon"
-                          className=""
+                          className="h-14 w-auto tall:h-[5.5rem]"
                         />
 
                         {/* Content */}
-                        <h3 className="font-poppins text-sm md:text-[1.25rem] 2xl:text-[1.625rem] font-medium text-slate mb-1">
+                        <h3 className="font-poppins text-sm md:text-[1.125rem] tall:text-[1.625rem] font-medium text-slate mb-1">
                           {type.title}
                         </h3>
-                        <p className="font-poppins text-xs md:text-[1rem] 2xl:text-[1.5rem] text-slate mb-1 leading-tight">
+                        <p className="font-poppins text-xs md:text-[0.9375rem] tall:text-[1.5rem] text-slate mb-1 leading-tight">
                           {type.subtitle}
                         </p>
                         {type.description && (
@@ -169,11 +175,12 @@ export default function AppointmentType({ onNext, onBack }) {
                 </div>
               </div>
 
-              {/* Next continues with an already-saved choice after going back */}
+              {/* Next saves the selected appointment type */}
               <NavigationButtons
                 onBack={onBack}
-                onNext={() => onNext()}
-                isNextDisabled={!formData.appointment}
+                onNext={handleNext}
+                isNextDisabled={!selectedType}
+                loading={loading}
               />
             </div>
           </div>

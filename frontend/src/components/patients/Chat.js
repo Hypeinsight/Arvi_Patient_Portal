@@ -112,12 +112,6 @@ export default function Chat() {
     }
   };
 
-  // TODO: Remove this after the test
-  const handleClose = () => {
-    setShowAllSet(false);
-    setChatEnded(false);
-  };
-
   const handleSubmit = async () => {
     if (loading || submitting) return;
 
@@ -159,13 +153,13 @@ export default function Chat() {
             <button
               onClick={handleSubmit}
               disabled={loading || submitting}
-              className="h-[30px] xs:h-[38px] w-[80px] xl:w-[100px] justify-center bg-white/70 text-[#032B4A] border border-[#0575E6] rounded-lg xs:rounded-xl py-1 px-2 xs:p-2 sm:px-4 sm:py-2 text-sm flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity duration-500 ease-in-out disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-[30px] xs:h-[38px] w-auto shrink-0 justify-center bg-white/70 text-[#032B4A] border border-[#0575E6] rounded-lg xs:rounded-xl py-1 px-2 xs:p-2 sm:px-4 sm:py-2 text-sm flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity duration-500 ease-in-out disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  Skip
+                  Skip &amp; send
                   <SkipForward size={15} fill="#032B4A" />
                 </>
               )}
@@ -237,7 +231,7 @@ export default function Chat() {
               {chatEnded ? (
                 <InfoCard
                   title="You're Almost Done"
-                  description="Thank you for completing your intake. Tap Send All Details to securely share your information with your healthcare team."
+                  description="Thank you for completing your intake. Tap Send your details to securely share your information with your healthcare team."
                   className="mb-0"
                   icon={Check}
                   buttonIconClassName="text-white"
@@ -297,8 +291,7 @@ export default function Chat() {
             </div>
           </div>
 
-          {/* TODO: Remove onClose after the test */}
-          {showAllSet && <AllSet onClose={handleClose} />}
+          {showAllSet && <AllSet />}
         </div>
       </div>
     </div>

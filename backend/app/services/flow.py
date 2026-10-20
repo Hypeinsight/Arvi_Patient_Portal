@@ -1,7 +1,6 @@
 SCREENS = [
     "choose_access_method",
     "choose_appointment_type",
-    "privacy_consent",
     # "account_setup",
     # "upload_personal_details",
     "personal_details",
@@ -13,8 +12,9 @@ SCREENS = [
 
 SCREEN_ACCESS = {
     "choose_access_method":    ["pending", "guest", "new", "followup_lt12", "followup_gt12"],
-    "choose_appointment_type": ["pending", "new", "followup_lt12", "followup_gt12"],
-    "privacy_consent":         ["guest", "new"],
+    # New accounts get "new" assigned automatically, so only returning
+    # accounts choose between the follow-up types
+    "choose_appointment_type": ["pending", "followup_lt12", "followup_gt12"],
     # "account_setup":           ["new"],
     # "upload_personal_details": ["guest", "new", "followup_gt12"],
     "personal_details":        ["guest", "new", "followup_lt12", "followup_gt12"],

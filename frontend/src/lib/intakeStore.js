@@ -39,8 +39,29 @@ const useIntakeStore = create((set, get) => ({
   },
 
   // Actions
+  // A new session starts with empty form data; anything left from an earlier
+  // session in this tab would make the steps update records that don't exist
   initSession: (sessionId, patientType, screens, isNewAccount = false) =>
-    set({ sessionId, patientType, screens, isNewAccount, currentIndex: 0 }),
+    set({
+      sessionId,
+      patientType,
+      screens,
+      isNewAccount,
+      currentIndex: 0,
+      formData: {
+        appointment: null,
+        consent: null,
+        account: null,
+        personal: null,
+        medical: null,
+        referral: null,
+      },
+      uploadedFiles: [],
+      ocrPersonalText: null,
+      uploadedPersonalFile: null,
+      ocrMedicalText: null,
+      uploadedMedicalFile: null,
+    }),
 
   updatePatientFlow: (patientType, screens) =>
     set((state) => {

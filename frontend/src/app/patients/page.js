@@ -7,7 +7,6 @@ import useIntakeStore from "@/lib/intakeStore";
 import MainPage from "@/components/patients/MainPage";
 import RegisterForm from "@/components/patients/RegisterForm";
 import AppointmentType from "@/components/patients/AppointmentType";
-import PrivacyConsent from "@/components/patients/PrivacyConsent";
 import PersonalDetails from "@/components/patients/PersonalDetails";
 import MedicalDetails from "@/components/patients/MedicalDetails";
 import ReviewAndSubmit from "@/components/patients/ReviewAndSubmit";
@@ -18,7 +17,6 @@ const SCREEN_MAP = {
   choose_access_method: MainPage,
   register: RegisterForm,
   choose_appointment_type: AppointmentType,
-  privacy_consent: PrivacyConsent,
   // account_setup: AccountSetup,
   // upload_personal_details: UploadPersonalDetails,
   personal_details: PersonalDetails,
@@ -120,7 +118,7 @@ export default function PatientsPage() {
           : null;
       if (!token) router.replace("/");
     } else {
-      // guest / new — just need a valid session, no token expected
+      // guest / new - just need a valid session, no token expected
       if (!sessionId) router.replace("/");
     }
   }, [screens, currentIndex, isPublic, patientType, sessionId, router]);
