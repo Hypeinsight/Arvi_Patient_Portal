@@ -26,13 +26,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased py-4 md:py-6 min-h-screen flex flex-col gap-4`} style={{
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} style={{
           backgroundImage: "url('/new-bg.png')",
           // backgroundSize: "cover",
           // backgroundPosition: "center",
         }}>
-        <TopNav />
-        <main className="flex-1 flex flex-col justify-center">{children}</main>
+        {/* Page padding lives here, not on <body>: dropdowns reset the body's
+            padding while open, which made the whole page jump */}
+        <div className="py-4 md:py-6 min-h-screen flex flex-col gap-4">
+          <TopNav />
+          <main className="flex-1 flex flex-col justify-center">{children}</main>
+        </div>
         <Toaster position="top-right" richColors closeButton />
         {/* <Footer/> */}
       </body>

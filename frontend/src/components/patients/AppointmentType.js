@@ -9,7 +9,6 @@ import {
 } from "@/lib/api/appointment_details";
 import Title from "../Title";
 import NavigationButtons from "@/components/NavigationButtons";
-import InfoCard from "../InfoCard";
 import Image from "next/image";
 import { toast } from "sonner";
 
@@ -118,13 +117,6 @@ export default function AppointmentType({ onNext, onBack }) {
 
               {/* Choose your appointment Type Section */}
               <div className="mt-5 mb-6 tall:mt-8 tall:mb-12">
-                {/* Discount Information */}
-                <InfoCard
-                  title="Important Discount Information"
-                  description="Patients with a valid referral, Medicare number, and uploaded referral letter are eligible for our referral discount.
-                        Patients without a referral will be charged standard consultation fees."
-                />
-
                 <div
                   className={`grid grid-cols-1 gap-4 md:gap-6 ${
                     availableTypes.length > 2

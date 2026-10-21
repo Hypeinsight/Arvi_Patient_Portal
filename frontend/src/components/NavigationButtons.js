@@ -8,9 +8,11 @@ export default function NavigationButtons({
   backText = "Previous",
   nextText = "Next",
   loading = false,
+  // Top spacing above the buttons; pages with long forms pass a smaller one
+  marginClassName = "mt-8 tall:mt-16",
 }) {
   return (
-    <div className="flex flex-col-reverse xs:flex-row justify-end gap-3 mt-8 tall:mt-16 w-full font-poppins">
+    <div className={`flex flex-col-reverse xs:flex-row justify-end gap-3 ${marginClassName} w-full font-poppins`}>
       <button
         type="button"
         onClick={onBack}

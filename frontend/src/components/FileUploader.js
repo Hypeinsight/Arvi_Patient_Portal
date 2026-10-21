@@ -138,9 +138,9 @@ export default function FileUploader({
             onClick={onCancel}
             disabled={isImporting}
             aria-label="Close uploader"
-            className="absolute right-4 md:right-6 top-4 md:top-6 rounded-lg bg-[#ff0000] p-0.25 xs:p-1 cursor-pointer text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="absolute right-4 md:right-6 top-4 md:top-6 p-1.5 rounded-lg text-[#4f7ca8] cursor-pointer transition-colors hover:bg-[#0575E614] hover:text-[#032B4A] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <X className="h-3 xs:h-4 w-3 xs:w-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 

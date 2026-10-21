@@ -191,7 +191,7 @@ export default function MedicalDetails({ onNext, onBack }) {
   };
 
   const textareaClass = (field) =>
-    `w-full px-4 py-3 font-poppins no-scrollbar text-sm border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 placeholder-gray-300 ${
+    `w-full px-4 py-2 font-poppins no-scrollbar text-sm border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 placeholder-gray-300 ${
       errors[field] ? "border-red-500" : "border-gray-300"
     }`;
 
@@ -216,7 +216,8 @@ export default function MedicalDetails({ onNext, onBack }) {
 
 
               {/* Medical Details Section */}
-              <div className="mt-8 mb-16">
+              {/* No bottom margin: NavigationButtons adds its own top margin */}
+              <div className="mt-5 tall:mt-8">
                 {/* Information */}
                 <InfoCard
                   title={
@@ -243,7 +244,7 @@ export default function MedicalDetails({ onNext, onBack }) {
                         Current Medical Conditions*
                       </label>
                       <textarea
-                        rows={3}
+                        rows={2}
                         value={formData.currentConditions}
                         onChange={(e) =>
                           handleInputChange("currentConditions", e.target.value)
@@ -258,7 +259,7 @@ export default function MedicalDetails({ onNext, onBack }) {
                         Current Medications*
                       </label>
                       <textarea
-                        rows={3}
+                        rows={2}
                         value={formData.currentMedications}
                         onChange={(e) =>
                           handleInputChange(
@@ -280,7 +281,7 @@ export default function MedicalDetails({ onNext, onBack }) {
                         Allergies*
                       </label>
                       <textarea
-                        rows={3}
+                        rows={2}
                         value={formData.allergies}
                         onChange={(e) =>
                           handleInputChange("allergies", e.target.value)
@@ -295,7 +296,7 @@ export default function MedicalDetails({ onNext, onBack }) {
                         Previous Surgeries*
                       </label>
                       <textarea
-                        rows={3}
+                        rows={2}
                         value={formData.previousSurgeries}
                         onChange={(e) =>
                           handleInputChange("previousSurgeries", e.target.value)
@@ -313,7 +314,7 @@ export default function MedicalDetails({ onNext, onBack }) {
                       Family Medical History*
                     </label>
                     <textarea
-                      rows={4}
+                      rows={2}
                       value={formData.familyMedicalHistory}
                       onChange={(e) =>
                         handleInputChange(

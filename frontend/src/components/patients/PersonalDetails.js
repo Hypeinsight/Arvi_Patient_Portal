@@ -404,7 +404,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
               <Title title="Personal Details" />
 
               {/* Personal Details Section */}
-              <div className="mt-8 mb-16">
+              {/* No bottom margin: NavigationButtons adds its own top margin */}
+              <div className="mt-5 tall:mt-8">
                 <InfoCard
                   title={
                     ocrPersonalText
@@ -546,28 +547,24 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                     </div>
                   </div>
 
-                  {/* Home address and emergency contact: account holders only */}
+                  {/* Third Row: Home Address, Emergency Contacts (account holders only) */}
                   {!isGuest && (
-                  <>
-                  {/* Third Row: Home Address */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                      Home Address*
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.homeAddress}
-                      onChange={(e) =>
-                        handleInputChange("homeAddress", e.target.value)
-                      }
-                      className={fieldClass("homeAddress")}
-                      placeholder="Home Address"
-                    />
-                    <ErrorMsg field="homeAddress" />
-                  </div>
-
-                  {/* Fourth Row: Emergency Contacts */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
+                        Home Address*
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.homeAddress}
+                        onChange={(e) =>
+                          handleInputChange("homeAddress", e.target.value)
+                        }
+                        className={fieldClass("homeAddress")}
+                        placeholder="Home Address"
+                      />
+                      <ErrorMsg field="homeAddress" />
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
                         Emergency Contact Name
@@ -615,17 +612,13 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <ErrorMsg field="emergencyContactNumber" />
                     </div>
                   </div>
-                  </>
                   )}
 
-                  {/* Fifth Row: Referral */}
+                  {/* Fourth Row: Referral */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                      Referral
-                    </label>
                     <label
                       htmlFor="hasReferral"
-                      className={`${fieldClass("hasReferral")} flex items-start gap-3 py-3 cursor-pointer`}
+                      className={`${fieldClass("hasReferral")} flex items-start gap-3 py-2.5 cursor-pointer`}
                     >
                       <Checkbox
                         id="hasReferral"
@@ -635,7 +628,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       />
                       <span>
                         I have a referral
-                        <span className="block text-gray-500 mt-1">
+                        <span className="block text-xs text-gray-500 mt-0.5">
                           Patients with a valid referral, Medicare number, and
                           uploaded referral letter are eligible for our referral
                           discount. Patients without a referral will be charged
@@ -645,7 +638,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                     </label>
                   </div>
 
-                  {/* Sixth Row: Privacy & Consent */}
+                  {/* Fifth Row: Privacy & Consent */}
                   {needsConsent && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
@@ -678,7 +671,11 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
               </div>
 
               {/* Navigation Buttons */}
-              <NavigationButtons onBack={handlePrevious} onNext={handleNext} />
+              <NavigationButtons
+                onBack={handlePrevious}
+                onNext={handleNext}
+                marginClassName="mt-6 tall:mt-8"
+              />
             </div>
           </div>
         </div>

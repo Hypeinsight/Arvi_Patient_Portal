@@ -84,3 +84,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Dropdowns (Radix Select) and popups lock page scrolling while open, which
+   hides the scrollbar and makes the page jump sideways. Always reserve the
+   scrollbar's space, and stop Radix adding its own compensating margin
+   (the extra "html" outranks the rule Radix injects later). */
+html {
+  scrollbar-gutter: stable;
+}
+
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+}
