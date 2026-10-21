@@ -54,9 +54,7 @@ def update_session_sections(session, payload):
             "consent_record",
             ConsentRecord,
             {
-                "accepted_terms": bool(consent.get("accepted_terms")),
-                "accepted_privacy": bool(consent.get("accepted_privacy")),
-                "consent_marketing": bool(consent.get("consent_marketing")),
+                "accepted_terms_and_privacy": bool(consent.get("accepted_terms_and_privacy")),
                 "consented_at": _parse_datetime(consent.get("consented_at") or consent.get("timestamp"))
                 or datetime.now(timezone.utc),
             },
@@ -168,9 +166,7 @@ def _consent_to_dict(record):
         return None
     return {
         "id": str(record.id),
-        "accepted_terms": record.accepted_terms,
-        "accepted_privacy": record.accepted_privacy,
-        "consent_marketing": record.consent_marketing,
+        "accepted_terms_and_privacy": record.accepted_terms_and_privacy,
         "consented_at": _iso(record.consented_at),
     }
 

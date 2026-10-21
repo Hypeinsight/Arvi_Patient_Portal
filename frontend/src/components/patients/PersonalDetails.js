@@ -134,7 +134,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   // already did on their first visit
   const needsConsent = patientType === "guest" || patientType === "new";
   const [acceptedConsent, setAcceptedConsent] = useState(
-    !!(storeData.consent?.accepted_terms && storeData.consent?.accepted_privacy),
+    !!storeData.consent?.accepted_terms_and_privacy,
   );
 
   const [showUploader, setShowUploader] = useState(false);
@@ -374,9 +374,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
 
     if (needsConsent) {
       const consentPayload = {
-        accepted_terms: acceptedConsent,
-        accepted_privacy: acceptedConsent,
-        consent_marketing: false,
+        accepted_terms_and_privacy: acceptedConsent,
         timestamp: new Date().toISOString(),
       };
       const consentData = storeData.consent

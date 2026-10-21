@@ -22,9 +22,7 @@ def _consent_to_dict(consent):
     return {
         "id": str(consent.id),
         "session_id": str(consent.session_id),
-        "accepted_terms": consent.accepted_terms,
-        "accepted_privacy": consent.accepted_privacy,
-        "consent_marketing": consent.consent_marketing,
+        "accepted_terms_and_privacy": consent.accepted_terms_and_privacy,
         "consented_at": consent.consented_at.isoformat(),
     }
 

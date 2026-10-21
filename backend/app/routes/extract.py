@@ -12,8 +12,7 @@ import statistics
 
 extract_bp = Blueprint("extract", __name__)
 
-ALLOWED_MIME         = {"image/jpeg", "image/png", "image/webp", "application/pdf"}
-ALLOWED_EXTRACT_TYPES = {"personal", "medical"}
+ALLOWED_MIME = {"image/jpeg", "image/png", "image/webp", "application/pdf"}
 
 # Keep this in sync with the label variants your frontend regex looks for.
 # Used here only to decide which OCR cells are "labels" for pairing purposes.
@@ -294,38 +293,3 @@ def ocr_personal_id(session_id):
         "text": result["text"],
         "layout_text": result["layout_text"],
     }), 200
-
-# @extract_bp.post("/sessions/<uuid:session_id>/ocr") # to perform OCR on a personal ID upload
-# def ocr_personal_id(session_id):
-#     if get_intake_data(session_id) is None:
-#         return jsonify({"success": False, "message": "Session not found"}), 404
-
-#     file = request.files.get("file")
-#     if not file:
-#         return jsonify({"success": False, "message": "No file provided"}), 400
-#     if file.mimetype not in ALLOWED_MIME:
-#         return jsonify({"success": False, "message": f"File type {file.mimetype} not allowed"}), 415
-
-#     file_bytes = file.read()
-
-#     try:
-#         text = _extract_text(file_bytes, file.mimetype)
-#     except Exception as e:
-#         return jsonify({"success": False, "message": f"OCR failed: {str(e)}"}), 500
-
-#     return jsonify({"success": True, "text": text}), 200
-
-
-# def _extract_text(file_bytes: bytes, mime_type: str) -> str:
-#     if mime_type == "application/pdf":
-#         doc = fitz.open(stream=file_bytes, filetype="pdf")
-#         text = ""
-#         for page in doc:
-#             pix = page.get_pixmap(dpi=300)
-#             img = Image.open(io.BytesIO(pix.tobytes("png")))
-#             text += pytesseract.image_to_string(img)
-#         doc.close()
-#         return text.strip()
-#     else:
-#         img = Image.open(io.BytesIO(file_bytes))
-#         return pytesseract.image_to_string(img).strip()

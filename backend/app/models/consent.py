@@ -20,19 +20,8 @@ class ConsentRecord(db.Model):
         nullable=False,
         unique=True,
     )
-    accepted_terms = db.Column(
-        db.Boolean,
-        nullable=False,
-        default=False,
-        server_default=db.text("false"),
-    )
-    accepted_privacy = db.Column(
-        db.Boolean,
-        nullable=False,
-        default=False,
-        server_default=db.text("false"),
-    )
-    consent_marketing = db.Column(
+    # One checkbox covers both the Terms of Use and the Privacy Policy
+    accepted_terms_and_privacy = db.Column(
         db.Boolean,
         nullable=False,
         default=False,

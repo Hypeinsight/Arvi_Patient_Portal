@@ -23,16 +23,6 @@ export async function submitSession(sessionId, formData) {
   return res.json();
 }
 
-export async function extractFromFile(sessionId, file, extractType) {
-  const form = new FormData();
-  form.append("file", file);
-  const res = await fetch(
-    `${BASE_URL}/sessions/${sessionId}/extract/${extractType}`,
-    { method: "POST", body: form }
-  );
-  return res.json();
-}
-
 export async function ocrPersonalId(sessionId, file) {
   const form = new FormData();
   form.append("file", file);

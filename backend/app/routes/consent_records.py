@@ -12,17 +12,9 @@ consent_records_bp = Blueprint("consent_records", __name__)
 
 def _consent_data_from_body(body, existing=None):
     return {
-        "accepted_terms": _parse_bool(
-            body.get("accepted_terms"),
-            existing.accepted_terms if existing else False,
-        ),
-        "accepted_privacy": _parse_bool(
-            body.get("accepted_privacy"),
-            existing.accepted_privacy if existing else False,
-        ),
-        "consent_marketing": _parse_bool(
-            body.get("consent_marketing"),
-            existing.consent_marketing if existing else False,
+        "accepted_terms_and_privacy": _parse_bool(
+            body.get("accepted_terms_and_privacy"),
+            existing.accepted_terms_and_privacy if existing else False,
         ),
         "consented_at": _parse_datetime(
             body.get("consented_at") or body.get("timestamp"),
