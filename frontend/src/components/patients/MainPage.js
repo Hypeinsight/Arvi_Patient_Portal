@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  ArrowLeft,
   ArrowRight,
+  HeartPulse,
   Loader2,
   Lock,
   LogIn,
@@ -12,7 +14,54 @@ import {
 import useIntakeStore from "@/lib/intakeStore";
 import { createSession } from "@/lib/api/session";
 import AuthForm from "@/components/patients/AuthForm";
+import ForgotPasswordForm from "@/components/patients/ForgotPasswordForm";
 import { prefillSession } from "@/lib/api/session";
+
+const AUTH_COPY = {
+  login: {
+    title: "Welcome back!",
+    prompt: "Don't have an account?",
+    switchLabel: "Create a new account now",
+    switchNote: "it's free and takes less than a minute.",
+  },
+  register: {
+    title: "Create your account",
+    prompt: "Already have an account?",
+    switchLabel: "Log in instead",
+    switchNote: "your saved details will be filled in for you.",
+  },
+  forgot: {
+    title: "Forgot your password?",
+    prompt: "Enter the email you signed up with and we'll send you a link to choose a new one. Remembered it?",
+    switchLabel: "Back to log in",
+    switchNote: "",
+  },
+};
+
+// Concentric arcs drawn behind the brand panel text
+function BrandArcs() {
+  return (
+    <svg
+      className="pointer-events-none absolute inset-0 w-full h-full"
+      viewBox="0 0 600 800"
+      preserveAspectRatio="xMidYMid slice"
+      fill="none"
+      aria-hidden="true"
+    >
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <path
+          key={i}
+          d={`M ${-80 + i * 40} 820 C ${120 + i * 40} ${560 - i * 30}, ${300 + i * 45} ${
+            320 - i * 25
+          }, ${340 + i * 50} ${40 + i * 30}`}
+          stroke="#0575E6"
+          strokeOpacity="0.1"
+          strokeWidth="1.5"
+        />
+      ))}
+    </svg>
+  );
+}
 
 export default function MainPage({ onNext }) {
   const {
@@ -44,12 +93,23 @@ export default function MainPage({ onNext }) {
     setAuthMode(null);
   };
 
+  // Escape returns from the sign-in view to the access options
+  useEffect(() => {
+    if (!authMode) return;
+    const handleKey = (event) => {
+      if (event.key === "Escape") setAuthMode(null);
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [authMode]);
+
   const handleAuthSuccess = async (userId) => {
-    const data = await createSession("pending", userId, "doc-123", "apt-456");
+    const data = await createSession("pending", userId);
 
     if (data.success) {
+      // Stay on the sign-in view until the next step shows, so the access
+      // options don't flash up while the prefill loads
       initSession(data.session_id, data.patient_type, data.screens, data.is_new_account);
-      setAuthMode(null);
 
       // New accounts are booked as new patients by the backend, with no
       // appointment type screen; keep the store in step for the review
@@ -79,7 +139,7 @@ export default function MainPage({ onNext }) {
     }
 
     if (newPatientType !== patientType || !sessionId) {
-      const data = await createSession(newPatientType, null, "doc-123", "apt-456");
+      const data = await createSession(newPatientType, null);
       if (data.success) {
         initSession(data.session_id, data.patient_type, data.screens, data.is_new_account);
       } else {
@@ -121,6 +181,132 @@ export default function MainPage({ onNext }) {
       onClick: () => handleSelect("guest"),
     },
   ];
+
+  if (authMode) {
+    const copy = AUTH_COPY[authMode];
+
+    return (
+      <div className="px-4 md:px-8 lg:px-16 font-poppins">
+        <div className="max-w-8xl mx-auto">
+          <div className="grid md:grid-cols-[minmax(0,11fr)_minmax(0,9fr)] overflow-hidden bg-white rounded-[2.25rem] border border-[#0575E61F] shadow-sm md:min-h-[calc(100dvh-9rem)] short:md:min-h-[calc(100dvh-5rem)]">
+            {/* Brand panel */}
+            <aside className="relative overflow-hidden bg-gradient-to-br from-[#F5F9FF] via-[#EDF4FF] to-[#E3EEFC] border-b md:border-b-0 md:border-r border-[#0575E61F] px-6 py-6 md:px-14 md:py-14 short:md:py-8 flex flex-col">
+              {/* Soft brand glow, as on the welcome page */}
+              <div
+                className="pointer-events-none absolute inset-0 overflow-hidden"
+                aria-hidden="true"
+              >
+                <div className="absolute -bottom-24 -left-16 w-[26rem] h-[26rem] rounded-full bg-[#7DB9F5]/30 blur-3xl" />
+                <div className="absolute -top-20 -right-16 w-[20rem] h-[20rem] rounded-full bg-[#0575E6]/10 blur-3xl" />
+              </div>
+              <BrandArcs />
+
+              <div className="relative flex-1 flex flex-col">
+                
+                <div className="md:my-auto">
+                  <h1 className="mt-6 md:mt-0 pb-1 bg-gradient-to-tr from-[#032B4A] to-[#0575E6] bg-clip-text text-transparent text-3xl md:text-5xl short:md:text-4xl tall:text-6xl font-bold leading-[1.1] tracking-tight">
+                    Hello,
+                    <br />
+                    welcome to Arvi!
+                  </h1>
+                  <p className="mt-4 md:mt-6 short:md:mt-4 max-w-md text-sm md:text-lg short:md:text-base text-[#4f7ca8] leading-relaxed">
+                    Share your details and health history before your visit, so
+                    your doctor is ready for you the moment you walk in.
+                  </p>
+                </div>
+
+                <p className="hidden md:flex items-center gap-2 text-sm text-[#4f7ca8]">
+                  <Lock className="w-4 h-4 shrink-0" />
+                  © {new Date().getFullYear()} Arvi Health. Your information
+                  stays private and secure.
+                </p>
+              </div>
+            </aside>
+
+            {/* Form panel */}
+            <section
+              aria-labelledby="auth-heading"
+              className="relative px-6 py-6 md:px-14 md:py-14 short:md:py-6 flex flex-col"
+            >
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4f7ca8] cursor-pointer hover:text-[#032B4A] transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </button>
+              </div>
+
+              <div className="w-full max-w-sm mx-auto my-auto pt-10 short:pt-3">
+                <h2
+                  id="auth-heading"
+                  className="text-2xl sm:text-3xl short:sm:text-2xl font-bold text-[#032B4A]"
+                >
+                  {copy.title}
+                </h2>
+                <p className="mt-2 text-sm text-[#4f7ca8] leading-relaxed">
+                  {copy.prompt}{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = authMode === "login" ? "register" : "login";
+                      setAuthMode(next);
+                      setSelectedMethod(next === "register" ? "create" : "login");
+                    }}
+                    className="font-semibold text-[#0575E6] underline underline-offset-2 cursor-pointer hover:text-[#032B4A]"
+                  >
+                    {copy.switchLabel}
+                  </button>
+                  {copy.switchNote && `, ${copy.switchNote}`}
+                </p>
+
+                <div className="mt-8 short:mt-5">
+                  {authMode === "forgot" ? (
+                    <ForgotPasswordForm onBackToLogin={() => setAuthMode("login")} />
+                  ) : (
+                    <AuthForm
+                      variant="plain"
+                      isRegister={authMode === "register"}
+                      onSuccess={handleAuthSuccess}
+                      onForgotPassword={() => setAuthMode("forgot")}
+                    />
+                  )}
+                </div>
+
+                {authMode !== "forgot" && (
+                <>
+                <div className="mt-8 short:mt-4 flex items-center gap-3 text-xs text-[#4f7ca8]/70">
+                  <span className="flex-1 h-px bg-[#0575E61F]" />
+                  or
+                  <span className="flex-1 h-px bg-[#0575E61F]" />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelect("guest")}
+                  disabled={loading}
+                  className="mt-4 short:mt-3 w-full h-12 short:h-11 rounded-xl border border-[#0575E63D] bg-white text-sm font-medium text-[#032B4A] inline-flex items-center justify-center gap-2 cursor-pointer hover:border-[#0575E6] hover:bg-[#F5F9FF] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <UserRound className="w-4 h-4" />
+                      Continue as guest
+                    </>
+                  )}
+                </button>
+                </>
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 md:px-8 lg:px-16 font-poppins">
@@ -201,34 +387,6 @@ export default function MainPage({ onNext }) {
           </div>
         </div>
       </div>
-
-      {authMode && (
-        <div
-          className="fixed inset-0 z-50 flex justify-center overflow-y-auto bg-[#032B4A]/40 backdrop-blur-sm px-4 py-6"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setAuthMode(null);
-          }}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="auth-dialog-title"
-            className="relative w-full max-w-3xl my-auto"
-          >
-            <h2 id="auth-dialog-title" className="sr-only">
-              {authMode === "register" ? "Create account" : "Patient login"}
-            </h2>
-            <AuthForm
-              isRegister={authMode === "register"}
-              isModal
-              onClose={handleClose}
-              onSuccess={handleAuthSuccess}
-              onRegisterClick={() => setAuthMode("register")}
-              onLoginClick={() => setAuthMode("login")}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -13,6 +13,11 @@ class Config:
     DOCTOR_API_KEY                 = os.getenv("DOCTOR_API_KEY")
     JWT_SECRET_KEY                 = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret")
     REDIS_URL                      = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    # Email goes through Resend, same as ARVI
+    RESEND_API_KEY                 = os.getenv("RESEND_API_KEY")
+    SENDER_EMAIL                   = os.getenv("SENDER_EMAIL", "Info@arvihealth.com")
+    # Where links in emails point to (the Next.js app)
+    FRONTEND_URL                   = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 class DevelopmentConfig(Config):
     DEBUG = True

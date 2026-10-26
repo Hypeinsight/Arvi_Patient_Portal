@@ -9,23 +9,36 @@ import { Eye, EyeOff, Loader2, Lock, Mail, X } from "lucide-react";
 const inputClass =
   "w-full h-12 short:h-10 pl-11 rounded-xl border bg-white text-sm text-[#032B4A] placeholder:text-[#4f7ca8]/60 outline-none transition-colors focus:border-[#0575E6] focus:ring-4 focus:ring-[#0575E6]/10";
 
-function PasswordField({ id, label, value, onChange, show, onToggle, error, autoComplete }) {
+// Filled field with an underline, used by the "plain" variant
+export const minimalInputClass =
+  "w-full h-12 short:h-11 px-4 rounded-t-lg border-0 border-b-2 bg-[#F5F9FF] text-sm text-[#032B4A] placeholder:text-[#4f7ca8]/70 outline-none transition-colors focus:bg-[#EDF4FF] focus:border-[#0575E6]";
+
+export function PasswordField({ id, label, value, onChange, show, onToggle, error, autoComplete, minimal }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-[#032B4A] mb-1.5">
+      <label
+        htmlFor={id}
+        className={minimal ? "sr-only" : "block text-sm font-medium text-[#032B4A] mb-1.5"}
+      >
         {label}
       </label>
       <div className="relative">
-        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4f7ca8]" />
+        {!minimal && (
+          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4f7ca8]" />
+        )}
         <input
           id={id}
           type={show ? "text" : "password"}
-          placeholder="••••••••"
+          placeholder={minimal ? label : "••••••••"}
           value={value}
           onChange={onChange}
           autoComplete={autoComplete}
           required
-          className={`${inputClass} pr-12 ${error ? "border-red-400" : "border-[#0575E63D]"}`}
+          className={
+            minimal
+              ? `${minimalInputClass} pr-12 ${error ? "border-red-400" : "border-[#0575E63D]"}`
+              : `${inputClass} pr-12 ${error ? "border-red-400" : "border-[#0575E63D]"}`
+          }
         />
         <button
           type="button"
@@ -49,6 +62,10 @@ export default function AuthForm({
   isOpen = false,
   isModal = false,
   onClose,
+  // "card": standalone card with logo (login/register pages)
+  // "plain": just the form, for pages that supply their own layout
+  variant = "card",
+  onForgotPassword,
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -84,6 +101,124 @@ export default function AuthForm({
       setLoading(false);
     }
   };
+
+  const isPlain = variant === "plain";
+
+  const form = (
+    <form
+      className={`${isPlain ? "" : "mt-7 short:mt-5"} space-y-4 short:space-y-3`}
+      onSubmit={handleSubmit}
+    >
+      <div>
+        <label
+          htmlFor="auth-email"
+          className={isPlain ? "sr-only" : "block text-sm font-medium text-[#032B4A] mb-1.5"}
+        >
+          Email address
+        </label>
+        <div className="relative">
+          {!isPlain && (
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4f7ca8]" />
+          )}
+          <input
+            id="auth-email"
+            type="email"
+            placeholder={isPlain ? "Email address" : "name@example.com"}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            autoFocus={isPlain}
+            required
+            className={
+              isPlain
+                ? `${minimalInputClass} border-[#0575E63D]`
+                : `${inputClass} pr-4 border-[#0575E63D]`
+            }
+          />
+        </div>
+      </div>
+
+      <PasswordField
+        id="auth-password"
+        label="Password"
+        value={password}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          setMismatch(false);
+        }}
+        show={showPassword}
+        onToggle={() => setShowPassword((visible) => !visible)}
+        autoComplete={isRegister ? "new-password" : "current-password"}
+        minimal={isPlain}
+      />
+
+      {isRegister && (
+        <PasswordField
+          id="auth-confirm-password"
+          label="Confirm password"
+          value={confirmPassword}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            setMismatch(false);
+          }}
+          show={showConfirmPassword}
+          onToggle={() => setShowConfirmPassword((visible) => !visible)}
+          error={mismatch ? "Passwords do not match." : ""}
+          autoComplete="new-password"
+          minimal={isPlain}
+        />
+      )}
+
+      {!isRegister && !isPlain && (
+        <div className="flex justify-end -mt-1">
+          <button
+            type="button"
+            className="text-xs font-medium text-[#0575E6] cursor-pointer hover:underline"
+          >
+            Forgot password?
+          </button>
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full h-12 short:h-11 rounded-xl text-white text-sm sm:text-base font-medium inline-flex items-center justify-center gap-2 cursor-pointer transition-opacity disabled:opacity-60 disabled:cursor-not-allowed ${
+          isPlain
+            ? "!mt-6 short:!mt-4 bg-gradient-to-tr from-[#032B4A] to-[#0575E6] shadow-md hover:opacity-95"
+            : "mt-2 bg-gradient-to-tr from-[#032B4A] to-[#0575E6] shadow-md hover:opacity-95"
+        }`}
+      >
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            {isRegister ? "Creating account..." : "Signing in..."}
+          </>
+        ) : isRegister ? (
+          "Create account"
+        ) : isPlain ? (
+          "Log in now"
+        ) : (
+          "Log in"
+        )}
+      </button>
+
+      {!isRegister && isPlain && (
+        <p className="pt-2 text-center text-sm text-[#4f7ca8]">
+          Forgot password?{" "}
+          <button
+            type="button"
+            onClick={onForgotPassword}
+            className="font-semibold text-[#0575E6] underline underline-offset-2 cursor-pointer hover:text-[#032B4A]"
+          >
+            Click here
+          </button>
+        </p>
+      )}
+    </form>
+  );
+
+  if (isPlain) return form;
 
   return (
     <div
@@ -125,84 +260,7 @@ export default function AuthForm({
           </p>
         </div>
 
-        {/* Form */}
-        <form className="mt-7 short:mt-5 space-y-4 short:space-y-3" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="auth-email" className="block text-sm font-medium text-[#032B4A] mb-1.5">
-              Email address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4f7ca8]" />
-              <input
-                id="auth-email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                required
-                className={`${inputClass} pr-4 border-[#0575E63D]`}
-              />
-            </div>
-          </div>
-
-          <PasswordField
-            id="auth-password"
-            label="Password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setMismatch(false);
-            }}
-            show={showPassword}
-            onToggle={() => setShowPassword((visible) => !visible)}
-            autoComplete={isRegister ? "new-password" : "current-password"}
-          />
-
-          {isRegister && (
-            <PasswordField
-              id="auth-confirm-password"
-              label="Confirm password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                setMismatch(false);
-              }}
-              show={showConfirmPassword}
-              onToggle={() => setShowConfirmPassword((visible) => !visible)}
-              error={mismatch ? "Passwords do not match." : ""}
-              autoComplete="new-password"
-            />
-          )}
-
-          {!isRegister && (
-            <div className="flex justify-end -mt-1">
-              <button
-                type="button"
-                className="text-xs font-medium text-[#0575E6] cursor-pointer hover:underline"
-              >
-                Forgot password?
-              </button>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-12 short:h-11 mt-2 rounded-xl bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white text-sm sm:text-base font-medium shadow-md inline-flex items-center justify-center gap-2 cursor-pointer hover:opacity-95 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                {isRegister ? "Creating account..." : "Signing in..."}
-              </>
-            ) : isRegister ? (
-              "Create account"
-            ) : (
-              "Log in"
-            )}
-          </button>
-        </form>
+        {form}
 
         {/* Switch between login and register */}
         <p className="mt-6 short:mt-4 text-center text-sm text-[#4f7ca8]">
