@@ -19,19 +19,6 @@ def _fmt_list(values: list) -> str:
     return ", ".join(str(v) for v in values if v)
 
 
-def _calc_age(dob) -> str:
-    if not dob:
-        return ""
-    if isinstance(dob, str):
-        try:
-            dob = datetime.fromisoformat(dob[:10]).date()
-        except Exception:
-            return ""
-    today = date.today()
-    age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-    return f" (Age: {age})"
-
-
 def _divider() -> str:
     return "━" * 42
 
@@ -65,7 +52,6 @@ def build_doctor_summary(
 ) -> str:
     lines = []
 
-    p = form_data.get("personal") or {}
     m = form_data.get("medical") or {}
     a = form_data.get("appointment") or {}
     r = form_data.get("referral") or {}
@@ -91,32 +77,8 @@ def build_doctor_summary(
             "",
         ]
 
-    # Patient details
-    dob = p.get("date_of_birth")
-    age_str = _calc_age(dob)
-
-    emergency_name = p.get("emergency_contact_name") or ""
-    emergency_number = p.get("emergency_contact_number") or ""
-    emergency = (
-        f"{emergency_name} — {emergency_number}"
-        if emergency_name and emergency_number
-        else emergency_name or emergency_number or "Not provided"
-    )
-
-    lines += [
-        _divider(),
-        "PATIENT DETAILS",
-        _divider(),
-        f"Name:             {p.get('first_name', '')} {p.get('last_name', '')}".strip() or "Not provided",
-        f"Date of Birth:    {_fmt_date(dob)}{age_str}",
-        f"Gender:           {p.get('gender') or 'Not provided'}",
-        f"Phone:            {p.get('phone') or 'Not provided'}",
-        f"Email:            {p.get('email') or 'Not provided'}",
-        f"Address:          {p.get('address') or 'Not provided'}",
-        "",
-        f"Emergency Contact: {emergency}",
-        "",
-    ]
+    # No patient details here: ARVI receives them as separate fields, and this
+    # text is reused as AI chat context on follow-up visits
 
     # Medical history
     lines += [

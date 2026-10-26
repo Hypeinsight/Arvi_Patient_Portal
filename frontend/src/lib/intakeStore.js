@@ -16,6 +16,7 @@ const useIntakeStore = create((set, get) => ({
     personal: null,
     medical: null,
     referral: null,
+    doctor: null,               // { organization_id, organization_name, doctor_id, doctor_name }
   },
 
   // Upload references returned by the server
@@ -55,6 +56,7 @@ const useIntakeStore = create((set, get) => ({
         personal: null,
         medical: null,
         referral: null,
+        doctor: null,
       },
       uploadedFiles: [],
       ocrPersonalText: null,
@@ -131,6 +133,7 @@ const useIntakeStore = create((set, get) => ({
         personal: prefill.personal ?? state.formData.personal,
         medical: prefill.medical ?? state.formData.medical,
         referral: prefill.referral ?? state.formData.referral,
+        doctor: prefill.doctor ?? state.formData.doctor,
       },
     })),
 
@@ -143,6 +146,7 @@ const useIntakeStore = create((set, get) => ({
         personal: null,
         medical: null,
         referral: null,
+        doctor: null,
       },
       uploadedFiles: [],
     }),
@@ -161,6 +165,7 @@ const useIntakeStore = create((set, get) => ({
         personal: null,
         medical: null,
         referral: null,
+        doctor: null,
       },
       uploadedFiles: [],
       ocrText: null,

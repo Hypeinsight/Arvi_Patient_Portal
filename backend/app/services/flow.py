@@ -1,5 +1,6 @@
 SCREENS = [
     "choose_access_method",
+    "choose_clinic_doctor",
     "choose_appointment_type",
     # "account_setup",
     # "upload_personal_details",
@@ -12,16 +13,21 @@ SCREENS = [
 
 SCREEN_ACCESS = {
     "choose_access_method":    ["pending", "guest", "new", "followup_lt12", "followup_gt12"],
+    # Everyone picks the clinic and doctor that will receive their intake
+    "choose_clinic_doctor":    ["pending", "guest", "new", "followup_lt12", "followup_gt12"],
     # New accounts get "new" assigned automatically, so only returning
     # accounts choose between the follow-up types
     "choose_appointment_type": ["pending", "followup_lt12", "followup_gt12"],
     # "account_setup":           ["new"],
     # "upload_personal_details": ["guest", "new", "followup_gt12"],
-    "personal_details":        ["guest", "new", "followup_lt12", "followup_gt12"],
+    # "pending" (logged in, follow-up type not chosen yet) gets the same later
+    # screens as the follow-ups, so the progress bar shows the whole intake
+    # from the start; the appointment type step still has to be passed first
+    "personal_details":        ["pending", "guest", "new", "followup_lt12", "followup_gt12"],
     # "upload_medical_details":  ["guest", "new", "followup_lt12", "followup_gt12"],
-    "medical_details":         ["guest", "new", "followup_lt12", "followup_gt12"],
-    "review_submit":           ["guest", "new", "followup_lt12", "followup_gt12"],
-    "chat":                    ["guest", "new", "followup_lt12", "followup_gt12"],
+    "medical_details":         ["pending", "guest", "new", "followup_lt12", "followup_gt12"],
+    "review_submit":           ["pending", "guest", "new", "followup_lt12", "followup_gt12"],
+    "chat":                    ["pending", "guest", "new", "followup_lt12", "followup_gt12"],
 }
 
 

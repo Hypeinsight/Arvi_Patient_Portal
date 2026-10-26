@@ -16,6 +16,7 @@ from app.services.summariser import build_doctor_summary
 from app.utils.session_helpers import _parse_datetime
 from app.services.chat_cache import delete_cached_messages, get_cached_messages, refresh_cached_messages
 from app.services.chat import build_ai_messages, determine_chat_ended, persist_chat_messages
+from app.services.delivery import deliver_to_arvi
 
 chat_bp = Blueprint("chat", __name__)
 
@@ -168,10 +169,15 @@ def flush_chat_messages(session_id):
         if session.status != "submitted":
             session.status = "submitted"
             session.submitted_at = datetime.now(timezone.utc)
+            # Submitted but not yet accepted by ARVI
+            session.delivery_status = "pending"
             db.session.commit()
     except SQLAlchemyError as exc:
         db.session.rollback()
         return jsonify({"success": False, "message": str(exc)}), 400
+
+    # The intake is saved either way; a failed send is recorded for retry
+    delivered = deliver_to_arvi(session)
 
     return jsonify({
         "success": True,
@@ -179,6 +185,8 @@ def flush_chat_messages(session_id):
         "persisted_count": len(chat_messages),
         "chat_messages": chat_messages,
         "summary": summary_text,
+        "delivered": delivered,
+        "delivery_status": session.delivery_status,
     }), 201 if source == "database" and cached_messages else 200
 
     # Delete cached messages if the messages are persisted

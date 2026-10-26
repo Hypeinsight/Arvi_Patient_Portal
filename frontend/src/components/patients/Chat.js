@@ -1,13 +1,23 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { SendHorizontal, SkipForward, Check, Loader2, Sparkles } from "lucide-react";
+import {
+  SendHorizontal,
+  SkipForward,
+  Check,
+  Loader2,
+  Sparkles,
+  TriangleAlert,
+  RotateCw,
+} from "lucide-react";
+import { toast } from "sonner";
 import useIntakeStore from "@/lib/intakeStore";
 import {
   fetchChatHistory,
   sendChatMessage,
   submit as submitChat,
 } from "@/lib/api/chat";
+import { retryDelivery } from "@/lib/api/clinics";
 import InfoCard from "@/components/InfoCard";
 import AllSet from "@/components/patients/AllSet";
 
@@ -20,8 +30,10 @@ const SUGGESTIONS = [
 ];
 
 export default function Chat() {
-  const { sessionId } = useIntakeStore();
+  const { sessionId, formData } = useIntakeStore();
   const [messages, setMessages] = useState([]);
+  // The intake is saved but didn't reach the clinic; offer a retry
+  const [deliveryFailed, setDeliveryFailed] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -119,9 +131,35 @@ export default function Chat() {
     try {
       const data = await submitChat(sessionId);
 
-      if (data.success) {
+      if (!data.success) {
+        toast.error(data.message || "Could not send your details. Please try again.");
+      } else if (data.delivered) {
         setShowAllSet(true);
+      } else {
+        setDeliveryFailed(true);
       }
+    } catch {
+      toast.error("Could not send your details. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Resends the saved intake; ARVI ignores a duplicate if an earlier try got through
+  const handleRetryDelivery = async () => {
+    if (submitting) return;
+
+    setSubmitting(true);
+    try {
+      const data = await retryDelivery(sessionId);
+      if (data.success) {
+        setDeliveryFailed(false);
+        setShowAllSet(true);
+      } else {
+        toast.error("We still couldn't reach your clinic. Please try again shortly.");
+      }
+    } catch {
+      toast.error("We still couldn't reach your clinic. Please try again shortly.");
     } finally {
       setSubmitting(false);
     }
@@ -149,7 +187,7 @@ export default function Chat() {
           <h1 className="bg-gradient-to-tr from-[#032B4A] to-[#0575E6] bg-clip-text text-transparent font-semibold text-base xs:text-lg sm:text-xl lg:text-2xl">
             Welcome Arvi Chat
           </h1>
-          {!chatEnded && (
+          {!chatEnded && !deliveryFailed && (
             <button
               onClick={handleSubmit}
               disabled={loading || submitting}
@@ -228,7 +266,39 @@ export default function Chat() {
           {/* Composer */}
           <div className="relative px-4 sm:px-10 pb-6 pt-2 shrink-0">
             <div className="max-w-[940px] mx-auto">
-              {chatEnded ? (
+              {deliveryFailed ? (
+                <div
+                  role="alert"
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white/90 backdrop-blur-sm border border-red-200 rounded-2xl shadow-sm px-4 py-3"
+                >
+                  <TriangleAlert className="w-6 h-6 shrink-0 text-red-500" strokeWidth={1.75} />
+                  <div className="flex-1 text-sm">
+                    <p className="font-medium text-[#032B4A]">
+                      Your details are saved, but we couldn&apos;t reach{" "}
+                      {formData.doctor?.organization_name || "your clinic"}.
+                    </p>
+                    <p className="text-[#4f7ca8]">
+                      Please try again so your doctor receives them before your
+                      appointment.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRetryDelivery}
+                    disabled={submitting}
+                    className="h-10 px-5 shrink-0 rounded-xl bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-sm font-medium text-white inline-flex items-center justify-center gap-2 cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <RotateCw className="w-4 h-4" />
+                        Try again
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : chatEnded ? (
                 <InfoCard
                   title="You're Almost Done"
                   description="Thank you for completing your intake. Tap Send your details to securely share your information with your healthcare team."
@@ -291,7 +361,12 @@ export default function Chat() {
             </div>
           </div>
 
-          {showAllSet && <AllSet />}
+          {showAllSet && (
+            <AllSet
+              doctorName={formData.doctor?.doctor_name}
+              clinicName={formData.doctor?.organization_name}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import requests
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from sqlalchemy.exc import SQLAlchemyError
@@ -8,6 +9,8 @@ from app.models.patient_details import PatientProfile
 from app.models.session import IntakeSession
 from app.models.summaries import Summary
 from app.models.user import User
+from app.services.delivery import deliver_to_arvi
+from app.services.doctor_api import DoctorApiNotConfigured, list_clinics, list_doctors
 from app.services.flow import get_screen_order
 from app.services.session_data import session_form_data, session_to_dict, update_session_sections
 
@@ -135,6 +138,68 @@ def update_session(session_id):
     }), 200
 
 
+@sessions_bp.get("/clinics")
+def read_clinics():
+    try:
+        clinics = list_clinics()
+    except (DoctorApiNotConfigured, requests.RequestException) as exc:
+        return jsonify({"success": False, "message": f"Could not load clinics: {exc}"}), 502
+    return jsonify({"success": True, "clinics": clinics}), 200
+
+
+@sessions_bp.get("/clinics/<organization_id>/doctors")
+def read_doctors(organization_id):
+    try:
+        doctors = list_doctors(organization_id)
+    except (DoctorApiNotConfigured, requests.RequestException) as exc:
+        return jsonify({"success": False, "message": f"Could not load doctors: {exc}"}), 502
+    return jsonify({"success": True, "doctors": doctors}), 200
+
+
+@sessions_bp.put("/sessions/<uuid:session_id>/doctor")
+def select_doctor(session_id):
+    session = db.session.get(IntakeSession, session_id)
+    if not session:
+        return jsonify({"success": False, "message": "Session not found"}), 404
+    if session.delivery_status == "sent":
+        return jsonify({"success": False, "message": "Intake already sent to the doctor"}), 409
+
+    body = request.get_json(silent=True) or {}
+    organization_id = str(body.get("organization_id") or "").strip()
+    doctor_id = str(body.get("doctor_id") or "").strip()
+    if not organization_id or not doctor_id:
+        return jsonify({"success": False, "message": "organization_id and doctor_id are required"}), 400
+
+    session.organization_id = organization_id
+    session.organization_name = body.get("organization_name")
+    session.doctor_id = doctor_id
+    session.doctor_name = body.get("doctor_name")
+
+    try:
+        db.session.commit()
+    except SQLAlchemyError as exc:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(exc)}), 400
+
+    return jsonify({"success": True, "session": session.to_dict()}), 200
+
+
+@sessions_bp.post("/sessions/<uuid:session_id>/deliver")
+def retry_delivery(session_id):
+    session = db.session.get(IntakeSession, session_id)
+    if not session:
+        return jsonify({"success": False, "message": "Session not found"}), 404
+    if session.status != "submitted":
+        return jsonify({"success": False, "message": "Intake has not been submitted yet"}), 400
+
+    delivered = deliver_to_arvi(session)
+    return jsonify({
+        "success": delivered,
+        "delivery_status": session.delivery_status,
+        "message": None if delivered else session.delivery_error,
+    }), 200 if delivered else 502
+
+
 @sessions_bp.get("/sessions/<uuid:session_id>/prefill")
 def prefill_session(session_id):
     current_session = db.session.get(IntakeSession, session_id)
@@ -194,5 +259,12 @@ def prefill_session(session_id):
             "referral": {
                 "has_referral": referral.has_referral,
             } if referral else None,
+            # Follow-ups usually see the same doctor, so offer the last choice
+            "doctor": {
+                "organization_id": previous_session.organization_id,
+                "organization_name": previous_session.organization_name,
+                "doctor_id": previous_session.doctor_id,
+                "doctor_name": previous_session.doctor_name,
+            } if previous_session and previous_session.doctor_id else None,
         },
     })

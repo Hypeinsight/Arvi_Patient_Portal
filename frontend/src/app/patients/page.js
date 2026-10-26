@@ -6,6 +6,7 @@ import useIntakeStore from "@/lib/intakeStore";
 
 import MainPage from "@/components/patients/MainPage";
 import RegisterForm from "@/components/patients/RegisterForm";
+import ClinicDoctor from "@/components/patients/ClinicDoctor";
 import AppointmentType from "@/components/patients/AppointmentType";
 import PersonalDetails from "@/components/patients/PersonalDetails";
 import MedicalDetails from "@/components/patients/MedicalDetails";
@@ -16,6 +17,7 @@ import { useRouter } from "next/navigation";
 const SCREEN_MAP = {
   choose_access_method: MainPage,
   register: RegisterForm,
+  choose_clinic_doctor: ClinicDoctor,
   choose_appointment_type: AppointmentType,
   // account_setup: AccountSetup,
   // upload_personal_details: UploadPersonalDetails,

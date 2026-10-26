@@ -17,6 +17,10 @@ class IntakeSession(db.Model):
             "status IN ('in_progress', 'submitted', 'expired')",
             name="ck_intake_sessions_status",
         ),
+        CheckConstraint(
+            "delivery_status IN ('pending', 'sent', 'failed')",
+            name="ck_intake_sessions_delivery_status",
+        ),
     )
 
     id = db.Column(
@@ -56,6 +60,19 @@ class IntakeSession(db.Model):
         server_default=db.text("now()"),
     )
     submitted_at = db.Column(db.DateTime(timezone=True))
+
+    # Clinic and doctor chosen by the patient. IDs come from ARVI, names are
+    # kept so the intake still reads correctly if ARVI is unreachable
+    organization_id = db.Column(db.String(100))
+    organization_name = db.Column(db.String(255))
+    doctor_id = db.Column(db.String(100))
+    doctor_name = db.Column(db.String(255))
+
+    # Result of sending the finished intake to ARVI
+    delivery_status = db.Column(db.String(20))
+    delivery_error = db.Column(db.Text)
+    delivered_at = db.Column(db.DateTime(timezone=True))
+    arvi_reference = db.Column(db.String(100))
 
     user = db.relationship("User", backref="intake_sessions")
     appointment_details = db.relationship(
@@ -114,4 +131,10 @@ class IntakeSession(db.Model):
             "last_activity_at": self.last_activity_at.isoformat(),
             "created_at": self.created_at.isoformat(),
             "submitted_at": self.submitted_at.isoformat() if self.submitted_at else None,
+            "organization_id": self.organization_id,
+            "organization_name": self.organization_name,
+            "doctor_id": self.doctor_id,
+            "doctor_name": self.doctor_name,
+            "delivery_status": self.delivery_status,
+            "delivered_at": self.delivered_at.isoformat() if self.delivered_at else None,
         }

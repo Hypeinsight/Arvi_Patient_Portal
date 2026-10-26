@@ -1,11 +1,6 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000/api";
 
-export async function createSession(
-  patientType,
-  userId,
-  doctorId,
-  appointmentId,
-) {
+export async function createSession(patientType, userId) {
   console.log("patient type: ", patientType);
   const token = typeof window !== "undefined"
     ? localStorage.getItem("user_token")
@@ -20,8 +15,6 @@ export async function createSession(
     body: JSON.stringify({
       patient_type: patientType,
       user_id: userId,
-      doctor_id: doctorId,
-      appointment_id: appointmentId,
     }),
   });
   const data = await res.json();

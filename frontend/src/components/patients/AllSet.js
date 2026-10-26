@@ -6,7 +6,7 @@ import Image from "next/image";
 import useIntakeStore from "@/lib/intakeStore";
 import { useRouter } from "next/navigation";
 
-export default function AllSet() {
+export default function AllSet({ doctorName, clinicName }) {
   const { reset } = useIntakeStore();
   const router = useRouter();
 
@@ -43,8 +43,12 @@ export default function AllSet() {
         </h1>
 
         <p className="mt-2 text-sm text-[#4f7ca8] max-w-sm">
-          Thank you for providing your details. Your information has been
-          securely submitted.
+          Thank you for providing your details.{" "}
+          {doctorName
+            ? `Your information has been securely sent to ${doctorName}${
+                clinicName ? ` at ${clinicName}` : ""
+              }.`
+            : "Your information has been securely submitted."}
         </p>
 
         <button

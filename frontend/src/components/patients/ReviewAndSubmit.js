@@ -82,6 +82,14 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
 
   const sections = [
     {
+      title: "Clinic & doctor",
+      screen: "choose_clinic_doctor",
+      rows: [
+        { label: "Clinic", value: formData.doctor?.organization_name },
+        { label: "Doctor", value: formData.doctor?.doctor_name },
+      ],
+    },
+    {
       title: "Personal details",
       screen: "personal_details",
       rows: [

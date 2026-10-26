@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import useIntakeStore from "@/lib/intakeStore";
 
 const SCREEN_LABELS = {
+  choose_clinic_doctor: "Clinic & Doctor",
   choose_appointment_type: "Appointment Type",
   account_setup: "Account Setup",
   upload_personal_details: "Upload Personal Details",
@@ -42,7 +43,7 @@ export default function ProgressSteps() {
   return (
     <nav
       aria-label="Intake progress"
-      className="bg-white/70 rounded-3xl px-2 sm:px-4 py-4 shadow-sm"
+      className="bg-white/70 rounded-3xl px-2 sm:px-4 py-4 short:py-2.5 shadow-sm"
     >
       <ol className="flex items-start">
         {progressScreens.map((screen, index) => {
@@ -60,7 +61,7 @@ export default function ProgressSteps() {
               {/* Connector to the next step */}
               {!isLast && (
                 <div
-                  className="absolute top-4 left-1/2 w-full h-0.5 bg-blue-100"
+                  className="absolute top-4 short:top-3.5 left-1/2 w-full h-0.5 bg-blue-100"
                   aria-hidden="true"
                 >
                   <div
@@ -89,7 +90,7 @@ export default function ProgressSteps() {
               >
                 {/* Step marker */}
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
+                  className={`w-8 h-8 short:w-7 short:h-7 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
                     isCurrent
                       ? "text-white ring-4 ring-blue-100"
                       : isCompleted
@@ -107,7 +108,7 @@ export default function ProgressSteps() {
 
                 {/* Step label */}
                 <span
-                  className={`mt-2 px-1 text-center text-xs md:text-sm leading-tight font-poppins ${
+                  className={`mt-2 short:mt-1 px-1 text-center text-xs md:text-sm leading-tight font-poppins ${
                     isCurrent
                       ? "block font-semibold text-[#032B4A]"
                       : isCompleted
