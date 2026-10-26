@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
         }}>
         {/* Page padding lives here, not on <body>: dropdowns reset the body's
             padding while open, which made the whole page jump */}
-        <div className="py-4 md:py-6 min-h-screen flex flex-col gap-4">
+        <div className="py-4 md:py-6 short:py-2 min-h-screen flex flex-col gap-4 short:gap-2">
           <TopNav />
           <main className="flex-1 flex flex-col justify-center">{children}</main>
         </div>

@@ -100,15 +100,15 @@ export default function AppointmentType({ onNext, onBack }) {
   return (
     <div className="px-4 md:px-8 lg:px-16">
       {/* Main Content */}
-      <div className="pb-8">
+      <div className="pb-8 short:pb-2">
         <div className="max-w-8xl mx-auto">
           {/* Progress Steps */}
           <ProgressSteps />
 
           {/* Main White Container */}
-          <div className="relative mt-4 bg-white rounded-4xl">
+          <div className="relative mt-4 short:mt-2 bg-white rounded-4xl">
             {/* Content Container */}
-            <div className="relative z-10 p-4 md:p-6 tall:p-8">
+            <div className="relative z-10 p-4 md:p-6 short:md:px-6 short:md:py-4 tall:p-8">
               <Title
                 title="Choose Your Appointment Type"
                 className="md:!text-2xl"
@@ -116,7 +116,7 @@ export default function AppointmentType({ onNext, onBack }) {
 
 
               {/* Choose your appointment Type Section */}
-              <div className="mt-5 mb-6 tall:mt-8 tall:mb-12">
+              <div className="mt-5 mb-6 short:mt-3 short:mb-2 tall:mt-8 tall:mb-12">
                 <div
                   className={`grid grid-cols-1 gap-4 md:gap-6 ${
                     availableTypes.length > 2
@@ -131,7 +131,7 @@ export default function AppointmentType({ onNext, onBack }) {
                         key={type.id}
                         className={`
           relative cursor-pointer transition-all duration-200 hover:shadow-lg
-          border-2 rounded-2xl bg-white p-3 text-center h-36 md:h-52 tall:h-88 flex flex-col justify-center items-center
+          border-2 rounded-2xl bg-white p-3 text-center h-36 md:h-52 short:md:h-44 tall:h-88 flex flex-col justify-center items-center
           ${
             selectedType === type.id
               ? "border-blue-600 shadow-lg"

@@ -21,9 +21,9 @@ export default function InfoCard({
 
   return (
     <Card
-      className={`mb-6 h-auto ${className} bg-blue-50 rounded-lg xs:rounded-2xl`}
+      className={`mb-6 short:mb-3 h-auto ${className} bg-blue-50 rounded-lg xs:rounded-2xl`}
     >
-      <CardContent className="p-3 sm:p-4 md:px-6 md:py-5 h-full flex items-center font-poppins">
+      <CardContent className="p-3 sm:p-4 md:px-6 md:py-5 short:md:py-3 h-full flex items-center font-poppins">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 xs:gap-4 w-full">
           {/* Left Side: Icon & Texts */}
           <div className="flex items-start gap-1 sm:gap-3 md:gap-4">

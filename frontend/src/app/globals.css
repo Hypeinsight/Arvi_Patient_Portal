@@ -5,8 +5,9 @@
    A 1080p monitor gives ~945px of browser height, a typical laptop ~875px. */
 @custom-variant tall (@media (min-width: 48rem) and (min-height: 920px));
 
-/* Short windows such as laptops, where popups need to be more compact */
-@custom-variant short (@media (max-height: 800px));
+/* Anything shorter than a desktop monitor (laptops): the step pages tighten
+   their spacing so Next stays on screen without scrolling. Mirrors "tall". */
+@custom-variant short (@media (max-height: 919px));
 
 :root {
   --background: #ffffff;

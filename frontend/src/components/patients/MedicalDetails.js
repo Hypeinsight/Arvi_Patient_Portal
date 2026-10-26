@@ -203,22 +203,22 @@ export default function MedicalDetails({ onNext, onBack }) {
   return (
     <div className="px-4 md:px-8 lg:px-16">
       {/* Main Content */}
-      <div className="pb-8">
+      <div className="pb-8 short:pb-2">
         <div className="max-w-8xl mx-auto">
           {/* Progress Steps */}
           <ProgressSteps />
 
           {/* Main White Container */}
-          <div className="relative mt-4 bg-white rounded-4xl">
+          <div className="relative mt-4 short:mt-2 bg-white rounded-4xl">
             {/* Content Container */}
-            <div className="relative z-10 p-4 md:p-8">
+            <div className="relative z-10 p-4 md:p-8 short:md:px-6 short:md:py-4">
               <Title title="Medical Details" />
 
 
               {/* Medical Details Section */}
               {/* No bottom margin: NavigationButtons adds its own top margin */}
-              <div className="mt-5 tall:mt-8">
-                {/* Information */}
+              <div className="mt-5 short:mt-2 tall:mt-8">
+                {/* Document upload hidden for now; uncomment to bring it back
                 <InfoCard
                   title={
                     ocrMedicalText
@@ -235,13 +235,14 @@ export default function MedicalDetails({ onNext, onBack }) {
                   buttonIconClassName="bg-white text-[#032B4A] hover:bg-blue-50 rounded-sm p-0.5"
                   onClick={() => setShowUploader(true)}
                 />
+                */}
 
-                <form className="space-y-6">
+                <form className="space-y-6 short:space-y-3">
                   {/* Row 1 */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 short:gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Current Medical Conditions*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Current Medical Conditions<span className="text-red-500">*</span>
                       </label>
                       <textarea
                         rows={2}
@@ -255,8 +256,8 @@ export default function MedicalDetails({ onNext, onBack }) {
                       <ErrorMsg field="currentConditions" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Current Medications*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Current Medications<span className="text-red-500">*</span>
                       </label>
                       <textarea
                         rows={2}
@@ -275,10 +276,10 @@ export default function MedicalDetails({ onNext, onBack }) {
                   </div>
 
                   {/* Row 2 */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 short:gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Allergies*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Allergies<span className="text-red-500">*</span>
                       </label>
                       <textarea
                         rows={2}
@@ -292,8 +293,8 @@ export default function MedicalDetails({ onNext, onBack }) {
                       <ErrorMsg field="allergies" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Previous Surgeries*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Previous Surgeries<span className="text-red-500">*</span>
                       </label>
                       <textarea
                         rows={2}
@@ -310,8 +311,8 @@ export default function MedicalDetails({ onNext, onBack }) {
 
                   {/* Row 3 — full width */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                      Family Medical History*
+                    <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                      Family Medical History<span className="text-red-500">*</span>
                     </label>
                     <textarea
                       rows={2}
@@ -337,6 +338,7 @@ export default function MedicalDetails({ onNext, onBack }) {
         </div>
       </div>
 
+      {/* Document upload hidden for now; uncomment to bring it back
       {showUploader && (
         <FileUploader
           isOpen={showUploader}
@@ -365,6 +367,7 @@ export default function MedicalDetails({ onNext, onBack }) {
           }}
         />
       )}
+      */}
     </div>
   );
 }

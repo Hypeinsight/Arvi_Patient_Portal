@@ -390,20 +390,21 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
   return (
     <div className="px-4 md:px-8 lg:px-16">
       {/* Main Content */}
-      <div className="pb-8">
+      <div className="pb-8 short:pb-2">
         <div className="max-w-8xl mx-auto ">
           {/* Progress Steps */}
           <ProgressSteps />
 
           {/* Main White Container */}
-          <div className="relative mt-4 bg-white rounded-4xl">
+          <div className="relative mt-4 short:mt-2 bg-white rounded-4xl">
             {/* Content Container */}
-            <div className="relative z-10 p-4 md:p-8">
+            <div className="relative z-10 p-4 md:p-8 short:md:px-6 short:md:py-4">
               <Title title="Personal Details" />
 
               {/* Personal Details Section */}
               {/* No bottom margin: NavigationButtons adds its own top margin */}
-              <div className="mt-5 tall:mt-8">
+              <div className="mt-5 short:mt-2 tall:mt-8">
+                {/* Document upload hidden for now; uncomment to bring it back
                 <InfoCard
                   title={
                     ocrPersonalText
@@ -420,14 +421,15 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                   buttonIconClassName="bg-white text-[#032B4A] hover:bg-blue-50 rounded-sm p-0.5"
                   onClick={() => setShowUploader(true)}
                 />
+                */}
 
                 {/* Form Fields */}
-                <form className="space-y-6">
+                <form className="space-y-6 short:space-y-3">
                   {/* First Row: First Name, Last Name, Date of Birth */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 short:md:gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        First Name*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        First Name<span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -441,8 +443,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <ErrorMsg field="firstName" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Last Name*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Last Name<span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -456,8 +458,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <ErrorMsg field="lastName" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Date of Birth*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Date of Birth<span className="text-red-500">*</span>
                       </label>
                       <DatePicker
                         value={formData.dateOfBirth}
@@ -475,8 +477,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                   {/* Second Row: Gender, Phone Number, Email */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Gender*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Gender<span className="text-red-500">*</span>
                       </label>
                       <Select
                         value={formData.gender}
@@ -505,8 +507,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <ErrorMsg field="gender" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Phone Number*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Phone Number<span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
@@ -528,8 +530,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <ErrorMsg field="phoneNumber" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Email Address*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Email Address<span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
@@ -547,10 +549,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
 
                   {/* Third Row: Home Address, Emergency Contacts (account holders only) */}
                   {!isGuest && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 short:md:gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Home Address*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Home Address<span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -564,7 +566,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <ErrorMsg field="homeAddress" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
                         Emergency Contact Name
                       </label>
                       <input
@@ -582,7 +584,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                       <ErrorMsg field="emergencyContactName" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
                         Emergency Contact Number
                       </label>
                       <div className="relative">
@@ -639,8 +641,8 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                   {/* Fifth Row: Privacy & Consent */}
                   {needsConsent && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-poppins">
-                        Privacy &amp; Consent*
+                      <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                        Privacy &amp; Consent<span className="text-red-500">*</span>
                       </label>
                       <label
                         htmlFor="acceptedConsent"
@@ -672,13 +674,14 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
               <NavigationButtons
                 onBack={handlePrevious}
                 onNext={handleNext}
-                marginClassName="mt-6 tall:mt-8"
+                marginClassName="mt-6 short:mt-3 tall:mt-8"
               />
             </div>
           </div>
         </div>
       </div>
 
+      {/* Document upload hidden for now; uncomment to bring it back
       {showUploader && (
         <FileUploader
           isOpen={showUploader}
@@ -707,6 +710,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
           }}
         />
       )}
+      */}
     </div>
   );
 }

@@ -9,7 +9,7 @@ export default function NavigationButtons({
   nextText = "Next",
   loading = false,
   // Top spacing above the buttons; pages with long forms pass a smaller one
-  marginClassName = "mt-8 tall:mt-16",
+  marginClassName = "mt-8 short:mt-4 tall:mt-16",
 }) {
   return (
     <div className={`flex flex-col-reverse xs:flex-row justify-end gap-3 ${marginClassName} w-full font-poppins`}>
