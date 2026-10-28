@@ -37,6 +37,7 @@ def call_chat_model_plain(messages: list) -> str:
         model=AZURE_OPENAI_DEPLOYMENT,
         messages=messages,
         max_tokens=500,
-        temperature=0.7,
+        # Low temperature: summaries must stick to what the patient said
+        temperature=0.2,
     )
     return response.choices[0].message.content

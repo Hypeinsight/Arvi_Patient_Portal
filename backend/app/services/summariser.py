@@ -22,8 +22,12 @@ def _fmt_list(values: list) -> str:
 def _divider() -> str:
     return "━" * 42
 
-def summarise_chat_transcript(messages: list) -> str:
-    """Condenses the raw Q&A into a short clinical note for the doctor."""
+def summarise_chat_transcript(messages: list) -> str | None:
+    """Condenses the raw Q&A into a short clinical note for the doctor.
+    Returns None when the patient never replied, since there's nothing to summarise."""
+    if not any(m.get("role") == "user" and (m.get("content") or "").strip() for m in messages):
+        return None
+
     transcript_text = "\n".join(
         f"{'Patient' if m['role'] == 'user' else 'Assistant'}: {m['content']}"
         for m in messages
@@ -35,8 +39,9 @@ def summarise_chat_transcript(messages: list) -> str:
             "content": (
                 "You are summarising a pre-appointment patient conversation for a doctor. "
                 "Read the conversation below and write a brief, clinical, factual summary "
-                "of what the patient shared — no more than 5-6 short lines. Do not diagnose, "
-                "speculate, or add anything not stated by the patient. Write in plain prose, "
+                "of what the patient shared — no more than 5-6 short lines. Only use what is "
+                "written on 'Patient:' lines. Do not diagnose, speculate, or add anything not "
+                "stated by the patient. Write in plain prose, "
                 "third person (e.g. 'Patient reports...'), no bullet points."
             ),
         },
