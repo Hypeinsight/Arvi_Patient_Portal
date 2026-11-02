@@ -17,6 +17,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { extractPersonalDetails } from "@/lib/utils";
+import { formatPhoneInput, restorePhoneCursor } from "@/lib/phoneInput";
 import {
   createPatientProfile,
   updatePatientProfile,
@@ -193,15 +194,10 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
     }
   }, [ocrPersonalText, uploadedPersonalFile]);
 
-  const handlePhoneInput = (field, value) => {
-    const digits = value.replace(/\D/g, "").slice(0, 10);
-    let formatted = digits;
-    if (digits.length > 4)
-      formatted = digits.slice(0, 4) + " " + digits.slice(4);
-    if (digits.length > 7)
-      formatted =
-        digits.slice(0, 4) + " " + digits.slice(4, 7) + " " + digits.slice(7);
+  const handlePhoneInput = (field, input) => {
+    const { formatted, cursor } = formatPhoneInput(input);
     setFormData((prev) => ({ ...prev, [field]: formatted }));
+    restorePhoneCursor(input, cursor);
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
@@ -518,7 +514,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                           type="tel"
                           value={formData.phoneNumber}
                           onChange={(e) =>
-                            handlePhoneInput("phoneNumber", e.target.value)
+                            handlePhoneInput("phoneNumber", e.target)
                           }
                           onBlur={(e) =>
                             handlePhoneBlur("phoneNumber", e.target.value)
@@ -597,7 +593,7 @@ export default function PersonalDetails({ onNext, onBack, progress }) {
                           onChange={(e) =>
                             handlePhoneInput(
                               "emergencyContactNumber",
-                              e.target.value,
+                              e.target,
                             )
                           }
                           onBlur={(e) =>

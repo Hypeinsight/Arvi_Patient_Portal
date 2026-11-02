@@ -30,6 +30,8 @@ const SCREEN_MAP = {
 
 const PUBLIC_SCREENS = new Set(["choose_access_method"]);
 
+const CENTRED_SCREENS = new Set(["choose_access_method", "register", "chat"]);
+
 export default function PatientsPage() {
   const router = useRouter();
   const {
@@ -152,7 +154,7 @@ export default function PatientsPage() {
     return <p>Unknown screen: {currentScreen}</p>;
   }
 
-  return (
+  const screen = (
     <CurrentComponent
       onNext={(data, section) => {
         if (data && section) saveStepData(section, data);
@@ -161,5 +163,12 @@ export default function PatientsPage() {
       onBack={goBack}
       progress={progress}
     />
+  );
+
+  // flex-1 fills <main>, so its centring no longer pushes the step down
+  return CENTRED_SCREENS.has(currentScreen) ? (
+    screen
+  ) : (
+    <div className="flex-1 pt-4 md:pt-6 short:pt-2">{screen}</div>
   );
 }

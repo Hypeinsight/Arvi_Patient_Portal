@@ -17,6 +17,16 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
+// Always open below the field; shrink to the space left (keeping a gap above
+// the bottom of the window) rather than flipping up
+const dropdownProps = {
+  scrollable: true,
+  side: "bottom",
+  avoidCollisions: false,
+  className:
+    "max-h-[min(13rem,calc(var(--radix-select-content-available-height)-2rem))]",
+};
+
 const triggerClass = (hasValue) =>
   `w-full px-4 py-2 border border-gray-300 rounded-lg text-sm font-poppins focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
     hasValue ? "text-gray-900" : "text-gray-300"
@@ -179,7 +189,7 @@ export default function ClinicDoctor({ onNext, onBack }) {
                         <SelectTrigger className={triggerClass(organizationId)}>
                           <SelectValue placeholder="Select Clinic" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent {...dropdownProps}>
                           {clinics.map((clinic) => (
                             <SelectItem key={clinic.id} value={String(clinic.id)}>
                               {clinic.name}
@@ -216,7 +226,7 @@ export default function ClinicDoctor({ onNext, onBack }) {
                             }
                           />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent {...dropdownProps}>
                           {doctors.map((doctor) => (
                             <SelectItem key={doctor.id} value={String(doctor.id)}>
                               {doctor.name}
