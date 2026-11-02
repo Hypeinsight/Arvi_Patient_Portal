@@ -22,10 +22,12 @@ export async function prepareSummary(sessionId) {
   return res.json();
 }
 
-export async function submit(sessionId){
+// includeChatNotes=false leaves the chat out of the doctor's summary
+export async function submit(sessionId, { includeChatNotes = true } = {}){
   const res = await fetch(`${BASE_URL}/sessions/${sessionId}/chat/submit`, {
     method: "POST",
-    headers: {"Content-Type": "application/json"}
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ include_chat_notes: includeChatNotes }),
   });
   return res.json();
 }

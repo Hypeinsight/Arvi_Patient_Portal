@@ -9,6 +9,7 @@ import {
   Sparkles,
   TriangleAlert,
   RotateCw,
+  CircleStop,
 } from "lucide-react";
 import { toast } from "sonner";
 import useIntakeStore from "@/lib/intakeStore";
@@ -40,6 +41,7 @@ export default function Chat() {
   const [initializing, setInitializing] = useState(true);
   const [chatEnded, setChatEnded] = useState(false);
   const [showAllSet, setShowAllSet] = useState(false);
+  const [showSkipConfirm, setShowSkipConfirm] = useState(false);
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -124,16 +126,21 @@ export default function Chat() {
     }
   };
 
-  const handleSubmit = async () => {
+  // includeChatNotes=false sends the intake without the chat (Skip & send
+  // after the patient has started chatting)
+  const handleSubmit = async ({ includeChatNotes = true } = {}) => {
     if (loading || submitting) return;
 
     setSubmitting(true);
     try {
-      const data = await submitChat(sessionId);
+      const data = await submitChat(sessionId, { includeChatNotes });
 
       if (!data.success) {
         toast.error(data.message || "Could not send your details. Please try again.");
-      } else if (data.delivered) {
+        return;
+      }
+      setShowSkipConfirm(false);
+      if (data.delivered) {
         setShowAllSet(true);
       } else {
         setDeliveryFailed(true);
@@ -166,13 +173,20 @@ export default function Chat() {
   };
 
   const hasMessages = messages.length > 0;
+  const hasReplied = messages.some((msg) => msg.role === "user");
   // Only offer suggestions until the patient answers the first question
   const showSuggestions =
     hasMessages &&
-    !messages.some((msg) => msg.role === "user") &&
+    !hasReplied &&
     !chatEnded &&
     !loading &&
     !submitting;
+
+  // Before any reply there's no chat to lose, so skip straight away
+  const handleSkip = () => {
+    if (hasReplied) setShowSkipConfirm(true);
+    else handleSubmit();
+  };
 
   const handleSuggestion = (suggestion) => {
     setInput(suggestion);
@@ -189,7 +203,7 @@ export default function Chat() {
           </h1>
           {!chatEnded && !deliveryFailed && (
             <button
-              onClick={handleSubmit}
+              onClick={handleSkip}
               disabled={loading || submitting}
               className="h-[30px] xs:h-[38px] w-auto shrink-0 justify-center bg-white/70 text-[#032B4A] border border-[#0575E6] rounded-lg xs:rounded-xl py-1 px-2 xs:p-2 sm:px-4 sm:py-2 text-sm flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity duration-500 ease-in-out disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -309,7 +323,7 @@ export default function Chat() {
                   buttonIcon={SendHorizontal}
                   buttonClassName="flex-row-reverse !px-5"
                   buttonDisabled={loading || submitting}
-                  onClick={handleSubmit}
+                  onClick={() => handleSubmit()}
                   loading={submitting}
                 />
               ) : (
@@ -356,10 +370,81 @@ export default function Chat() {
                       <SendHorizontal size={22} strokeWidth={1.75} />
                     </button>
                   </div>
+
+                  {/* Ends the chat early and sends what's been shared so far,
+                      same as Skip & send; offered once the patient has replied */}
+                  {hasReplied && (
+                    <div className="flex justify-end mt-3">
+                      <button
+                        type="button"
+                        onClick={() => handleSubmit()}
+                        disabled={loading || submitting}
+                        className="h-9 px-4 rounded-xl bg-white/70 backdrop-blur-sm border border-red-100 text-sm font-medium text-red-400 inline-flex items-center gap-2 cursor-pointer hover:bg-red-50 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {submitting ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <CircleStop className="w-4 h-4" />
+                        )}
+                        Stop chat
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </div>
           </div>
+
+          {/* Skip & send after chatting: the chat is left out of the summary */}
+          {showSkipConfirm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center overscroll-contain bg-[#032B4A]/40 backdrop-blur-sm p-4">
+              <div
+                role="alertdialog"
+                aria-modal="true"
+                aria-labelledby="skip-confirm-title"
+                aria-describedby="skip-confirm-description"
+                className="w-full max-w-md rounded-3xl bg-white shadow-2xl px-6 py-8 sm:px-10 flex flex-col items-center text-center font-poppins"
+              >
+                <TriangleAlert className="w-12 h-12 text-amber-500" strokeWidth={1.75} />
+                <h2
+                  id="skip-confirm-title"
+                  className="mt-4 text-xl font-semibold text-[#032B4A]"
+                >
+                  Skip the rest of the chat?
+                </h2>
+                <p
+                  id="skip-confirm-description"
+                  className="mt-2 text-sm text-[#4f7ca8] max-w-sm"
+                >
+                  Your chat so far won&apos;t be included in the summary sent to
+                  your doctor. Your other details will still be sent. To keep
+                  your chat, use <b>Stop chat</b> instead.
+                </p>
+                <div className="mt-6 w-full flex flex-col-reverse sm:flex-row gap-3 sm:justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowSkipConfirm(false)}
+                    disabled={submitting}
+                    className="w-full sm:w-36 h-11 rounded-xl bg-[#0318220A] text-sm font-medium text-gray-700 cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Back to chat
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSubmit({ includeChatNotes: false })}
+                    disabled={submitting}
+                    className="w-full sm:w-36 h-11 rounded-xl bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-sm font-medium text-white shadow-md inline-flex items-center justify-center cursor-pointer hover:opacity-95 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Continue"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {showAllSet && (
             <AllSet

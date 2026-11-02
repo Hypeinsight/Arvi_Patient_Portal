@@ -162,8 +162,14 @@ def flush_chat_messages(session_id):
 
     cached_messages = get_cached_messages(session_id)
 
+    # False when the patient skipped the chat partway through
+    body = request.get_json(silent=True) or {}
+    include_chat_notes = body.get("include_chat_notes", True) is not False
+
     try:
-        source, chat_messages, summary_text = persist_chat_messages(session, existing_messages, cached_messages)
+        source, chat_messages, summary_text = persist_chat_messages(
+            session, existing_messages, cached_messages, include_chat_notes
+        )
 
         # Sending the chat (or skipping it) completes the intake
         if session.status != "submitted":

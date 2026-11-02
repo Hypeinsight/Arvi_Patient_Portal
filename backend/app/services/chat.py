@@ -30,8 +30,10 @@ def build_ai_messages(context: dict, user_message: str) -> list:
         {"role": "user", "content": user_message},
     ]
 
-def persist_chat_messages(session, existing_messages, cached_messages) -> tuple[str, list, str | None]:
-    """Returns (source, chat_message_dicts). Handles all the DB/Redis logic."""
+def persist_chat_messages(session, existing_messages, cached_messages, include_chat_notes=True) -> tuple[str, list, str | None]:
+    """Returns (source, chat_message_dicts, summary_text). Handles all the DB/Redis logic.
+    include_chat_notes=False leaves the chat out of the doctor's summary (the
+    patient skipped the chat partway through); the messages are still saved."""
     if existing_messages:
         delete_cached_messages(session.id)
         return ("database", [_chat_message_to_dict(m) for m in existing_messages], session.summary.summary_text if session.summary else None)
@@ -50,7 +52,7 @@ def persist_chat_messages(session, existing_messages, cached_messages) -> tuple[
         if m.get("role") in VALID_ROLES and m.get("content")
     ]
 
-    chat_notes = summarise_chat_transcript(cached_messages)
+    chat_notes = summarise_chat_transcript(cached_messages) if include_chat_notes else None
     form_data = session_form_data(session)
     summary_text = build_doctor_summary(session, form_data, chat_notes)
 
