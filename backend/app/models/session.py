@@ -67,6 +67,8 @@ class IntakeSession(db.Model):
     organization_name = db.Column(db.String(255))
     doctor_id = db.Column(db.String(100))
     doctor_name = db.Column(db.String(255))
+    # Day the patient expects to see the doctor
+    appointment_date = db.Column(db.Date)
 
     # Result of sending the finished intake to ARVI
     delivery_status = db.Column(db.String(20))
@@ -135,6 +137,7 @@ class IntakeSession(db.Model):
             "organization_name": self.organization_name,
             "doctor_id": self.doctor_id,
             "doctor_name": self.doctor_name,
+            "appointment_date": self.appointment_date.isoformat() if self.appointment_date else None,
             "delivery_status": self.delivery_status,
             "delivered_at": self.delivered_at.isoformat() if self.delivered_at else None,
         }

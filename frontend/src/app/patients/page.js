@@ -169,6 +169,7 @@ export default function PatientsPage() {
   return CENTRED_SCREENS.has(currentScreen) ? (
     screen
   ) : (
-    <div className="flex-1 pt-4 md:pt-6 short:pt-2">{screen}</div>
+    // flex-col lets a step stretch to the bottom of the screen with flex-1
+    <div className="flex-1 flex flex-col pt-4 md:pt-6 short:pt-2">{screen}</div>
   );
 }

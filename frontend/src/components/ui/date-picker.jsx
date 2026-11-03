@@ -41,15 +41,19 @@ export default function DatePicker({
   value,
   onChange,
   max,
+  min,
   minYear = 1900,
   placeholder = "DD/MM/YYYY",
   className = "",
 }) {
   const selected = parseISO(value);
   const limit = parseISO(max);
+  const floor = parseISO(min);
   const today = todayParts();
+  const firstYear = floor ? floor.year : minYear;
 
   const [open, setOpen] = useState(false);
+  const popupRef = useRef(null);
   const [view, setView] = useState(() =>
     selected
       ? { year: selected.year, month: selected.month }
@@ -76,19 +80,30 @@ export default function DatePicker({
 
   const maxYear = limit ? limit.year : today.year + 10;
   const years = [];
-  for (let year = maxYear; year >= minYear; year--) years.push(year);
+  for (let year = maxYear; year >= firstYear; year--) years.push(year);
 
   const isMonthAfterMax = (year, month) =>
     !!limit &&
     (year > limit.year || (year === limit.year && month > limit.month));
 
-  const isDayAfterMax = (day) =>
-    !!limit && toISO(view.year, view.month, day) > toISO(limit.year, limit.month, limit.day);
+  const isMonthBeforeMin = (year, month) =>
+    !!floor &&
+    (year < floor.year || (year === floor.year && month < floor.month));
+
+  const isDayOutOfRange = (day) => {
+    const iso = toISO(view.year, view.month, day);
+    return (
+      (!!limit && iso > toISO(limit.year, limit.month, limit.day)) ||
+      (!!floor && iso < toISO(floor.year, floor.month, floor.day))
+    );
+  };
 
   const showMonth = (year, month) => {
-    // Never land on a month that is entirely after the limit
+    // Never land on a month that is entirely outside the allowed range
     if (limit && isMonthAfterMax(year, month)) {
       setView({ year: limit.year, month: limit.month });
+    } else if (floor && isMonthBeforeMin(year, month)) {
+      setView({ year: floor.year, month: floor.month });
     } else {
       setView({ year, month });
     }
@@ -104,6 +119,10 @@ export default function DatePicker({
     setOpen((current) => !current);
   };
 
+  useEffect(() => {
+    if (open) popupRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [open]);
+
   const selectDay = (day) => {
     onChange(toISO(view.year, view.month, day));
     setOpen(false);
@@ -116,7 +135,12 @@ export default function DatePicker({
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
-  const prevDisabled = view.year === minYear && view.month === 0;
+  const prevDisabled = floor
+    ? isMonthBeforeMin(
+        view.month === 0 ? view.year - 1 : view.year,
+        (view.month + 11) % 12,
+      )
+    : view.year === minYear && view.month === 0;
   const nextDisabled = isMonthAfterMax(
     view.month === 11 ? view.year + 1 : view.year,
     (view.month + 1) % 12,
@@ -145,9 +169,10 @@ export default function DatePicker({
         <div
           role="dialog"
           aria-label="Choose a date"
-          className="absolute right-0 top-full mt-2 z-50 w-[18rem] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-gray-200 shadow-xl font-poppins"
+          ref={popupRef}
+          className={`absolute right-0 top-full mt-2 scroll-mb-4 z-50 w-[17rem] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-gray-200 shadow-xl font-poppins`}
         >
-          <div className="p-3">
+          <div className="px-3 pt-3 pb-2">
             {/* Month and year selects */}
             <div className="flex gap-2">
               <select
@@ -160,7 +185,10 @@ export default function DatePicker({
                   <option
                     key={name}
                     value={index}
-                    disabled={isMonthAfterMax(view.year, index)}
+                    disabled={
+                      isMonthAfterMax(view.year, index) ||
+                      isMonthBeforeMin(view.year, index)
+                    }
                   >
                     {name}
                   </option>
@@ -181,7 +209,7 @@ export default function DatePicker({
             </div>
 
             {/* Month heading with arrows */}
-            <div className="flex items-center justify-between mt-3 mb-2">
+            <div className="flex items-center justify-between mt-2 mb-1">
               <button
                 type="button"
                 onClick={() => shiftMonth(-1)}
@@ -208,14 +236,14 @@ export default function DatePicker({
             {/* Weekday names */}
             <div className="grid grid-cols-7 text-center text-[11px] font-medium text-gray-500 mb-1">
               {WEEKDAYS.map((weekday) => (
-                <span key={weekday} className="py-1">
+                <span key={weekday} className="py-0.5">
                   {weekday}
                 </span>
               ))}
             </div>
 
             {/* Days */}
-            <div className="grid grid-cols-7 gap-y-0.5 text-center">
+            <div className="grid grid-cols-7 text-center">
               {cells.map((day, index) => {
                 if (!day) return <span key={`blank-${index}`} />;
 
@@ -228,7 +256,7 @@ export default function DatePicker({
                   today.year === view.year &&
                   today.month === view.month &&
                   today.day === day;
-                const disabled = isDayAfterMax(day);
+                const disabled = isDayOutOfRange(day);
 
                 return (
                   <button
@@ -236,7 +264,7 @@ export default function DatePicker({
                     type="button"
                     onClick={() => selectDay(day)}
                     disabled={disabled}
-                    className={`mx-auto w-8 h-8 rounded-full text-xs transition-colors ${
+                    className={`mx-auto w-7 h-7 rounded-full text-xs transition-colors ${
                       isSelected
                         ? "bg-gradient-to-tr from-[#032B4A] to-[#0575E6] text-white font-semibold"
                         : disabled
@@ -254,7 +282,7 @@ export default function DatePicker({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-gray-100 px-3 py-2 text-xs">
+          <div className="flex items-center justify-between border-t border-gray-100 px-3 py-1.5 text-xs">
             <button
               type="button"
               onClick={() => showMonth(today.year, today.month)}

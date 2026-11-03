@@ -5,10 +5,10 @@ import { Loader2, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import ProgressSteps from "@/components/ProgressSteps";
 import NavigationButtons from "@/components/NavigationButtons";
-import InfoCard from "../InfoCard";
 import Title from "../Title";
 import useIntakeStore from "@/lib/intakeStore";
 import { getClinics, getDoctors, selectDoctor } from "@/lib/api/clinics";
+import DatePicker from "@/components/ui/date-picker";
 import {
   Select,
   SelectTrigger,
@@ -25,6 +25,12 @@ const dropdownProps = {
   avoidCollisions: false,
   className:
     "max-h-[min(13rem,calc(var(--radix-select-content-available-height)-2rem))]",
+};
+
+// Appointments can be booked from today onwards
+const todayISO = () => {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 };
 
 const triggerClass = (hasValue) =>
@@ -66,6 +72,12 @@ export default function ClinicDoctor({ onNext, onBack }) {
     formData.doctor?.organization_id ?? "",
   );
   const [doctorId, setDoctorId] = useState(formData.doctor?.doctor_id ?? "");
+  // Starts as today; a date chosen earlier is kept when coming Back to this
+  // step, unless it has since passed
+  const [appointmentDate, setAppointmentDate] = useState(() => {
+    const saved = formData.doctor?.appointment_date ?? "";
+    return saved && saved >= todayISO() ? saved : todayISO();
+  });
 
   const [clinics, setClinics] = useState([]);
   const [clinicsStatus, setClinicsStatus] = useState("loading");
@@ -127,13 +139,14 @@ export default function ClinicDoctor({ onNext, onBack }) {
   const handleNext = async () => {
     const clinic = clinics.find((c) => String(c.id) === organizationId);
     const doctor = doctors.find((d) => String(d.id) === doctorId);
-    if (!clinic || !doctor) return;
+    if (!clinic || !doctor || !appointmentDate) return;
 
     const payload = {
       organization_id: organizationId,
       organization_name: clinic.name,
       doctor_id: doctorId,
       doctor_name: doctor.name,
+      appointment_date: appointmentDate,
     };
 
     setSaving(true);
@@ -151,24 +164,21 @@ export default function ClinicDoctor({ onNext, onBack }) {
     }
   };
 
+  // The card stretches to the bottom of the screen with the buttons pinned
+  // there, which leaves the dropdowns room to open downwards
   return (
-    <div className="px-4 md:px-8 lg:px-16">
-      <div className="pb-8 short:pb-2">
-        <div className="max-w-8xl mx-auto">
+    <div className="flex-1 flex flex-col px-4 md:px-8 lg:px-16">
+      <div className="flex-1 flex flex-col pb-8 short:pb-2">
+        <div className="flex-1 flex flex-col w-full max-w-8xl mx-auto">
           <ProgressSteps />
 
-          <div className="relative mt-4 short:mt-2 bg-white rounded-4xl">
-            <div className="relative z-10 p-4 md:p-6 short:md:px-6 short:md:py-4 tall:p-8">
+          <div className="relative flex-1 flex flex-col mt-4 short:mt-2 bg-white rounded-4xl">
+            <div className="relative z-10 flex-1 flex flex-col p-4 pb-10 md:p-6 md:pb-14 short:md:px-6 short:md:pt-4 short:md:pb-8 tall:p-8 tall:pb-20">
               <Title title="Choose Your Clinic & Doctor" />
 
               {/* No bottom margin: NavigationButtons adds its own top margin */}
               <div className="mt-5 short:mt-2 tall:mt-8">
-                <InfoCard
-                  title="Who should receive your details?"
-                  description="Your intake summary will be sent securely to the doctor you choose, so they can prepare for your appointment."
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 short:md:gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 short:md:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
                       Clinic<span className="text-red-500">*</span>
@@ -241,14 +251,27 @@ export default function ClinicDoctor({ onNext, onBack }) {
                       </p>
                     )}
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2 short:mb-1 font-poppins">
+                      Appointment Date<span className="text-red-500">*</span>
+                    </label>
+                    <DatePicker
+                      value={appointmentDate}
+                      onChange={setAppointmentDate}
+                      min={todayISO()}
+                      className="w-full h-10 px-4 py-2 border border-gray-300 rounded-lg text-sm font-poppins bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
                 </div>
               </div>
 
               <NavigationButtons
                 onBack={onBack}
                 onNext={handleNext}
-                isNextDisabled={!organizationId || !doctorId}
+                isNextDisabled={!organizationId || !doctorId || !appointmentDate}
                 loading={saving}
+                marginClassName="mt-auto pt-8 short:pt-4"
               />
             </div>
           </div>

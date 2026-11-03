@@ -16,7 +16,7 @@ const useIntakeStore = create((set, get) => ({
     personal: null,
     medical: null,
     referral: null,
-    doctor: null,               // { organization_id, organization_name, doctor_id, doctor_name }
+    doctor: null,               // { organization_id, organization_name, doctor_id, doctor_name, appointment_date }
   },
 
   // Upload references returned by the server

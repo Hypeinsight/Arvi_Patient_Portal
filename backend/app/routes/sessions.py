@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 import requests
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
@@ -170,10 +172,19 @@ def select_doctor(session_id):
     if not organization_id or not doctor_id:
         return jsonify({"success": False, "message": "organization_id and doctor_id are required"}), 400
 
+    try:
+        appointment_date = date.fromisoformat(str(body.get("appointment_date") or ""))
+    except ValueError:
+        return jsonify({"success": False, "message": "appointment_date is required (YYYY-MM-DD)"}), 400
+    # A day's slack, since the patient's "today" can be ahead of the server's
+    if appointment_date < date.today() - timedelta(days=1):
+        return jsonify({"success": False, "message": "Appointment date can't be in the past"}), 400
+
     session.organization_id = organization_id
     session.organization_name = body.get("organization_name")
     session.doctor_id = doctor_id
     session.doctor_name = body.get("doctor_name")
+    session.appointment_date = appointment_date
 
     try:
         db.session.commit()

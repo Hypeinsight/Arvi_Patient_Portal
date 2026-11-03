@@ -98,17 +98,17 @@ export default function AppointmentType({ onNext, onBack }) {
   };
 
   return (
-    <div className="px-4 md:px-8 lg:px-16">
+    <div className="flex-1 flex flex-col px-4 md:px-8 lg:px-16">
       {/* Main Content */}
-      <div className="pb-8 short:pb-2">
-        <div className="max-w-8xl mx-auto">
+      <div className="flex-1 flex flex-col pb-8 short:pb-2">
+        <div className="flex-1 flex flex-col w-full max-w-8xl mx-auto">
           {/* Progress Steps */}
           <ProgressSteps />
 
           {/* Main White Container */}
-          <div className="relative mt-4 short:mt-2 bg-white rounded-4xl">
+          <div className="relative flex-1 flex flex-col mt-4 short:mt-2 bg-white rounded-4xl">
             {/* Content Container */}
-            <div className="relative z-10 p-4 md:p-6 short:md:px-6 short:md:py-4 tall:p-8">
+            <div className="relative z-10 flex-1 flex flex-col p-4 pb-10 md:p-6 md:pb-14 short:md:px-6 short:md:pt-4 short:md:pb-8 tall:p-8 tall:pb-20">
               <Title
                 title="Choose Your Appointment Type"
                 className="md:!text-2xl"
@@ -173,6 +173,7 @@ export default function AppointmentType({ onNext, onBack }) {
                 onNext={handleNext}
                 isNextDisabled={!selectedType}
                 loading={loading}
+                marginClassName="mt-auto pt-8 short:pt-4"
               />
             </div>
           </div>

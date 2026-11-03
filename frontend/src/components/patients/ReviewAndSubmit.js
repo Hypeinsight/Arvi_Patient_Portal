@@ -87,6 +87,12 @@ export default function ReviewAndSubmit({ onNext, onBack }) {
       rows: [
         { label: "Clinic", value: formData.doctor?.organization_name },
         { label: "Doctor", value: formData.doctor?.doctor_name },
+        {
+          label: "Appointment date",
+          value: formData.doctor?.appointment_date
+            ? formData.doctor.appointment_date.split("-").reverse().join("/")
+            : null,
+        },
       ],
     },
     {

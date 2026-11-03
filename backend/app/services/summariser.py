@@ -69,6 +69,7 @@ def build_doctor_summary(
         f"Session Date:     {_fmt_date(session.created_at)}",
         f"Patient Type:     {session.patient_type.replace('_', ' ').title()}",
         f"Appointment Type: {a.get('appointment_type') or 'Not specified'}",
+        f"Appointment Date: {_fmt_date(session.appointment_date)}",
         "",
     ]
 
