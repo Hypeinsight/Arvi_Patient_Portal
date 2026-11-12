@@ -45,14 +45,18 @@ def get_cached_messages(session_id: str) -> list:
     return context.get("messages", [])
 
 
-def append_cached_message(session_id: str, role: str, content: str) -> dict:
-    """Appends a single message to the messages list and writes back to Redis."""
+def append_cached_message(session_id: str, role: str, content: str, ai_content: str | None = None) -> dict:
+    """Appends a single message to the messages list and writes back to Redis.
+    ai_content is the PII-masked copy sent to Azure OpenAI; content stays as
+    the patient typed it, for display and the database."""
     context = get_chat_context(session_id) or {"system_prompt": "", "messages": []}
     message = {
         "role": role,
         "content": content,
         "created_at": _now_iso(),
     }
+    if ai_content is not None:
+        message["ai_content"] = ai_content
     context["messages"].append(message)
     extensions.redis_client.setex(_key(session_id), TTL_SECONDS, json.dumps(context))
     return message

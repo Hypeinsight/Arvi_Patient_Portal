@@ -15,8 +15,9 @@ from app.services.session_data import session_form_data
 from app.services.summariser import build_doctor_summary
 from app.utils.session_helpers import _parse_datetime
 from app.services.chat_cache import delete_cached_messages, get_cached_messages, refresh_cached_messages
-from app.services.chat import build_ai_messages, determine_chat_ended, persist_chat_messages
+from app.services.chat import build_ai_messages, determine_chat_ended, persist_chat_messages, without_ai_content
 from app.services.delivery import deliver_to_arvi
+from app.services.dlp import DLPUnavailable, mask
 
 chat_bp = Blueprint("chat", __name__)
 
@@ -40,8 +41,15 @@ def create_chat_message(session_id):
     if not context:
         return jsonify({"success": False, "message": "Chat session not initialized. Please complete the form first."}), 404
 
+    # Mask PII before the message is sent to Azure OpenAI. If DLP is down,
+    # refuse the message rather than send it unmasked
+    try:
+        masked_message = mask(user_message, session_form_data(session)["personal"])
+    except DLPUnavailable:
+        return jsonify({"success": False, "message": "We couldn't send your message securely. Please try again."}), 503
+
     # Build AI payload — system prompt + all previous messages + new user message
-    ai_messages = build_ai_messages(context, user_message)  # This line is redundant since ai_messages is already built above
+    ai_messages = build_ai_messages(context, masked_message)
 
     # Call Azure OpenAI
     try:
@@ -55,7 +63,7 @@ def create_chat_message(session_id):
     chat_ended = determine_chat_ended(turn_count, result)
 
     # Append both turns to Redis (content is always the plain question string)
-    append_cached_message(str(session_id), "user", user_message)
+    append_cached_message(str(session_id), "user", user_message, ai_content=masked_message)
     append_cached_message(str(session_id), "assistant", result.question)
 
     # Persist turn_count alongside the rest of the context
@@ -80,7 +88,7 @@ def read_chat_messages(session_id):
         return jsonify({
             "success": True,
             "source": "redis",
-            "chat_messages": cached_messages,
+            "chat_messages": without_ai_content(cached_messages),
         }), 200
 
     # If no messages are found in Redis, query the database
@@ -140,6 +148,9 @@ def prepare_summary(session_id):
     except SQLAlchemyError as exc:
         db.session.rollback()
         return jsonify({"success": False, "message": str(exc)}), 500
+    except DLPUnavailable:
+        # The summary is saved; only the chat couldn't start, so a retry is safe
+        return jsonify({"success": False, "message": "We couldn't start the chat securely. Please try again."}), 503
 
     return jsonify({
         "success": True,
@@ -189,7 +200,7 @@ def flush_chat_messages(session_id):
         "success": True,
         "source": source,
         "persisted_count": len(chat_messages),
-        "chat_messages": chat_messages,
+        "chat_messages": without_ai_content(chat_messages),
         "summary": summary_text,
         "delivered": delivered,
         "delivery_status": session.delivery_status,

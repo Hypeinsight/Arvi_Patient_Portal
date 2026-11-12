@@ -1,5 +1,7 @@
 from datetime import date, datetime
 
+from app.services.dlp import mask
+
 
 def _calc_age(dob) -> int | None:
     if not dob:
@@ -59,6 +61,17 @@ def build_chat_system_prompt(form_data: dict, previous_summary: str | None = Non
             {framing}
             """
 
+    # Free-text fields and the previous summary can hold names or numbers the
+    # patient typed, so mask them before they reach Azure OpenAI. One call for
+    # the whole block; raises DLPUnavailable if DLP can't be reached
+    history_section = mask(f"""MEDICAL HISTORY:
+            - Conditions:       {conditions}
+            - Medications:      {medications}
+            - Allergies:        {allergies}
+            - Previous surgeries: {surgeries}
+            - Family history:   {family_hx}
+            {follow_up_section}""", p)
+
     return f"""You are a clinical intake assistant for a medical clinic.
             A patient has completed a pre-appointment intake form. Your role is to have a brief, 
             conversational follow-up with the patient to clarify or expand on their submitted details, 
@@ -68,13 +81,7 @@ def build_chat_system_prompt(form_data: dict, previous_summary: str | None = Non
             - Age: {age_str}
             - Gender: {gender}
 
-            MEDICAL HISTORY:
-            - Conditions:       {conditions}
-            - Medications:      {medications}
-            - Allergies:        {allergies}
-            - Previous surgeries: {surgeries}
-            - Family history:   {family_hx}
-            {follow_up_section}
+            {history_section}
 
             INSTRUCTIONS:
             - Keep every message short: one or two sentences, under 30 words
@@ -85,6 +92,8 @@ def build_chat_system_prompt(form_data: dict, previous_summary: str | None = Non
             severity of allergies, relevant lifestyle factors, reason for today's visit
             - Keep a warm, professional tone appropriate for a healthcare setting
             - Do not ask for personal identifying information (name, address, phone, email)
+            - Text in square brackets such as [PERSON_NAME] or [PHONE_NUMBER] is a detail removed
+            for privacy. Never ask the patient to repeat it, guess it, or mention the placeholder
             - Do not diagnose or give medical advice
             - When you have gathered enough useful information, thank the patient and let them 
             know the doctor will review everything shortly

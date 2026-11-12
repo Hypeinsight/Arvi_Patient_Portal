@@ -23,10 +23,20 @@ def determine_chat_ended(turn_count: int, result) -> bool:
         or (turn_count >= MIN_TURNS and result.sufficient_info)
     )
 
+def ai_content(message: dict) -> str:
+    """The PII-masked text of a cached message, for sending to Azure OpenAI.
+    Assistant messages have no masked copy: the AI wrote them from masked text."""
+    return message.get("ai_content", message["content"])
+
+def without_ai_content(messages: list) -> list:
+    """Cached messages for the frontend: the masked copies are only for Azure OpenAI."""
+    return [{k: v for k, v in m.items() if k != "ai_content"} for m in messages]
+
 def build_ai_messages(context: dict, user_message: str) -> list:
+    """user_message must already be masked."""
     return [
         {"role": "system", "content": context["system_prompt"]},
-        *[{"role": m["role"], "content": m["content"]} for m in context["messages"]],
+        *[{"role": m["role"], "content": ai_content(m)} for m in context["messages"]],
         {"role": "user", "content": user_message},
     ]
 

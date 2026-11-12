@@ -92,8 +92,17 @@ export default function Chat() {
     if (!userMessage || loading) return; // Prevent sending empty messages or sending while loading
 
     // Optimistically add user message to display
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    const pending = { role: "user", content: userMessage };
+    setMessages((prev) => [...prev, pending]);
     setLoading(true);
+
+    // The message wasn't sent (e.g. it couldn't be masked securely): take it
+    // back out of the chat and put it back in the input to resend
+    const unsend = (error) => {
+      setMessages((prev) => prev.filter((msg) => msg !== pending));
+      setInput((current) => current || userMessage);
+      toast.error(error || "Your message wasn't sent. Please try again.");
+    };
 
     try {
       const data = await sendChatMessage(sessionId, userMessage);
@@ -106,7 +115,11 @@ export default function Chat() {
         if (data.chat_ended) {
           setChatEnded(true);
         }
+      } else {
+        unsend(data.message);
       }
+    } catch {
+      unsend();
     } finally {
       setLoading(false);
     }

@@ -18,6 +18,10 @@ class Config:
     SENDER_EMAIL                   = os.getenv("SENDER_EMAIL", "Info@arvihealth.com")
     # Where links in emails point to (the Next.js app)
     FRONTEND_URL                   = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    # Google DLP masks PII in chat text before it reaches Azure OpenAI.
+    # Off by default in development; while off, text is sent unmasked
+    DLP_ENABLED                    = (os.getenv("DLP_ENABLED") or "false").lower() == "true"
+    GCP_PROJECT                    = os.getenv("GCP_PROJECT")
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -26,6 +30,9 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     SQLALCHEMY_ECHO = False
+    # On unless explicitly turned off, so a missing setting can't send PII
+    # unmasked. Without GCP_PROJECT, chat then fails with a 503 instead
+    DLP_ENABLED = (os.getenv("DLP_ENABLED") or "true").lower() == "true"
 
 config_map = {
     "development": DevelopmentConfig,

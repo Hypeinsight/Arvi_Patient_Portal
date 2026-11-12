@@ -28,8 +28,9 @@ def summarise_chat_transcript(messages: list) -> str | None:
     if not any(m.get("role") == "user" and (m.get("content") or "").strip() for m in messages):
         return None
 
+    # Masked copies only: the original text never goes to Azure OpenAI
     transcript_text = "\n".join(
-        f"{'Patient' if m['role'] == 'user' else 'Assistant'}: {m['content']}"
+        f"{'Patient' if m['role'] == 'user' else 'Assistant'}: {m.get('ai_content', m['content'])}"
         for m in messages
     )
 
@@ -41,7 +42,9 @@ def summarise_chat_transcript(messages: list) -> str | None:
                 "Read the conversation below and write a brief, clinical, factual summary "
                 "of what the patient shared — no more than 5-6 short lines. Only use what is "
                 "written on 'Patient:' lines. Do not diagnose, speculate, or add anything not "
-                "stated by the patient. Write in plain prose, "
+                "stated by the patient. Placeholders in square brackets such as [PERSON_NAME] "
+                "are details removed for privacy: keep them as written, never guess what they hide. "
+                "Write in plain prose, "
                 "third person (e.g. 'Patient reports...'), no bullet points."
             ),
         },
